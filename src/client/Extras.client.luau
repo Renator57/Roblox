@@ -1214,8 +1214,14 @@ local function buildPetModel(entry)
 	-- Eigenes Modell aus ReplicatedStorage > Modelle (gleicher Name wie die Haustier-ID)
 	local folder = ReplicatedStorage:FindFirstChild("Modelle")
 	local template = folder and folder:FindFirstChild(pet.id)
-	if template and template:IsA("Model") then
-		local custom = template:Clone()
+	if template and (template:IsA("Model") or template:IsA("BasePart")) then
+		local custom
+		if template:IsA("Model") then
+			custom = template:Clone()
+		else
+			custom = Instance.new("Model")
+			template:Clone().Parent = custom
+		end
 		local firstPart = nil
 		for _, inst in custom:GetDescendants() do
 			if inst:IsA("LuaSourceContainer") then

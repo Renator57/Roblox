@@ -96,6 +96,7 @@ Schöner wird es mit Modellen aus der **Toolbox**:
    - Haustiere: `Mouse`, `Cat`, `Bunny`, `Fox`, `Dragon`, `Frog`, `Hedgehog`, `Owl`, `Spirit`,
      `Phoenix`, `Jelly`, `Comet`, `Wolf`, `Nebula`, `Unicorn`, `RainbowUnicorn`, `ShadowGriffin`
    - Boss: `Golem`
+   - Bäume: beliebig viele, Name beginnt mit `Baum` (z. B. `Baum1`, `Baum2`, `Baum3`)
 
-Größe und Position passt das Spiel automatisch an. Skripte in Toolbox-Modellen werden
+Größe und Position passt das Spiel automatisch an. Einzelne MeshParts aus der Toolbox funktionieren auch. Skripte in Toolbox-Modellen werden
 aus Sicherheitsgründen entfernt.

@@ -138,6 +138,50 @@ local function terrainIsland(center, radius, rng)
 	Terrain:FillBall(center + Vector3.new(0, -38, 0), 7, Enum.Material.Rock)
 end
 
+----------------------------------------------------------------------
+-- Eigene 3D-Modelle: Lege Modelle in ReplicatedStorage > Modelle
+-- (Name = ID, z. B. "Pickaxe", "Golem"). Sonst werden einfache Modelle gebaut.
+----------------------------------------------------------------------
+
+-- Macht aus einem Toolbox-Fund ein Modell (auch wenn es nur ein einzelnes MeshPart ist)
+local function cloneAsModel(template)
+	if template:IsA("Model") then
+		return template:Clone()
+	elseif template:IsA("BasePart") then
+		local model = Instance.new("Model")
+		model.Name = template.Name
+		template:Clone().Parent = model
+		return model
+	end
+	return nil
+end
+
+local function customModel(name, targetSize, cframe, template)
+	local folder = ReplicatedStorage:FindFirstChild("Modelle")
+	template = template or (folder and folder:FindFirstChild(name))
+	local model = template and cloneAsModel(template)
+	if not model then
+		return nil
+	end
+	for _, inst in model:GetDescendants() do
+		if inst:IsA("LuaSourceContainer") then
+			inst:Destroy() -- Skripte aus Toolbox-Modellen nie mitlaufen lassen
+		elseif inst:IsA("BasePart") then
+			inst.Anchored = true
+			inst.CanCollide = false
+		end
+	end
+	local boxCF, size = model:GetBoundingBox()
+	local biggest = math.max(size.X, size.Y, size.Z)
+	if biggest > 0 then
+		model.WorldPivot = boxCF
+		model:ScaleTo(model:GetScale() * targetSize / biggest)
+	end
+	local _, newSize = model:GetBoundingBox()
+	model:PivotTo(cframe * CFrame.new(0, newSize.Y / 2, 0))
+	return model
+end
+
 -- Cartoon-Baum: Stamm mit runden, weichen Kronen (oder eine Tanne)
 local function softBall(parent, size, cframe, color)
 	local p = makePart(parent, { Size = size, CFrame = cframe, Color = color, CanCollide = false })
@@ -148,6 +192,25 @@ local function softBall(parent, size, cframe, color)
 end
 
 local function terrainTree(parent, pos, rng)
+	-- Eigene Bäume: alle Modelle in "Modelle", deren Name mit "Baum" beginnt
+	local folder = ReplicatedStorage:FindFirstChild("Modelle")
+	if folder then
+		local trees = {}
+		for _, child in folder:GetChildren() do
+			if string.sub(child.Name, 1, 4) == "Baum" then
+				table.insert(trees, child)
+			end
+		end
+		if #trees > 0 then
+			local template = trees[rng:NextInteger(1, #trees)]
+			local size = rng:NextNumber(11, 15)
+			local tree = customModel(template.Name, size, CFrame.new(pos) * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0), template)
+			if tree then
+				tree.Parent = parent
+				return
+			end
+		end
+	end
 	local leaf = Color3.fromHSV(rng:NextNumber(0.24, 0.36), rng:NextNumber(0.55, 0.7), rng:NextNumber(0.6, 0.8))
 	local leafLight = leaf:Lerp(Color3.fromRGB(230, 255, 180), 0.25)
 	local pine = rng:NextNumber() < 0.3
@@ -172,37 +235,6 @@ local function terrainTree(parent, pos, rng)
 			softBall(parent, Vector3.new(4.2, 3.8, 4.2), CFrame.new(top + Vector3.new(math.cos(a) * 2.6, rng:NextNumber(0.2, 2.2), math.sin(a) * 2.6)), k == 1 and leafLight or leaf)
 		end
 	end
-end
-
-----------------------------------------------------------------------
--- Eigene 3D-Modelle: Lege Modelle in ReplicatedStorage > Modelle
--- (Name = ID, z. B. "Pickaxe", "Golem"). Sonst werden einfache Modelle gebaut.
-----------------------------------------------------------------------
-
-local function customModel(name, targetSize, cframe)
-	local folder = ReplicatedStorage:FindFirstChild("Modelle")
-	local template = folder and folder:FindFirstChild(name)
-	if not (template and template:IsA("Model")) then
-		return nil
-	end
-	local model = template:Clone()
-	for _, inst in model:GetDescendants() do
-		if inst:IsA("LuaSourceContainer") then
-			inst:Destroy() -- Skripte aus Toolbox-Modellen nie mitlaufen lassen
-		elseif inst:IsA("BasePart") then
-			inst.Anchored = true
-			inst.CanCollide = false
-		end
-	end
-	local boxCF, size = model:GetBoundingBox()
-	local biggest = math.max(size.X, size.Y, size.Z)
-	if biggest > 0 then
-		model.WorldPivot = boxCF
-		model:ScaleTo(model:GetScale() * targetSize / biggest)
-	end
-	local _, newSize = model:GetBoundingBox()
-	model:PivotTo(cframe * CFrame.new(0, newSize.Y / 2, 0))
-	return model
 end
 
 ----------------------------------------------------------------------
