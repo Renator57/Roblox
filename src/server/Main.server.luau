@@ -1,11 +1,8 @@
--- Hauptskript: verbindet Strecke, Spielerdaten und Spielregeln.
+-- Kristall-Imperium: Hauptskript (Server).
 
-local CollectionService = game:GetService("CollectionService")
-local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapBuilder = require(script.Parent.MapBuilder)
@@ -15,260 +12,385 @@ local PlayerData = require(script.Parent.PlayerData)
 
 local remotes = Instance.new("Folder")
 remotes.Name = "Remotes"
-local buyItem = Instance.new("RemoteFunction")
-buyItem.Name = "BuyItem"
-buyItem.Parent = remotes
-local notify = Instance.new("RemoteEvent")
-notify.Name = "Notify"
-notify.Parent = remotes
+local function remote(className, name)
+	local r = Instance.new(className)
+	r.Name = name
+	r.Parent = remotes
+	return r
+end
+local mineEvent = remote("RemoteEvent", "Mine")
+local stateEvent = remote("RemoteEvent", "State")
+local notifyEvent = remote("RemoteEvent", "Notify")
+local buyFunction = remote("RemoteFunction", "Buy")
+local rebirthFunction = remote("RemoteFunction", "Rebirth")
 remotes.Parent = ReplicatedStorage
 
--- Welt ------------------------------------------------------------------
-
-Lighting.ClockTime = 14.5
-Lighting.Brightness = 2
+MapBuilder.build()
 Players.CharacterAutoLoads = false
 
-local course = MapBuilder.build()
-local checkpoints = course.checkpoints
+-- Sitzungen -------------------------------------------------------------
 
--- Hilfsfunktionen -------------------------------------------------------
+-- sessions[player] = { data, plot, tokens, frenzyEnd, nextGolden, golden, lastLevel }
+local sessions = {}
 
-local function playerFromHit(hit)
-	local character = hit:FindFirstAncestorOfClass("Model")
-	if not character then
-		return nil
-	end
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not humanoid or humanoid.Health <= 0 then
-		return nil
-	end
-	local player = Players:GetPlayerFromCharacter(character)
-	if not player then
-		return nil
-	end
-	return player, humanoid
+local function now()
+	return workspace:GetServerTimeNow()
 end
 
-local function applyItems(player, character)
-	local data = PlayerData.get(player)
-	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not (data and humanoid) then
+local function frenzyMultiplier(session)
+	return (session.frenzyEnd > now()) and Config.FRENZY_MULTIPLIER or 1
+end
+
+local function notify(player, text, kind)
+	notifyEvent:FireClient(player, text, kind)
+end
+
+local function sendState(player)
+	local session = sessions[player]
+	if not session then
 		return
 	end
-	local items = data.Items
+	local data = session.data
+	stateEvent:FireClient(player, {
+		crystals = data.crystals,
+		runTotal = data.runTotal,
+		allTime = data.allTime,
+		gens = data.gens,
+		upgrades = data.upgrades,
+		star = data.star,
+		stardust = data.stardust,
+		stardustSpent = data.stardustSpent,
+		rebirths = data.rebirths,
+		frenzyEnd = session.frenzyEnd,
+	})
+end
 
-	humanoid.WalkSpeed = Config.BASE_WALKSPEED + (items.Speed and Config.SPEED_BONUS or 0)
-	humanoid.UseJumpPower = true
-	humanoid.JumpPower = Config.BASE_JUMPPOWER + (items.Jump and Config.JUMP_BONUS or 0)
+local function scheduleGolden(session)
+	local delay = Config.GOLDEN_MIN_DELAY + math.random() * (Config.GOLDEN_MAX_DELAY - Config.GOLDEN_MIN_DELAY)
+	session.nextGolden = os.clock() + delay * Config.goldenDelayFactor(session.data)
+end
 
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if items.Glow and root and not root:FindFirstChild("GlowLight") then
-		local light = Instance.new("PointLight")
-		light.Name = "GlowLight"
-		light.Color = Color3.fromRGB(255, 220, 90)
-		light.Range = 14
-		light.Brightness = 2
-		light.Parent = root
-		local sparkles = Instance.new("Sparkles")
-		sparkles.SparkleColor = Color3.fromRGB(255, 220, 90)
-		sparkles.Parent = root
+local function earn(session, amount)
+	local data = session.data
+	data.crystals += amount
+	data.runTotal += amount
+	data.allTime += amount
+end
+
+-- Prüft, ob die Insel eine neue Ausbaustufe erreicht hat
+local function checkIslandLevel(player, session)
+	local level = Config.islandLevel(session.data.allTime)
+	if level > session.lastLevel then
+		session.lastLevel = level
+		MapBuilder.updatePlot(session.plot, session.data)
+		notify(player, "🏗️ Deine Insel wächst: " .. Config.ISLAND_LEVELS[level].name .. "!", "build")
 	end
 end
 
-local function respawn(player)
-	if player.Parent == Players then
-		player:LoadCharacter()
-	end
-end
-
--- Spieler ---------------------------------------------------------------
+-- Spieler betreten / verlassen ------------------------------------------
 
 local function onCharacterAdded(player, character)
+	local session = sessions[player]
+	if not session then
+		return
+	end
 	local humanoid = character:WaitForChild("Humanoid")
 	character:WaitForChild("HumanoidRootPart")
-	applyItems(player, character)
-
 	humanoid.Died:Connect(function()
-		task.delay(Config.RESPAWN_TIME, function()
-			if player.Character == character then
-				respawn(player)
+		task.delay(2, function()
+			if player.Parent == Players and player.Character == character then
+				player:LoadCharacter()
 			end
 		end)
 	end)
-
-	-- Am letzten erreichten Checkpoint absetzen, Blick Richtung Strecke
 	task.wait()
-	local data = PlayerData.get(player)
-	local checkpoint = (data and checkpoints[data.Stage]) or checkpoints[0]
-	local position = checkpoint.Position + Vector3.new(0, 4, 0)
 	if character.Parent then
-		character:PivotTo(CFrame.lookAt(position, position + Vector3.xAxis))
+		character:PivotTo(session.plot.spawnCF)
 	end
 end
 
 local function onPlayerAdded(player)
+	local plot = MapBuilder.claimPlot(player)
+	if not plot then
+		player:Kick("Dieser Server ist voll. Bitte versuch es auf einem anderen Server.")
+		return
+	end
+
+	local data = PlayerData.load(player)
+	if player.Parent ~= Players then
+		MapBuilder.releasePlot(plot)
+		PlayerData.release(player)
+		return
+	end
+
+	local session = {
+		data = data,
+		plot = plot,
+		tokens = Config.CLICKS_PER_SECOND,
+		frenzyEnd = 0,
+		nextGolden = 0,
+		golden = nil,
+		lastLevel = Config.islandLevel(data.allTime),
+	}
+	sessions[player] = session
+	scheduleGolden(session)
+	MapBuilder.updatePlot(plot, data)
+
 	player.CharacterAdded:Connect(function(character)
 		onCharacterAdded(player, character)
 	end)
-	PlayerData.load(player)
-	respawn(player)
+	player:LoadCharacter()
+
+	-- Offline-Einnahmen
+	local offlineSeconds = data.lastSeen > 0 and math.clamp(os.time() - data.lastSeen, 0, Config.OFFLINE_MAX_SECONDS) or 0
+	local factor = Config.hasUpgrade(data, "offline") and 1 or Config.OFFLINE_FACTOR
+	local offlineGain = Config.perSecond(data) * offlineSeconds * factor
+	sendState(player)
+	task.delay(3, function()
+		if sessions[player] ~= session then
+			return
+		end
+		if offlineGain >= 1 then
+			earn(session, offlineGain)
+			notify(player, "😴 Während du weg warst, haben deine Helfer " .. Config.format(offlineGain) .. " 💎 gesammelt!", "gold")
+			checkIslandLevel(player, session)
+		else
+			notify(player, "Willkommen bei " .. Config.GAME_NAME .. "! Klick den Kristall 💎", "info")
+		end
+	end)
+end
+
+local function onPlayerRemoving(player)
+	local session = sessions[player]
+	sessions[player] = nil
+	if session then
+		if session.golden then
+			session.golden:Destroy()
+		end
+		MapBuilder.releasePlot(session.plot)
+	end
+	PlayerData.release(player)
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
+Players.PlayerRemoving:Connect(onPlayerRemoving)
 for _, player in Players:GetPlayers() do
 	task.spawn(onPlayerAdded, player)
 end
 PlayerData.startAutosave()
 
--- Münzen ----------------------------------------------------------------
+-- Klicken ---------------------------------------------------------------
 
-for _, coin in CollectionService:GetTagged("Coin") do
-	coin.Touched:Connect(function(hit)
-		if not coin:GetAttribute("Active") then
-			return
-		end
-		local player = playerFromHit(hit)
-		local data = player and PlayerData.get(player)
-		if not data then
-			return
-		end
-		coin:SetAttribute("Active", false)
-		coin.Transparency = 1
-		local value = Config.COIN_VALUE * (data.Items.Double and 2 or 1)
-		PlayerData.add(player, "Coins", value)
-		task.delay(Config.COIN_RESPAWN_TIME, function()
-			coin.Transparency = 0
-			coin:SetAttribute("Active", true)
-		end)
-	end)
-end
-
--- Lava ------------------------------------------------------------------
-
-for _, part in CollectionService:GetTagged("Lava") do
-	part.Touched:Connect(function(hit)
-		local _, humanoid = playerFromHit(hit)
-		if humanoid then
-			humanoid.Health = 0
-		end
-	end)
-end
-
--- Verschwindende Plattformen -------------------------------------------
-
-for _, part in CollectionService:GetTagged("Vanish") do
-	local originalColor = part.Color
-	part.Touched:Connect(function(hit)
-		if part:GetAttribute("Busy") or not playerFromHit(hit) then
-			return
-		end
-		part:SetAttribute("Busy", true)
-		part.Color = Color3.fromRGB(255, 90, 90)
-		task.wait(0.6)
-		local fade = TweenService:Create(part, TweenInfo.new(0.3), { Transparency = 1 })
-		fade:Play()
-		fade.Completed:Wait()
-		part.CanCollide = false
-		task.wait(2.5)
-		part.CanCollide = true
-		part.Transparency = 0
-		part.Color = originalColor
-		part:SetAttribute("Busy", false)
-	end)
-end
-
--- Drehende Balken -------------------------------------------------------
-
-local overlap = OverlapParams.new()
-overlap.FilterType = Enum.RaycastFilterType.Include
-
-RunService.Heartbeat:Connect(function(dt)
-	local characters = {}
-	for _, player in Players:GetPlayers() do
-		if player.Character then
-			table.insert(characters, player.Character)
-		end
-	end
-	overlap.FilterDescendantsInstances = characters
-
-	for _, spinner in course.spinners do
-		spinner.angle += spinner.speed * dt
-		spinner.part.CFrame = spinner.pivot * CFrame.Angles(0, spinner.angle, 0)
-		if #characters > 0 then
-			for _, hit in workspace:GetPartsInPart(spinner.part, overlap) do
-				local _, humanoid = playerFromHit(hit)
-				if humanoid then
-					humanoid.Health = 0
-				end
-			end
-		end
-	end
-end)
-
--- Checkpoints -----------------------------------------------------------
-
-for _, checkpoint in CollectionService:GetTagged("Checkpoint") do
-	local stage = checkpoint:GetAttribute("Stage")
-	checkpoint.Touched:Connect(function(hit)
-		local player = playerFromHit(hit)
-		local data = player and PlayerData.get(player)
-		if data and stage > data.Stage then
-			PlayerData.set(player, "Stage", stage)
-			notify:FireClient(player, "✅ Checkpoint " .. stage .. " erreicht!")
-		end
-	end)
-end
-
--- Ziel ------------------------------------------------------------------
-
-local finishing = {}
-
-course.finish.Touched:Connect(function(hit)
-	local player = playerFromHit(hit)
-	local data = player and PlayerData.get(player)
-	if not data or finishing[player] or data.Stage < Config.STAGE_COUNT - 1 then
+mineEvent.OnServerEvent:Connect(function(player)
+	local session = sessions[player]
+	if not session or session.tokens < 1 then
 		return
 	end
-	finishing[player] = true
-
-	PlayerData.add(player, "Wins", 1)
-	PlayerData.add(player, "Coins", Config.FINISH_BONUS)
-	PlayerData.set(player, "Stage", 0)
-	notify:FireAllClients("🏆 " .. player.DisplayName .. " hat das Ziel erreicht!")
-	notify:FireClient(player, "+" .. Config.FINISH_BONUS .. " Bonus-Münzen! Auf geht's zur nächsten Runde.")
-	task.spawn(PlayerData.save, player)
-
-	task.delay(4, function()
-		finishing[player] = nil
-		respawn(player)
-	end)
+	session.tokens -= 1
+	earn(session, Config.clickValue(session.data) * frenzyMultiplier(session))
 end)
 
-Players.PlayerRemoving:Connect(function(player)
-	finishing[player] = nil
+-- Goldene Kristalle -----------------------------------------------------
+
+local function collectGolden(player, session)
+	local golden = session.golden
+	if not golden then
+		return
+	end
+	session.golden = nil
+	golden:Destroy()
+
+	local data = session.data
+	local rewardMult = Config.hasUpgrade(data, "goldenReward") and 3 or 1
+	if math.random() < 0.55 then
+		local amount = math.max(Config.perSecond(data) * 90, Config.clickValue(data) * 40, 50) * rewardMult
+		earn(session, amount)
+		notify(player, "🍀 Glücksfund! +" .. Config.format(amount) .. " 💎", "gold")
+	else
+		local duration = Config.FRENZY_DURATION * rewardMult
+		session.frenzyEnd = now() + duration
+		notify(player, "🔥 KRISTALLRAUSCH! Alles x" .. Config.FRENZY_MULTIPLIER .. " für " .. duration .. " Sekunden!", "frenzy")
+	end
+	sendState(player)
+end
+
+local function spawnGolden(player, session)
+	local golden, click = MapBuilder.spawnGolden(session.plot)
+	session.golden = golden
+	click.MouseClick:Connect(function(clicker)
+		if clicker == player and sessions[player] == session and session.golden == golden then
+			collectGolden(player, session)
+		end
+	end)
+	golden.Touched:Connect(function(hit)
+		local character = player.Character
+		if character and hit:IsDescendantOf(character) and session.golden == golden then
+			collectGolden(player, session)
+		end
+	end)
+	notify(player, "✨ Ein goldener Kristall ist auf deiner Insel erschienen!", "gold")
+	task.delay(Config.GOLDEN_LIFETIME, function()
+		if session.golden == golden then
+			session.golden = nil
+			golden:Destroy()
+		end
+	end)
+end
+
+-- Spielschleife ---------------------------------------------------------
+
+local sendTimer, slowTimer = 0, 0
+
+RunService.Heartbeat:Connect(function(dt)
+	sendTimer += dt
+	slowTimer += dt
+	local sendNow = sendTimer >= 0.25
+	local slowNow = slowTimer >= 1
+	if sendNow then
+		sendTimer = 0
+	end
+	if slowNow then
+		slowTimer = 0
+	end
+
+	for player, session in sessions do
+		session.tokens = math.min(Config.CLICKS_PER_SECOND, session.tokens + Config.CLICKS_PER_SECOND * dt)
+		earn(session, Config.perSecond(session.data) * frenzyMultiplier(session) * dt)
+
+		if not session.golden and os.clock() >= session.nextGolden then
+			scheduleGolden(session)
+			spawnGolden(player, session)
+		end
+		if sendNow then
+			sendState(player)
+		end
+		if slowNow then
+			checkIslandLevel(player, session)
+			PlayerData.updateLeaderstats(player)
+			session.plot.sign.Text = "🏝️ " .. player.DisplayName .. "\n💎 " .. Config.format(Config.perSecond(session.data)) .. "/Sek"
+		end
+	end
 end)
 
 -- Shop ------------------------------------------------------------------
 
-buyItem.OnServerInvoke = function(player, itemId)
-	if type(itemId) ~= "string" then
-		return false, "Ungültiger Artikel."
+local function buyGenerator(player, session, id, amount)
+	local gen = Config.GENERATORS_BY_ID[id]
+	if not gen then
+		return false, "Unbekannter Helfer."
 	end
-	local item = Config.ITEMS_BY_ID[itemId]
-	local data = PlayerData.get(player)
-	if not (item and data) then
-		return false, "Ungültiger Artikel."
+	local data = session.data
+	local owned = data.gens[id] or 0
+	local count
+	if amount == "max" then
+		count = Config.maxAffordable(gen, owned, data.crystals, data)
+	elseif amount == 1 or amount == 10 or amount == 100 then
+		count = amount
+	else
+		return false, "Ungültige Menge."
 	end
-	if data.Items[itemId] then
-		return false, "Du besitzt " .. item.name .. " schon."
+	if count < 1 then
+		return false, "Nicht genug Kristalle."
 	end
-	if data.Coins < item.price then
-		return false, "Dir fehlen noch " .. (item.price - data.Coins) .. " Münzen."
+	local cost = Config.generatorCost(gen, owned, count, data)
+	if cost > data.crystals then
+		return false, "Nicht genug Kristalle."
 	end
 
-	PlayerData.add(player, "Coins", -item.price)
-	PlayerData.grantItem(player, itemId)
-	applyItems(player, player.Character)
-	return true, "🛒 " .. item.name .. " gekauft!"
+	data.crystals -= cost
+	data.gens[id] = owned + count
+	MapBuilder.updatePlot(session.plot, data)
+
+	local before, after = Config.milestonesReached(owned), Config.milestonesReached(owned + count)
+	if after > before then
+		notify(player, "🎉 Meilenstein! " .. gen.name .. " produziert jetzt x" .. Config.milestoneMultiplier(owned + count) .. "!", "build")
+	end
+	return true, gen.icon .. " +" .. count .. " " .. gen.name
+end
+
+local function buyUpgrade(session, id)
+	local upgrade = Config.UPGRADES_BY_ID[id]
+	local data = session.data
+	if not upgrade then
+		return false, "Unbekanntes Upgrade."
+	end
+	if data.upgrades[id] then
+		return false, "Schon gekauft."
+	end
+	if data.crystals < upgrade.cost then
+		return false, "Nicht genug Kristalle."
+	end
+	data.crystals -= upgrade.cost
+	data.upgrades[id] = true
+	if upgrade.kind == "luck" then
+		scheduleGolden(session)
+	end
+	return true, upgrade.icon .. " " .. upgrade.name .. " gekauft!"
+end
+
+local function buyStarUpgrade(session, id)
+	local upgrade = Config.STAR_UPGRADES_BY_ID[id]
+	local data = session.data
+	if not upgrade then
+		return false, "Unbekanntes Upgrade."
+	end
+	local level = Config.starLevel(data, id)
+	if level >= upgrade.maxLevel then
+		return false, "Schon auf der höchsten Stufe."
+	end
+	local cost = Config.starUpgradeCost(upgrade, level)
+	if Config.availableStardust(data) < cost then
+		return false, "Nicht genug Sternenstaub."
+	end
+	data.stardustSpent += cost
+	data.star[id] = level + 1
+	return true, upgrade.icon .. " " .. upgrade.name .. " ist jetzt Stufe " .. (level + 1) .. "!"
+end
+
+buyFunction.OnServerInvoke = function(player, kind, id, amount)
+	local session = sessions[player]
+	if not session or type(id) ~= "string" then
+		return false, "Fehler."
+	end
+	local ok, message
+	if kind == "gen" then
+		ok, message = buyGenerator(player, session, id, amount)
+	elseif kind == "upgrade" then
+		ok, message = buyUpgrade(session, id)
+	elseif kind == "star" then
+		ok, message = buyStarUpgrade(session, id)
+	else
+		return false, "Fehler."
+	end
+	sendState(player)
+	return ok, message
+end
+
+-- Wiedergeburt ----------------------------------------------------------
+
+rebirthFunction.OnServerInvoke = function(player)
+	local session = sessions[player]
+	if not session then
+		return false, "Fehler."
+	end
+	local data = session.data
+	local gain = Config.stardustForRun(data.runTotal)
+	if gain < 1 then
+		return false, "Sammle erst " .. Config.format(Config.REBIRTH_BASE) .. " 💎 in dieser Runde."
+	end
+
+	data.stardust += gain
+	data.rebirths += 1
+	data.runTotal = 0
+	data.gens = {}
+	data.upgrades = {}
+	data.crystals = Config.startCrystals(data)
+	session.frenzyEnd = 0
+
+	MapBuilder.updatePlot(session.plot, data)
+	PlayerData.updateLeaderstats(player)
+	sendState(player)
+	task.spawn(PlayerData.save, player)
+	notifyEvent:FireAllClients("🌟 " .. player.DisplayName .. " ist wiedergeboren! (Rebirth " .. data.rebirths .. ")", "frenzy")
+	return true, "✨ +" .. gain .. " Sternenstaub! Dein Kristall leuchtet in neuer Farbe."
 end

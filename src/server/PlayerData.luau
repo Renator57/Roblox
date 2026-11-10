@@ -1,4 +1,4 @@
--- Spielerdaten: laden, speichern und als leaderstats anzeigen.
+-- Spielerdaten: laden, speichern und in der Bestenliste anzeigen.
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -8,8 +8,6 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 
 local PlayerData = {}
 
-local LEADERSTATS = { "Coins", "Stage", "Wins" }
-
 local store = nil
 do
 	local ok, result = pcall(function()
@@ -18,18 +16,40 @@ do
 	if ok then
 		store = result
 	else
-		warn("[Münzjäger] DataStore nicht verfügbar, Fortschritt wird nicht gespeichert:", result)
+		warn("[Kristall-Imperium] DataStore nicht verfügbar, Fortschritt wird nicht gespeichert:", result)
 	end
 end
 
 local profiles = {}
 
 local function defaultData()
-	return { Coins = 0, Stage = 0, Wins = 0, Items = {} }
+	return {
+		crystals = 0,
+		runTotal = 0, -- gesammelt seit der letzten Wiedergeburt
+		allTime = 0, -- insgesamt je gesammelt (für die Insel-Ausbaustufen)
+		gens = {},
+		upgrades = {},
+		star = {},
+		stardust = 0,
+		stardustSpent = 0,
+		rebirths = 0,
+		lastSeen = 0,
+	}
 end
 
 local function keyFor(player)
 	return "u_" .. player.UserId
+end
+
+local function sanitize(data)
+	local clean = defaultData()
+	for key, default in clean do
+		local value = data[key]
+		if type(value) == type(default) then
+			clean[key] = value
+		end
+	end
+	return clean
 end
 
 function PlayerData.load(player)
@@ -37,33 +57,23 @@ function PlayerData.load(player)
 	if store then
 		local ok, saved = pcall(store.GetAsync, store, keyFor(player))
 		if ok and type(saved) == "table" then
-			for key, value in saved do
-				data[key] = value
-			end
+			data = sanitize(saved)
 		elseif not ok then
-			warn("[Münzjäger] Laden fehlgeschlagen für", player.Name, saved)
+			warn("[Kristall-Imperium] Laden fehlgeschlagen für", player.Name, saved)
 		end
 	end
-	if type(data.Items) ~= "table" then
-		data.Items = {}
-	end
-	data.Stage = math.clamp(tonumber(data.Stage) or 0, 0, Config.STAGE_COUNT - 1)
-
 	profiles[player] = data
 
 	local leaderstats = Instance.new("Folder")
 	leaderstats.Name = "leaderstats"
-	for _, name in LEADERSTATS do
-		local value = Instance.new("IntValue")
-		value.Name = name
-		value.Value = data[name]
-		value.Parent = leaderstats
-	end
+	local perSecond = Instance.new("StringValue")
+	perSecond.Name = "💎/Sek"
+	perSecond.Parent = leaderstats
+	local rebirths = Instance.new("IntValue")
+	rebirths.Name = "Rebirths"
+	rebirths.Parent = leaderstats
 	leaderstats.Parent = player
-
-	for itemId in data.Items do
-		player:SetAttribute("Owned_" .. itemId, true)
-	end
+	PlayerData.updateLeaderstats(player)
 
 	return data
 end
@@ -72,32 +82,14 @@ function PlayerData.get(player)
 	return profiles[player]
 end
 
-function PlayerData.set(player, key, value)
+function PlayerData.updateLeaderstats(player)
 	local data = profiles[player]
-	if not data then
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if not (data and leaderstats) then
 		return
 	end
-	data[key] = value
-	local leaderstats = player:FindFirstChild("leaderstats")
-	local stat = leaderstats and leaderstats:FindFirstChild(key)
-	if stat then
-		stat.Value = value
-	end
-end
-
-function PlayerData.add(player, key, amount)
-	local data = profiles[player]
-	if data then
-		PlayerData.set(player, key, data[key] + amount)
-	end
-end
-
-function PlayerData.grantItem(player, itemId)
-	local data = profiles[player]
-	if data then
-		data.Items[itemId] = true
-		player:SetAttribute("Owned_" .. itemId, true)
-	end
+	leaderstats["💎/Sek"].Value = Config.format(Config.perSecond(data))
+	leaderstats.Rebirths.Value = data.rebirths
 end
 
 function PlayerData.save(player)
@@ -105,9 +97,10 @@ function PlayerData.save(player)
 	if not (data and store) then
 		return
 	end
+	data.lastSeen = os.time()
 	local ok, err = pcall(store.SetAsync, store, keyFor(player), data)
 	if not ok then
-		warn("[Münzjäger] Speichern fehlgeschlagen für", player.Name, err)
+		warn("[Kristall-Imperium] Speichern fehlgeschlagen für", player.Name, err)
 	end
 end
 
@@ -141,7 +134,5 @@ function PlayerData.startAutosave()
 		end
 	end)
 end
-
-Players.PlayerRemoving:Connect(PlayerData.release)
 
 return PlayerData

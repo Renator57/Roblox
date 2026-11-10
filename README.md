@@ -1,61 +1,47 @@
-# 🪙 Münzjäger – ein Roblox-Obby
+# 💎 Kristall-Imperium – ein Roblox-Incremental-Spiel
 
-Ein eigenes Roblox-Spiel: Lauf über eine Hindernisstrecke, sammle Münzen,
-erreiche Checkpoints und kauf dir im Shop Upgrades.
+Jeder Spieler bekommt eine eigene schwebende Insel mit einem riesigen Kristall.
+Klick den Kristall, kauf Helfer, die automatisch Kristalle sammeln, und bau deine
+Insel immer weiter aus.
 
-## Features
+## So funktioniert das Spiel
 
-- **10 Abschnitte** mit steigender Schwierigkeit, die Strecke wird beim Start per Code gebaut
-- **5 Hindernis-Typen:** Sprungplattformen, schmale Zickzack-Balken, Lava mit Trittsteinen,
-  verschwindende Glasplattformen und drehende Laser-Balken
-- **Checkpoints:** nach dem Tod geht es am letzten Checkpoint weiter
-- **Münzen**, die sich drehen und nach 20 Sekunden wieder auftauchen
-- **Ziel** mit Bonus-Münzen und Sieg-Zähler (`Wins`)
-- **Shop:** Leuchtaura, Turbo-Schuhe, Sprungfedern, Goldfinger (doppelte Münzen)
-- **Speicherstand** über DataStore (Münzen, Checkpoint, Siege, gekaufte Items)
-- Bestenliste über `leaderstats` (Coins / Stage / Wins)
+- **Klicken:** Kristall anklicken oder den Knopf **⛏️ ABBAUEN** drücken.
+- **8 Helfer** (Spitzhacke → Galaxiekern). Jeder gekaufte Helfer erscheint als 3D-Modell
+  auf deiner Insel. Bei **Meilensteinen** (10, 25, 50, 100 …) verdoppelt sich die Produktion
+  und das Modell wird größer.
+- **12 Upgrades** für stärkere Klicks, mehr Produktion, Offline-Einnahmen und mehr.
+- **Goldene Kristalle** tauchen zufällig auf: Glücksfund oder **Kristallrausch** (alles x7).
+- **9 Insel-Ausbaustufen:** Steinweg, Laternen, Blumenwiese, Wasserfälle, Kristalltürme,
+  Schwebende Inseln, Sternenringe, Regenbogen, Kristallkrone. Sie bleiben für immer.
+- **Wiedergeburt (Rebirth):** Ab 1M gesammelten Kristallen neu starten und dafür
+  **Sternenstaub** bekommen (+10 % Produktion pro Stück, für immer). Der Kristall bekommt
+  eine neue Farbe.
+- **Sternen-Shop:** Dauerhafte Upgrades mit Sternenstaub, z. B. die Kristall-Drohne
+  (klickt automatisch), Sternenmotor, Rabatt und Startkapital.
+- **Offline-Einnahmen** und **Speicherstand** per DataStore.
 
-## Projektstruktur
+## Dateien
 
-```
-default.project.json         Rojo-Projekt
-src/shared/Config.luau       Einstellungen (Strecke, Preise, Belohnungen) → ReplicatedStorage.Shared
-src/server/Main.server.luau  Spielregeln, Shop, Respawn               → ServerScriptService.Server
-src/server/MapBuilder.luau   Baut die Strecke
-src/server/PlayerData.luau   Laden/Speichern, leaderstats
-src/client/HUD.client.luau   Anzeige, Shop-Fenster, Meldungen        → StarterPlayerScripts.Client
-```
+| Datei | In Roblox Studio | Typ |
+|---|---|---|
+| `src/shared/Config.luau` | ReplicatedStorage → `Shared` → `Config` | ModuleScript |
+| `src/server/Main.server.luau` | ServerScriptService → `Server` → `Main` | Script |
+| `src/server/MapBuilder.luau` | ServerScriptService → `Server` → `MapBuilder` | ModuleScript |
+| `src/server/PlayerData.luau` | ServerScriptService → `Server` → `PlayerData` | ModuleScript |
+| `src/client/HUD.client.luau` | StarterPlayer → StarterPlayerScripts → `HUD` | LocalScript |
+
+Alle Werte (Preise, Helfer, Upgrades, Ausbaustufen) stehen in `Config.luau`.
 
 ## Starten
 
-### Mit Rojo (empfohlen)
+**Von Hand:** Die 5 Skripte wie in der Tabelle in Roblox Studio anlegen, den Code
+hineinkopieren und **Play** drücken.
 
-1. [Rojo](https://rojo.space) installieren und das Rojo-Plugin in Roblox Studio aktivieren.
-2. Place-Datei bauen und in Studio öffnen:
+**Mit Rojo:** `rojo build -o KristallImperium.rbxlx` und die Datei in Studio öffnen.
 
-   ```bash
-   rojo build -o Muenzjaeger.rbxlx
-   ```
-
-   Oder live synchronisieren: `rojo serve` ausführen und im Studio-Plugin auf **Connect** klicken.
-3. In Studio auf **Play** drücken.
-
-### Ohne Rojo (von Hand in Studio)
-
-1. In **ReplicatedStorage** einen Ordner `Shared` anlegen und darin ein **ModuleScript** `Config`
-   mit dem Inhalt von `src/shared/Config.luau`.
-2. In **ServerScriptService** einen Ordner `Server` anlegen mit:
-   - **Script** `Main` ← `src/server/Main.server.luau`
-   - **ModuleScript** `MapBuilder` ← `src/server/MapBuilder.luau`
-   - **ModuleScript** `PlayerData` ← `src/server/PlayerData.luau`
-3. In **StarterPlayer → StarterPlayerScripts** ein **LocalScript** `HUD` ← `src/client/HUD.client.luau`.
-4. **Play** drücken.
-
-> Damit das Speichern in Studio funktioniert: *Game Settings → Security →
-> Enable Studio Access to API Services* einschalten (das Spiel muss dafür veröffentlicht sein).
-> Ohne diese Einstellung läuft das Spiel trotzdem, nur ohne Speicherstand.
-
-## Anpassen
-
-Alle wichtigen Werte stehen in `src/shared/Config.luau`, z. B. die Anzahl der Abschnitte
-(`STAGE_COUNT`), der Ziel-Bonus (`FINISH_BONUS`) oder die Shop-Preise (`ITEMS`).
+Tipps:
+- Unter *Spieleinstellungen → Sicherheit* „Enable Studio Access to API Services“
+  einschalten, damit der Speicherstand funktioniert.
+- Unter *Spieleinstellungen → Orte* die maximale Spielerzahl auf **8** stellen
+  (es gibt 8 Inseln pro Server).
