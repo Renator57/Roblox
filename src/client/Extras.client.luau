@@ -965,6 +965,247 @@ local function petPart(model, props)
 	return p
 end
 
+-- Niedliche Cartoon-Haustiere aus weichen Ellipsoiden -------------------------
+
+local buildCutePet
+
+-- Ellipsoid: Teil mit Kugel-Mesh, nimmt jede Größe an (weiche Formen statt Klötze)
+local function ell(model, size, cf, color, props)
+	local p = petPart(model, { Size = size, CFrame = cf, Color = color })
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Sphere
+	mesh.Parent = p
+	if props then
+		for key, value in props do
+			p[key] = value
+		end
+	end
+	return p
+end
+
+local PINK = Color3.fromRGB(255, 150, 170)
+local BLACK = Color3.fromRGB(25, 20, 30)
+local WHITE = Color3.new(1, 1, 1)
+local ORANGE = Color3.fromRGB(255, 160, 50)
+local FLYING = { dragon = true, owl = true, phoenix = true, jelly = true, spirit = true, griffin = true }
+
+-- Merkmale je Tierart. a = Akzentfarbe (Bauch, Innenohr), c = Grundfarbe
+local FEATURES = {}
+
+local function pointyEars(m, c, a)
+	for _, x in { -1, 1 } do
+		local ear = CFrame.new(x * 0.52, 1.72, -0.45) * CFrame.Angles(0, 0, -x * 0.35)
+		ell(m, Vector3.new(0.5, 0.75, 0.28), ear, c)
+		ell(m, Vector3.new(0.28, 0.45, 0.1), ear * CFrame.new(0, -0.05, -0.12), a)
+	end
+end
+
+local function tail(m, c, size, cf)
+	ell(m, size, cf, c)
+end
+
+FEATURES.cat = function(m, c, a)
+	pointyEars(m, c, PINK)
+	tail(m, c, Vector3.new(0.28, 0.28, 1.3), CFrame.new(0, 0.55, 1.35) * CFrame.Angles(0.7, 0, 0))
+	for _, x in { -1, 1 } do -- Schnurrhaare
+		for _, y in { 0.72, 0.82 } do
+			petPart(m, { Size = Vector3.new(0.5, 0.03, 0.03), CFrame = CFrame.new(x * 0.75, y, -1.15) * CFrame.Angles(0, 0, x * (y - 0.77) * 3), Color = BLACK })
+		end
+	end
+end
+
+FEATURES.mouse = function(m, c, a)
+	for _, x in { -1, 1 } do
+		ell(m, Vector3.new(0.85, 0.85, 0.15), CFrame.new(x * 0.65, 1.65, -0.35), c)
+		ell(m, Vector3.new(0.55, 0.55, 0.1), CFrame.new(x * 0.65, 1.65, -0.43), PINK)
+	end
+	tail(m, PINK, Vector3.new(0.12, 0.12, 1.4), CFrame.new(0, 0.1, 1.5) * CFrame.Angles(0.3, 0, 0))
+	ell(m, Vector3.new(0.18, 0.15, 0.12), CFrame.new(0, 0.85, -1.3), PINK)
+end
+
+FEATURES.bunny = function(m, c, a)
+	for _, x in { -1, 1 } do
+		local ear = CFrame.new(x * 0.33, 2.2, -0.35) * CFrame.Angles(0.15, 0, -x * 0.12)
+		ell(m, Vector3.new(0.38, 1.35, 0.25), ear, c)
+		ell(m, Vector3.new(0.22, 1, 0.1), ear * CFrame.new(0, 0, -0.1), PINK)
+	end
+	ell(m, Vector3.new(0.55, 0.55, 0.55), CFrame.new(0, 0.2, 1.15), WHITE)
+	ell(m, Vector3.new(0.16, 0.12, 0.1), CFrame.new(0, 0.85, -1.3), PINK)
+end
+
+local function bushyTail(m, c, tip)
+	local cf = CFrame.new(0, 0.6, 1.5) * CFrame.Angles(0.6, 0, 0)
+	ell(m, Vector3.new(0.75, 0.75, 1.5), cf, c)
+	ell(m, Vector3.new(0.55, 0.55, 0.55), cf * CFrame.new(0, 0, 0.75), tip)
+end
+
+FEATURES.fox = function(m, c, a)
+	pointyEars(m, c, BLACK)
+	bushyTail(m, c, WHITE)
+	ell(m, Vector3.new(0.7, 0.5, 0.5), CFrame.new(0, 0.72, -1.15), WHITE) -- Schnauze
+	ell(m, Vector3.new(0.16, 0.12, 0.12), CFrame.new(0, 0.8, -1.42), BLACK)
+end
+
+FEATURES.wolf = function(m, c, a)
+	pointyEars(m, c, a)
+	bushyTail(m, c, a)
+	ell(m, Vector3.new(0.7, 0.5, 0.5), CFrame.new(0, 0.72, -1.15), a)
+	ell(m, Vector3.new(0.16, 0.12, 0.12), CFrame.new(0, 0.8, -1.42), BLACK)
+end
+
+local function wings(m, color, size)
+	for _, x in { -1, 1 } do
+		ell(m, size or Vector3.new(1.4, 0.8, 0.12), CFrame.new(x * 1.05, 0.55, 0.35) * CFrame.Angles(0.2, x * 0.4, x * 0.45), color)
+	end
+end
+
+FEATURES.dragon = function(m, c, a)
+	for _, x in { -1, 1 } do
+		ell(m, Vector3.new(0.22, 0.75, 0.22), CFrame.new(x * 0.45, 1.75, -0.2) * CFrame.Angles(-0.6, 0, -x * 0.3), Color3.fromRGB(250, 240, 210))
+	end
+	wings(m, a)
+	for i = 0, 2 do
+		ell(m, Vector3.new(0.18, 0.4, 0.35), CFrame.new(0, 0.75 - i * 0.12, 0.2 + i * 0.45), a)
+	end
+	tail(m, c, Vector3.new(0.4, 0.4, 1.3), CFrame.new(0, 0, 1.45) * CFrame.Angles(0.35, 0, 0))
+	for _, x in { -1, 1 } do -- Nasenlöcher
+		ell(m, Vector3.new(0.08, 0.08, 0.05), CFrame.new(x * 0.15, 0.82, -1.28), BLACK)
+	end
+end
+
+FEATURES.frog = function(m, c, a)
+	for _, x in { -1, 1 } do
+		ell(m, Vector3.new(0.6, 0.6, 0.6), CFrame.new(x * 0.45, 1.6, -0.75), c)
+		ell(m, Vector3.new(0.42, 0.42, 0.2), CFrame.new(x * 0.45, 1.65, -1.0), WHITE)
+		ell(m, Vector3.new(0.22, 0.26, 0.1), CFrame.new(x * 0.45, 1.65, -1.1), BLACK)
+	end
+	ell(m, Vector3.new(0.9, 0.08, 0.06), CFrame.new(0, 0.7, -1.28), BLACK)
+end
+
+FEATURES.hedgehog = function(m, c, a)
+	local dark = c:Lerp(BLACK, 0.45)
+	for i = 0, 11 do
+		local angle = (i % 4) / 3 * 1.6 - 0.8
+		local row = math.floor(i / 4)
+		ell(m, Vector3.new(0.32, 0.32, 0.95), CFrame.new(math.sin(angle) * 0.6, 1.25 - row * 0.4, 0.1 + row * 0.35) * CFrame.Angles(0.9 - row * 0.3, angle, 0) * CFrame.new(0, 0, 0.3), dark)
+	end
+	ell(m, Vector3.new(0.2, 0.15, 0.15), CFrame.new(0, 0.8, -1.32), BLACK)
+end
+
+FEATURES.owl = function(m, c, a)
+	for _, x in { -1, 1 } do
+		ell(m, Vector3.new(0.65, 0.65, 0.15), CFrame.new(x * 0.4, 1.0, -1.18), a)
+		ell(m, Vector3.new(0.25, 0.6, 0.2), CFrame.new(x * 0.55, 1.75, -0.4) * CFrame.Angles(0, 0, -x * 0.4), c)
+	end
+	ell(m, Vector3.new(0.22, 0.3, 0.25), CFrame.new(0, 0.75, -1.32), ORANGE)
+	wings(m, c:Lerp(BLACK, 0.2), Vector3.new(0.3, 1.0, 0.9))
+end
+
+FEATURES.phoenix = function(m, c, a)
+	wings(m, Color3.fromRGB(255, 200, 60))
+	for i = -1, 1 do
+		ell(m, Vector3.new(0.18, 0.7, 0.25), CFrame.new(i * 0.2, 1.85, -0.3) * CFrame.Angles(-0.3, 0, -i * 0.4), Color3.fromRGB(255, 220, 80), { Material = Enum.Material.Neon })
+	end
+	ell(m, Vector3.new(0.22, 0.3, 0.25), CFrame.new(0, 0.78, -1.32), ORANGE)
+	local tailPart = ell(m, Vector3.new(0.5, 0.5, 1.2), CFrame.new(0, 0.3, 1.4) * CFrame.Angles(0.5, 0, 0), Color3.fromRGB(255, 80, 30), { Material = Enum.Material.Neon })
+	local fire = Instance.new("Fire")
+	fire.Size = 2
+	fire.Heat = 4
+	fire.Parent = tailPart
+end
+
+FEATURES.spirit = function(m, c, a)
+	ell(m, Vector3.new(0.5, 0.15, 0.9), CFrame.new(0.15, 1.75, -0.3) * CFrame.Angles(0, 0.4, 0.3), Color3.fromRGB(90, 200, 90))
+	petPart(m, { Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.1, 1.3, 1.3), CFrame = CFrame.new(0, 2.05, -0.4) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(255, 240, 150), Material = Enum.Material.Neon, Transparency = 0.2 })
+end
+
+FEATURES.jelly = function(m, c, a)
+	for i = 0, 5 do
+		local angle = i / 6 * math.pi * 2
+		ell(m, Vector3.new(0.18, 1.0, 0.18), CFrame.new(math.cos(angle) * 0.5, -0.3, math.sin(angle) * 0.5 - 0.2) * CFrame.Angles(math.sin(angle) * 0.2, 0, math.cos(angle) * 0.2), a, { Transparency = 0.3, Material = Enum.Material.Neon })
+	end
+end
+
+FEATURES.unicorn = function(m, c, a)
+	pointyEars(m, c, PINK)
+	ell(m, Vector3.new(0.22, 1.0, 0.22), CFrame.new(0, 1.95, -0.85) * CFrame.Angles(-0.45, 0, 0), Color3.fromRGB(255, 215, 80), { Material = Enum.Material.Neon })
+	local mane = { Color3.fromRGB(255, 120, 200), Color3.fromRGB(150, 120, 255), Color3.fromRGB(110, 210, 255) }
+	for i, color in mane do
+		ell(m, Vector3.new(0.35, 0.55, 0.55), CFrame.new(0, 1.7 - i * 0.3, -0.1 + i * 0.3), color)
+	end
+	tail(m, mane[1], Vector3.new(0.45, 0.45, 1.2), CFrame.new(0, 0.4, 1.4) * CFrame.Angles(0.6, 0, 0))
+end
+
+FEATURES.griffin = function(m, c, a)
+	wings(m, a, Vector3.new(1.7, 0.9, 0.12))
+	ell(m, Vector3.new(0.3, 0.3, 0.45), CFrame.new(0, 0.8, -1.38) * CFrame.Angles(0.4, 0, 0), Color3.fromRGB(255, 200, 60))
+	for _, x in { -1, 1 } do
+		ell(m, Vector3.new(0.25, 0.6, 0.2), CFrame.new(x * 0.5, 1.75, -0.35) * CFrame.Angles(-0.4, 0, -x * 0.3), a)
+	end
+	tail(m, c, Vector3.new(0.3, 0.3, 1.2), CFrame.new(0, 0.3, 1.4) * CFrame.Angles(0.4, 0, 0))
+end
+
+buildCutePet = function(pet, golden)
+	local model = Instance.new("Model")
+	model.Name = pet.id
+	local species = pet.style
+	local c = golden and C.gold or pet.color
+	local a = c:Lerp(WHITE, 0.55)
+	local shiny = golden or pet.rarity == "Legendary" or pet.rarity == "Exclusive"
+	local glow = species == "jelly" or species == "spirit"
+	local bodyProps = glow and { Material = Enum.Material.Neon, Transparency = 0.25 } or (shiny and { Material = Enum.Material.SmoothPlastic, Reflectance = 0.15 } or nil)
+
+	-- Körper, Kopf, Bauch
+	local body
+	if species == "jelly" then
+		body = ell(model, Vector3.new(1.9, 1.5, 1.9), CFrame.new(0, 0.9, -0.3), c, bodyProps)
+	else
+		body = ell(model, Vector3.new(1.5, 1.3, 1.7), CFrame.new(0, 0, 0.3), c, bodyProps)
+		ell(model, Vector3.new(1.75, 1.55, 1.55), CFrame.new(0, 0.95, -0.45), c, bodyProps)
+		ell(model, Vector3.new(1.0, 0.85, 0.3), CFrame.new(0, -0.05, -0.48), a)
+		-- Füße
+		if not FLYING[species] then
+			for _, x in { -1, 1 } do
+				for _, zPos in { -0.25, 0.8 } do
+					ell(model, Vector3.new(0.45, 0.3, 0.55), CFrame.new(x * 0.45, -0.6, zPos), c:Lerp(BLACK, 0.15))
+				end
+			end
+		end
+	end
+	model.PrimaryPart = body
+
+	-- Gesicht: glänzende Kulleraugen, Bäckchen, Mund
+	for _, x in { -1, 1 } do
+		if species ~= "frog" then
+			ell(model, Vector3.new(0.34, 0.44, 0.16), CFrame.new(x * 0.38, 1.05, -1.18), BLACK)
+			ell(model, Vector3.new(0.13, 0.13, 0.06), CFrame.new(x * 0.34, 1.13, -1.26), WHITE, { Material = Enum.Material.Neon })
+		end
+		ell(model, Vector3.new(0.32, 0.18, 0.08), CFrame.new(x * 0.62, 0.78, -1.08), PINK, { Transparency = 0.15 })
+	end
+	if species ~= "frog" and species ~= "owl" and species ~= "phoenix" and species ~= "griffin" then
+		ell(model, Vector3.new(0.18, 0.08, 0.05), CFrame.new(0, 0.7, -1.24), BLACK)
+	end
+
+	local feature = FEATURES[species]
+	if feature then
+		feature(model, c, a)
+	end
+
+	if shiny then
+		local sparkles = Instance.new("Sparkles")
+		sparkles.SparkleColor = golden and C.gold or c
+		sparkles.Parent = body
+		local light = Instance.new("PointLight")
+		light.Color = c
+		light.Range = 7
+		light.Brightness = 1.2
+		light.Parent = body
+	end
+	model:SetAttribute("Flying", FLYING[species] == true)
+	model.Parent = petFolder
+	return model
+end
+
 local function buildPetModel(entry)
 	local pet, golden = Config.parsePet(entry)
 	if not pet then
@@ -1004,59 +1245,7 @@ local function buildPetModel(entry)
 		custom:Destroy()
 	end
 
-	local model = Instance.new("Model")
-	model.Name = pet.id
-	local color = golden and C.gold or pet.color
-	local shiny = golden or pet.rarity == "Legendary" or pet.rarity == "Exclusive"
-	local body = petPart(model, {
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.new(1.8, 1.8, 1.8),
-		CFrame = CFrame.new(),
-		Color = color,
-		Material = shiny and Enum.Material.Neon or Enum.Material.SmoothPlastic,
-	})
-	model.PrimaryPart = body
-	for _, x in { -0.38, 0.38 } do
-		petPart(model, { Shape = Enum.PartType.Ball, Size = Vector3.new(0.55, 0.55, 0.55), CFrame = CFrame.new(x, 0.25, -0.68), Color = Color3.new(1, 1, 1) })
-		petPart(model, { Shape = Enum.PartType.Ball, Size = Vector3.new(0.28, 0.28, 0.28), CFrame = CFrame.new(x, 0.25, -0.92), Color = Color3.new(0.05, 0.05, 0.1) })
-	end
-	local accent = golden and Color3.fromRGB(255, 240, 160) or color:Lerp(Color3.new(1, 1, 1), 0.35)
-	if pet.style == "ears" then
-		for _, x in { -0.5, 0.5 } do
-			petPart(model, { Size = Vector3.new(0.45, 0.6, 0.25), CFrame = CFrame.new(x, 0.95, 0) * CFrame.Angles(0, 0, -x * 0.6), Color = color })
-		end
-	elseif pet.style == "longears" then
-		for _, x in { -0.35, 0.35 } do
-			petPart(model, { Size = Vector3.new(0.3, 1.3, 0.25), CFrame = CFrame.new(x, 1.3, 0.1) * CFrame.Angles(0, 0, -x * 0.4), Color = accent })
-		end
-	elseif pet.style == "horns" then
-		for _, x in { -0.45, 0.45 } do
-			petPart(model, { Size = Vector3.new(0.25, 0.75, 0.25), CFrame = CFrame.new(x, 1, 0.1) * CFrame.Angles(-0.4, 0, -x * 0.7), Color = Color3.fromRGB(240, 240, 220) })
-		end
-	elseif pet.style == "horn" then
-		petPart(model, { Size = Vector3.new(0.25, 1, 0.25), CFrame = CFrame.new(0, 1.15, -0.45) * CFrame.Angles(-0.5, 0, 0), Color = C.gold, Material = Enum.Material.Neon })
-	elseif pet.style == "wings" then
-		for _, x in { -1, 1 } do
-			petPart(model, { Size = Vector3.new(1.3, 0.7, 0.12), CFrame = CFrame.new(x * 1.05, 0.25, 0.3) * CFrame.Angles(0, x * 0.5, x * 0.3), Color = accent })
-		end
-	elseif pet.style == "halo" then
-		petPart(model, { Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.12, 1.3, 1.3), CFrame = CFrame.new(0, 1.35, 0) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(255, 240, 150), Material = Enum.Material.Neon, Transparency = 0.2 })
-	elseif pet.style == "spikes" then
-		for i = -1, 1 do
-			petPart(model, { Size = Vector3.new(0.25, 0.7, 0.25), CFrame = CFrame.new(i * 0.4, 0.8, 0.35) * CFrame.Angles(0.6, 0, i * 0.3), Color = accent })
-		end
-	end
-	if shiny then
-		local sparkles = Instance.new("Sparkles")
-		sparkles.SparkleColor = golden and C.gold or pet.color
-		sparkles.Parent = body
-		local light = Instance.new("PointLight")
-		light.Color = color
-		light.Range = 6
-		light.Parent = body
-	end
-	model.Parent = petFolder
-	return model
+	return buildCutePet(pet, golden)
 end
 
 local petViews = {}
@@ -1116,8 +1305,17 @@ RunService.RenderStepped:Connect(function(dt)
 		local n = #view.models
 		for i, model in view.models do
 			if root then
-				local x = (i - (n + 1) / 2) * 3
-				local target = root.CFrame * CFrame.new(x, 0.5 + math.sin(t * 3 + i) * 0.35, 4.5)
+				local x = (i - (n + 1) / 2) * 3.2
+				local moving = root.AssemblyLinearVelocity.Magnitude > 2
+				local y
+				if model:GetAttribute("Flying") then
+					y = 0.6 + math.sin(t * 3 + i) * 0.4
+				elseif moving then
+					y = -2.15 + math.abs(math.sin(t * 9 + i)) * 0.9 -- hüpfen
+				else
+					y = -2.15 + math.abs(math.sin(t * 2 + i)) * 0.15
+				end
+				local target = root.CFrame * CFrame.new(x, y, 4.5)
 				local current = view.cframes[i]
 				if not current or (current.Position - target.Position).Magnitude > 60 then
 					current = target

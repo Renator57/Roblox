@@ -130,29 +130,29 @@ Config.RARITIES = {
 }
 
 -- boost: 0.10 = +10 % auf Produktion und Klicks
--- style: Aussehen des 3D-Haustiers (ears, longears, horns, horn, wings, halo, spikes, none)
+-- style: Tierart für das 3D-Modell (mouse, cat, bunny, fox, wolf, dragon, frog, hedgehog, owl, spirit, phoenix, jelly, unicorn, griffin)
 Config.PETS = {
-	{ id = "Mouse", name = "Kristallmaus", icon = "🐭", rarity = "Common", boost = 0.10, color = Color3.fromRGB(175, 175, 195), style = "ears" },
-	{ id = "Cat", name = "Steinkatze", icon = "🐱", rarity = "Common", boost = 0.15, color = Color3.fromRGB(150, 140, 130), style = "ears" },
-	{ id = "Bunny", name = "Glitzerhase", icon = "🐰", rarity = "Rare", boost = 0.30, color = Color3.fromRGB(255, 200, 230), style = "longears" },
-	{ id = "Fox", name = "Edelsteinfuchs", icon = "🦊", rarity = "Epic", boost = 0.75, color = Color3.fromRGB(255, 140, 50), style = "ears" },
-	{ id = "Dragon", name = "Diamantdrache", icon = "🐲", rarity = "Legendary", boost = 2.0, color = Color3.fromRGB(90, 220, 255), style = "horns" },
+	{ id = "Mouse", name = "Kristallmaus", icon = "🐭", rarity = "Common", boost = 0.10, color = Color3.fromRGB(175, 175, 195), style = "mouse" },
+	{ id = "Cat", name = "Steinkatze", icon = "🐱", rarity = "Common", boost = 0.15, color = Color3.fromRGB(150, 140, 130), style = "cat" },
+	{ id = "Bunny", name = "Glitzerhase", icon = "🐰", rarity = "Rare", boost = 0.30, color = Color3.fromRGB(255, 200, 230), style = "bunny" },
+	{ id = "Fox", name = "Edelsteinfuchs", icon = "🦊", rarity = "Epic", boost = 0.75, color = Color3.fromRGB(255, 140, 50), style = "fox" },
+	{ id = "Dragon", name = "Diamantdrache", icon = "🐲", rarity = "Legendary", boost = 2.0, color = Color3.fromRGB(90, 220, 255), style = "dragon" },
 
-	{ id = "Frog", name = "Moosfrosch", icon = "🐸", rarity = "Common", boost = 0.4, color = Color3.fromRGB(100, 200, 90), style = "none" },
-	{ id = "Hedgehog", name = "Pilzigel", icon = "🦔", rarity = "Common", boost = 0.6, color = Color3.fromRGB(150, 100, 70), style = "spikes" },
-	{ id = "Owl", name = "Waldeule", icon = "🦉", rarity = "Rare", boost = 1.2, color = Color3.fromRGB(160, 120, 80), style = "wings" },
-	{ id = "Spirit", name = "Baumgeist", icon = "🌳", rarity = "Epic", boost = 3, color = Color3.fromRGB(120, 255, 160), style = "halo" },
-	{ id = "Phoenix", name = "Phönix", icon = "🔥", rarity = "Legendary", boost = 8, color = Color3.fromRGB(255, 110, 40), style = "wings" },
+	{ id = "Frog", name = "Moosfrosch", icon = "🐸", rarity = "Common", boost = 0.4, color = Color3.fromRGB(100, 200, 90), style = "frog" },
+	{ id = "Hedgehog", name = "Pilzigel", icon = "🦔", rarity = "Common", boost = 0.6, color = Color3.fromRGB(150, 100, 70), style = "hedgehog" },
+	{ id = "Owl", name = "Waldeule", icon = "🦉", rarity = "Rare", boost = 1.2, color = Color3.fromRGB(160, 120, 80), style = "owl" },
+	{ id = "Spirit", name = "Baumgeist", icon = "🌳", rarity = "Epic", boost = 3, color = Color3.fromRGB(120, 255, 160), style = "spirit" },
+	{ id = "Phoenix", name = "Phönix", icon = "🔥", rarity = "Legendary", boost = 8, color = Color3.fromRGB(255, 110, 40), style = "phoenix" },
 
-	{ id = "Jelly", name = "Sternenqualle", icon = "🪼", rarity = "Common", boost = 2, color = Color3.fromRGB(200, 140, 255), style = "halo" },
-	{ id = "Comet", name = "Kometenkatze", icon = "☄️", rarity = "Common", boost = 3, color = Color3.fromRGB(80, 90, 160), style = "ears" },
-	{ id = "Wolf", name = "Mondwolf", icon = "🐺", rarity = "Rare", boost = 6, color = Color3.fromRGB(200, 210, 235), style = "ears" },
-	{ id = "Nebula", name = "Nebeldrache", icon = "🐉", rarity = "Epic", boost = 15, color = Color3.fromRGB(150, 60, 220), style = "horns" },
-	{ id = "Unicorn", name = "Galaxie-Einhorn", icon = "🦄", rarity = "Legendary", boost = 50, color = Color3.fromRGB(255, 120, 230), style = "horn" },
+	{ id = "Jelly", name = "Sternenqualle", icon = "🪼", rarity = "Common", boost = 2, color = Color3.fromRGB(200, 140, 255), style = "jelly" },
+	{ id = "Comet", name = "Kometenkatze", icon = "☄️", rarity = "Common", boost = 3, color = Color3.fromRGB(80, 90, 160), style = "cat" },
+	{ id = "Wolf", name = "Mondwolf", icon = "🐺", rarity = "Rare", boost = 6, color = Color3.fromRGB(200, 210, 235), style = "wolf" },
+	{ id = "Nebula", name = "Nebeldrache", icon = "🐉", rarity = "Epic", boost = 15, color = Color3.fromRGB(150, 60, 220), style = "dragon" },
+	{ id = "Unicorn", name = "Galaxie-Einhorn", icon = "🦄", rarity = "Legendary", boost = 50, color = Color3.fromRGB(255, 120, 230), style = "unicorn" },
 
 	-- Exklusiv: nur im Robux-Shop
-	{ id = "RainbowUnicorn", name = "Regenbogen-Einhorn", icon = "🌈", rarity = "Exclusive", boost = 10, color = Color3.fromRGB(255, 255, 255), style = "horn" },
-	{ id = "ShadowGriffin", name = "Schattengreif", icon = "🦅", rarity = "Exclusive", boost = 30, color = Color3.fromRGB(60, 50, 90), style = "wings" },
+	{ id = "RainbowUnicorn", name = "Regenbogen-Einhorn", icon = "🌈", rarity = "Exclusive", boost = 10, color = Color3.fromRGB(255, 255, 255), style = "unicorn" },
+	{ id = "ShadowGriffin", name = "Schattengreif", icon = "🦅", rarity = "Exclusive", boost = 30, color = Color3.fromRGB(60, 50, 90), style = "griffin" },
 }
 
 -- Eier: werden mit Kristallen gekauft, die Chancen stehen im Spiel

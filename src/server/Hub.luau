@@ -73,7 +73,7 @@ function Hub.init(ctx)
 		end
 		-- Schild am Brückenanfang mit dem Namen des Besitzers
 		local signPart = makePart(root, { Size = Vector3.one, CFrame = CFrame.new(a + dir * 3 + Vector3.new(0, 6, 0)), Transparency = 1, CanCollide = false })
-		local label = billboard(signPart, 12, 2.6, 0, 150)
+		local label = billboard(signPart, 7, 1.6, 0, 120)
 		local function refresh()
 			local owner = plot.owner
 			label.Text = owner and ("🏝️ " .. owner.DisplayName) or "🏝️ Freie Insel"

@@ -138,21 +138,39 @@ local function terrainIsland(center, radius, rng)
 	Terrain:FillBall(center + Vector3.new(0, -38, 0), 7, Enum.Material.Rock)
 end
 
--- Baum: Holzstamm mit buschiger Krone aus Laub-Gelände
+-- Cartoon-Baum: Stamm mit runden, weichen Kronen (oder eine Tanne)
+local function softBall(parent, size, cframe, color)
+	local p = makePart(parent, { Size = size, CFrame = cframe, Color = color, CanCollide = false })
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Sphere
+	mesh.Parent = p
+	return p
+end
+
 local function terrainTree(parent, pos, rng)
-	local height = rng:NextNumber(8, 12)
+	local leaf = Color3.fromHSV(rng:NextNumber(0.24, 0.36), rng:NextNumber(0.55, 0.7), rng:NextNumber(0.6, 0.8))
+	local leafLight = leaf:Lerp(Color3.fromRGB(230, 255, 180), 0.25)
+	local pine = rng:NextNumber() < 0.3
+	local height = rng:NextNumber(5, 7)
 	makePart(parent, {
 		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(height + 2, 1.8, 1.8),
-		CFrame = CFrame.new(pos + Vector3.new(0, height / 2 - 1, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Size = Vector3.new(height, 1.3, 1.3),
+		CFrame = CFrame.new(pos + Vector3.new(0, height / 2, 0)) * CFrame.Angles(0, 0, math.rad(90)),
 		Color = WOOD,
 		Material = Enum.Material.Wood,
 	})
 	local top = pos + Vector3.new(0, height, 0)
-	Terrain:FillBall(top, rng:NextNumber(4.5, 6), Enum.Material.LeafyGrass)
-	for _ = 1, 3 do
-		local offset = Vector3.new(rng:NextNumber(-3.5, 3.5), rng:NextNumber(-1.5, 2), rng:NextNumber(-3.5, 3.5))
-		Terrain:FillBall(top + offset, rng:NextNumber(3, 4.5), Enum.Material.LeafyGrass)
+	if pine then
+		local dark = leaf:Lerp(Color3.fromRGB(20, 60, 40), 0.35)
+		for i, size in { 7, 5.2, 3.4 } do
+			softBall(parent, Vector3.new(size, 3.2, size), CFrame.new(top + Vector3.new(0, (i - 1) * 2.2, 0)), dark)
+		end
+	else
+		softBall(parent, Vector3.new(7, 6, 7), CFrame.new(top + Vector3.new(0, 1.5, 0)), leaf)
+		for k = 1, 3 do
+			local a = k / 3 * math.pi * 2 + rng:NextNumber(0, 1)
+			softBall(parent, Vector3.new(4.2, 3.8, 4.2), CFrame.new(top + Vector3.new(math.cos(a) * 2.6, rng:NextNumber(0.2, 2.2), math.sin(a) * 2.6)), k == 1 and leafLight or leaf)
+		end
 	end
 end
 
@@ -609,7 +627,7 @@ local function buildPlot(index, root)
 		Transparency = 1,
 		CanCollide = false,
 	})
-	local sign = billboard(signAnchor, 24, 6, 4, 400)
+	local sign = billboard(signAnchor, 14, 3.5, 4, 400)
 	sign.Text = "🏝️ Freie Insel"
 
 	-- Sockel für die Helfer im Kreis um den Kristall
