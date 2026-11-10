@@ -214,6 +214,18 @@ function MapBuilder.build()
 		old:Destroy()
 	end
 
+	-- Teile der Studio-Vorlage entfernen: Auf der Baseplate würde man statt in
+	-- der Lava landen, und fremde SpawnLocations stören den Start.
+	local baseplate = workspace:FindFirstChild("Baseplate")
+	if baseplate then
+		baseplate:Destroy()
+	end
+	for _, descendant in workspace:GetDescendants() do
+		if descendant:IsA("SpawnLocation") then
+			descendant:Destroy()
+		end
+	end
+
 	local course = Instance.new("Folder")
 	course.Name = "Course"
 	course.Parent = workspace
