@@ -1,0 +1,2457 @@
+<roblox version="4"><Item class="ReplicatedStorage" referent="RBX00000000000000000000000000000003"><Properties><string name="Name">ReplicatedStorage</string></Properties><Item class="Folder" referent="RBX00000000000000000000000000000002"><Properties><string name="Name">Shared</string></Properties><Item class="ModuleScript" referent="RBX00000000000000000000000000000001"><Properties><string name="Name">Config</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Einstellungen und Spielmathematik.
+-- Wird von Server UND Client benutzt, damit beide gleich rechnen.
+
+local Config = {}
+
+Config.GAME_NAME = "Kristall-Imperium"
+
+-- Welt
+Config.PLOT_COUNT = 8 -- Anzahl Inseln (= max. Spieler pro Server)
+Config.PLOT_RADIUS = 150 -- Abstand der Inseln vom Weltmittelpunkt
+
+-- Wirtschaft
+Config.COST_GROWTH = 1.15 -- jeder gekaufte Helfer macht den nächsten 15 % teurer
+Config.MILESTONES = { 10, 25, 50, 100, 150, 200, 250, 300, 400, 500 } -- jeweils Produktion x2
+Config.CLICKS_PER_SECOND = 20 -- Schutz gegen Autoklicker
+
+-- Goldene Kristalle (Zufallsereignis)
+Config.GOLDEN_MIN_DELAY = 40
+Config.GOLDEN_MAX_DELAY = 90
+Config.GOLDEN_LIFETIME = 15
+Config.FRENZY_DURATION = 20
+Config.FRENZY_MULTIPLIER = 7
+
+-- Wiedergeburt
+Config.REBIRTH_BASE = 1e6 -- ab so vielen gesammelten Kristallen gibt es Sternenstaub
+Config.STARDUST_BONUS = 0.10 -- +10 % Produktion pro Sternenstaub
+
+-- Offline-Einnahmen
+Config.OFFLINE_MAX_SECONDS = 8 * 3600
+Config.OFFLINE_FACTOR = 0.5
+
+-- Speichern
+Config.DATASTORE_NAME = "KristallImperium_v1"
+Config.AUTOSAVE_INTERVAL = 90
+
+-- Helfer: produzieren automatisch Kristalle pro Sekunde
+Config.GENERATORS = {
+	{ id = "Pickaxe", name = "Spitzhacke", icon = "⛏️", baseCost = 15, baseRate = 0.2 },
+	{ id = "Dwarf", name = "Bergbau-Zwerg", icon = "🧔", baseCost = 100, baseRate = 1 },
+	{ id = "Drill", name = "Dampfbohrer", icon = "🔩", baseCost = 1100, baseRate = 8 },
+	{ id = "Mine", name = "Kristallmine", icon = "⛰️", baseCost = 12000, baseRate = 47 },
+	{ id = "Laser", name = "Laserturm", icon = "🔦", baseCost = 130000, baseRate = 260 },
+	{ id = "Portal", name = "Magieportal", icon = "🌀", baseCost = 1.4e6, baseRate = 1400 },
+	{ id = "Forge", name = "Sternenschmiede", icon = "⭐", baseCost = 2e7, baseRate = 7800 },
+	{ id = "Core", name = "Galaxiekern", icon = "🌌", baseCost = 3.3e8, baseRate = 44000 },
+}
+
+-- Einmalige Upgrades
+-- kind: click (Klick x mult), clickPercent (Klick + value * Produktion),
+--       global (alle Helfer x mult), luck, goldenReward, offline
+Config.UPGRADES = {
+	{ id = "Gloves", name = "Arbeitshandschuhe", icon = "🧤", desc = "Klicks x2", cost = 100, kind = "click", mult = 2 },
+	{ id = "Coffee", name = "Zwergenkaffee", icon = "☕", desc = "Alle Helfer +50 %", cost = 2500, kind = "global", mult = 1.5 },
+	{ id = "Hammer", name = "Diamanthammer", icon = "🔨", desc = "Klicks x3", cost = 10000, kind = "click", mult = 3 },
+	{ id = "Luck", name = "Glücksklee", icon = "🍀", desc = "Goldene Kristalle doppelt so oft", cost = 50000, kind = "luck" },
+	{ id = "Resonance", name = "Kristallresonanz", icon = "🔔", desc = "Klicks + 5 % deiner Produktion", cost = 100000, kind = "clickPercent", value = 0.05 },
+	{ id = "TimeCrystal", name = "Zeitkristall", icon = "⏳", desc = "Volle Offline-Einnahmen statt 50 %", cost = 500000, kind = "offline" },
+	{ id = "Moon", name = "Mondlicht", icon = "🌙", desc = "Alle Helfer x2", cost = 1e6, kind = "global", mult = 2 },
+	{ id = "GoldVein", name = "Goldader", icon = "💰", desc = "Goldene Kristalle geben x3", cost = 2.5e6, kind = "goldenReward" },
+	{ id = "Echo", name = "Echo-Kristall", icon = "🔮", desc = "Klicks + 10 % deiner Produktion", cost = 1e7, kind = "clickPercent", value = 0.10 },
+	{ id = "Titan", name = "Titanfaust", icon = "👊", desc = "Klicks x5", cost = 1e8, kind = "click", mult = 5 },
+	{ id = "Nova", name = "Supernova", icon = "💥", desc = "Alle Helfer x3", cost = 1e9, kind = "global", mult = 3 },
+	{ id = "Infinity", name = "Unendlichkeit", icon = "♾️", desc = "Alle Helfer x5", cost = 1e11, kind = "global", mult = 5 },
+}
+
+-- Sternen-Shop: dauerhafte Upgrades, bezahlt mit Sternenstaub (bleiben bei Wiedergeburt)
+-- Kosten pro Stufe: baseCost * 2 ^ Stufe
+Config.STAR_UPGRADES = {
+	{ id = "StarClick", name = "Sternenfaust", icon = "✊", desc = "Klicks x2 pro Stufe", baseCost = 1, maxLevel = 10 },
+	{ id = "Drone", name = "Kristall-Drohne", icon = "🛸", desc = "Klickt automatisch 2x pro Sekunde je Stufe", baseCost = 2, maxLevel = 10 },
+	{ id = "StarEngine", name = "Sternenmotor", icon = "🚀", desc = "Alle Helfer x1.5 pro Stufe", baseCost = 2, maxLevel = 20 },
+	{ id = "Discount", name = "Sternenrabatt", icon = "🏷️", desc = "Helfer 6 % billiger pro Stufe", baseCost = 3, maxLevel = 8 },
+	{ id = "HeadStart", name = "Startkapital", icon = "🎒", desc = "Starte jede Runde mit mehr Kristallen", baseCost = 1, maxLevel = 8 },
+	{ id = "GoldRush", name = "Goldregen", icon = "🌟", desc = "Goldene Kristalle 15 % öfter pro Stufe", baseCost = 3, maxLevel = 5 },
+}
+
+-- Ausbaustufen der Insel. Hängen von ALLEN je gesammelten Kristallen ab
+-- und bleiben deshalb auch nach einer Wiedergeburt stehen.
+Config.ISLAND_LEVELS = {
+	{ total = 500, name = "Steinweg" },
+	{ total = 5000, name = "Laternen" },
+	{ total = 50000, name = "Blumenwiese" },
+	{ total = 5e5, name = "Wasserfälle" },
+	{ total = 5e6, name = "Kristalltürme" },
+	{ total = 5e7, name = "Schwebende Inseln" },
+	{ total = 5e8, name = "Sternenringe" },
+	{ total = 5e9, name = "Regenbogen" },
+	{ total = 5e10, name = "Kristallkrone" },
+}
+
+-- Farbe des großen Kristalls je nach Anzahl Wiedergeburten
+Config.REBIRTH_COLORS = {
+	Color3.fromRGB(90, 200, 255),
+	Color3.fromRGB(90, 255, 160),
+	Color3.fromRGB(180, 110, 255),
+	Color3.fromRGB(255, 110, 200),
+	Color3.fromRGB(255, 200, 60),
+	Color3.fromRGB(255, 90, 80),
+	Color3.fromRGB(240, 245, 255),
+}
+
+Config.STAR_UPGRADES_BY_ID = {}
+for _, upgrade in Config.STAR_UPGRADES do
+	Config.STAR_UPGRADES_BY_ID[upgrade.id] = upgrade
+end
+
+Config.GENERATORS_BY_ID = {}
+for _, gen in Config.GENERATORS do
+	Config.GENERATORS_BY_ID[gen.id] = gen
+end
+Config.UPGRADES_BY_ID = {}
+for _, upgrade in Config.UPGRADES do
+	Config.UPGRADES_BY_ID[upgrade.id] = upgrade
+end
+
+----------------------------------------------------------------------
+-- Zahlen schön anzeigen: 1234 -> 1.23K, 5600000 -> 5.60M
+----------------------------------------------------------------------
+
+local SUFFIXES = { "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc" }
+
+function Config.format(n)
+	n = tonumber(n) or 0
+	if n ~= n then
+		return "0"
+	end
+	local sign = n < 0 and "-" or ""
+	n = math.abs(n)
+	if n < 1000 then
+		if n < 10 and n ~= math.floor(n) then
+			return sign .. string.format("%.1f", n)
+		end
+		return sign .. tostring(math.floor(n))
+	end
+	local tier = math.floor(math.log10(n) / 3)
+	local scaled = n / 10 ^ (tier * 3)
+	if scaled >= 999.5 then
+		tier += 1
+		scaled = n / 10 ^ (tier * 3)
+	end
+	if tier >= #SUFFIXES then
+		return sign .. string.format("%.2e", n)
+	end
+	local text
+	if scaled >= 100 then
+		text = string.format("%.0f", scaled)
+	elseif scaled >= 10 then
+		text = string.format("%.1f", scaled)
+	else
+		text = string.format("%.2f", scaled)
+	end
+	return sign .. text .. SUFFIXES[tier + 1]
+end
+
+----------------------------------------------------------------------
+-- Spielmathematik. `data` hat die Felder:
+-- crystals, runTotal, allTime, gens = {[id]=Anzahl}, upgrades = {[id]=true},
+-- stardust (je gesammelt), stardustSpent, star = {[id]=Stufe}, rebirths
+----------------------------------------------------------------------
+
+function Config.milestonesReached(owned)
+	local count = 0
+	for _, threshold in Config.MILESTONES do
+		if owned >= threshold then
+			count += 1
+		else
+			break
+		end
+	end
+	return count
+end
+
+function Config.milestoneMultiplier(owned)
+	return 2 ^ Config.milestonesReached(owned)
+end
+
+function Config.starLevel(data, id)
+	return data.star and data.star[id] or 0
+end
+
+function Config.starUpgradeCost(upgrade, level)
+	return upgrade.baseCost * 2 ^ level
+end
+
+function Config.availableStardust(data)
+	return (data.stardust or 0) - (data.stardustSpent or 0)
+end
+
+function Config.islandLevel(allTime)
+	local level = 0
+	for i, entry in Config.ISLAND_LEVELS do
+		if (allTime or 0) >= entry.total then
+			level = i
+		end
+	end
+	return level
+end
+
+function Config.rebirthColor(rebirths)
+	return Config.REBIRTH_COLORS[((rebirths or 0) % #Config.REBIRTH_COLORS) + 1]
+end
+
+function Config.costMultiplier(data)
+	return 1 - 0.06 * Config.starLevel(data, "Discount")
+end
+
+function Config.startCrystals(data)
+	local level = Config.starLevel(data, "HeadStart")
+	return level > 0 and 1000 * 10 ^ (level - 1) or 0
+end
+
+function Config.goldenDelayFactor(data)
+	local factor = 0.85 ^ Config.starLevel(data, "GoldRush")
+	if Config.hasUpgrade(data, "luck") then
+		factor *= 0.5
+	end
+	return factor
+end
+
+function Config.nextMilestone(owned)
+	for _, threshold in Config.MILESTONES do
+		if owned < threshold then
+			return threshold
+		end
+	end
+	return nil
+end
+
+function Config.generatorCost(gen, owned, amount, data)
+	local g = Config.COST_GROWTH
+	local mult = data and Config.costMultiplier(data) or 1
+	return gen.baseCost * mult * g ^ owned * (g ^ amount - 1) / (g - 1)
+end
+
+function Config.maxAffordable(gen, owned, money, data)
+	local g = Config.COST_GROWTH
+	local first = Config.generatorCost(gen, owned, 1, data)
+	if money < first then
+		return 0
+	end
+	local n = math.floor(math.log(money * (g - 1) / first + 1) / math.log(g))
+	-- Rundungsfehler abfangen
+	while n > 0 and Config.generatorCost(gen, owned, n, data) > money do
+		n -= 1
+	end
+	return n
+end
+
+function Config.hasUpgrade(data, kind)
+	for id in data.upgrades do
+		local upgrade = Config.UPGRADES_BY_ID[id]
+		if upgrade and upgrade.kind == kind then
+			return true
+		end
+	end
+	return false
+end
+
+function Config.stardustMultiplier(data)
+	return 1 + Config.STARDUST_BONUS * (data.stardust or 0)
+end
+
+function Config.globalMultiplier(data)
+	local mult = 1
+	for id in data.upgrades do
+		local upgrade = Config.UPGRADES_BY_ID[id]
+		if upgrade and upgrade.kind == "global" then
+			mult *= upgrade.mult
+		end
+	end
+	mult *= 1.5 ^ Config.starLevel(data, "StarEngine")
+	return mult * Config.stardustMultiplier(data)
+end
+
+-- Produktion eines einzelnen Helfers dieser Sorte (inkl. aller Boni)
+function Config.unitRate(data, gen)
+	local owned = data.gens[gen.id] or 0
+	return gen.baseRate * Config.milestoneMultiplier(owned) * Config.globalMultiplier(data)
+end
+
+-- Kristalle pro Sekunde (ohne Kristallrausch)
+function Config.production(data)
+	local total = 0
+	for _, gen in Config.GENERATORS do
+		local owned = data.gens[gen.id] or 0
+		if owned > 0 then
+			total += gen.baseRate * owned * Config.milestoneMultiplier(owned)
+		end
+	end
+	return total * Config.globalMultiplier(data)
+end
+
+-- Kristalle pro Klick (ohne Kristallrausch)
+function Config.clickValue(data)
+	local mult, percent = 1, 0
+	for id in data.upgrades do
+		local upgrade = Config.UPGRADES_BY_ID[id]
+		if upgrade and upgrade.kind == "click" then
+			mult *= upgrade.mult
+		elseif upgrade and upgrade.kind == "clickPercent" then
+			percent += upgrade.value
+		end
+	end
+	mult *= 2 ^ Config.starLevel(data, "StarClick")
+	return mult * Config.stardustMultiplier(data) + Config.production(data) * percent
+end
+
+-- Automatische Klicks der Kristall-Drohne pro Sekunde
+function Config.droneClicks(data)
+	return 2 * Config.starLevel(data, "Drone")
+end
+
+-- Gesamte Kristalle pro Sekunde (Helfer + Drohne, ohne Kristallrausch)
+function Config.perSecond(data)
+	return Config.production(data) + Config.droneClicks(data) * Config.clickValue(data)
+end
+
+function Config.stardustForRun(runTotal)
+	return math.floor(math.sqrt((runTotal or 0) / Config.REBIRTH_BASE))
+end
+
+-- Wie viele Kristalle braucht man in diesem Durchlauf für `stardust` Sternenstaub?
+function Config.runTotalForStardust(stardust)
+	return stardust * stardust * Config.REBIRTH_BASE
+end
+
+return Config
+]]></ProtectedString></Properties></Item></Item></Item><Item class="ServerScriptService" referent="RBX00000000000000000000000000000008"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX00000000000000000000000000000007"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000000000000000000000000000004"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Hauptskript (Server).
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local MapBuilder = require(script.Parent.MapBuilder)
+local PlayerData = require(script.Parent.PlayerData)
+
+-- Remotes ---------------------------------------------------------------
+
+local remotes = Instance.new("Folder")
+remotes.Name = "Remotes"
+local function remote(className, name)
+	local r = Instance.new(className)
+	r.Name = name
+	r.Parent = remotes
+	return r
+end
+local mineEvent = remote("RemoteEvent", "Mine")
+local stateEvent = remote("RemoteEvent", "State")
+local notifyEvent = remote("RemoteEvent", "Notify")
+local buyFunction = remote("RemoteFunction", "Buy")
+local rebirthFunction = remote("RemoteFunction", "Rebirth")
+remotes.Parent = ReplicatedStorage
+
+MapBuilder.build()
+Players.CharacterAutoLoads = false
+
+-- Sitzungen -------------------------------------------------------------
+
+-- sessions[player] = { data, plot, tokens, frenzyEnd, nextGolden, golden, lastLevel }
+local sessions = {}
+
+local function now()
+	return workspace:GetServerTimeNow()
+end
+
+local function frenzyMultiplier(session)
+	return (session.frenzyEnd > now()) and Config.FRENZY_MULTIPLIER or 1
+end
+
+local function notify(player, text, kind)
+	notifyEvent:FireClient(player, text, kind)
+end
+
+local function sendState(player)
+	local session = sessions[player]
+	if not session then
+		return
+	end
+	local data = session.data
+	stateEvent:FireClient(player, {
+		crystals = data.crystals,
+		runTotal = data.runTotal,
+		allTime = data.allTime,
+		gens = data.gens,
+		upgrades = data.upgrades,
+		star = data.star,
+		stardust = data.stardust,
+		stardustSpent = data.stardustSpent,
+		rebirths = data.rebirths,
+		frenzyEnd = session.frenzyEnd,
+	})
+end
+
+local function scheduleGolden(session)
+	local delay = Config.GOLDEN_MIN_DELAY + math.random() * (Config.GOLDEN_MAX_DELAY - Config.GOLDEN_MIN_DELAY)
+	session.nextGolden = os.clock() + delay * Config.goldenDelayFactor(session.data)
+end
+
+local function earn(session, amount)
+	local data = session.data
+	data.crystals += amount
+	data.runTotal += amount
+	data.allTime += amount
+end
+
+-- Prüft, ob die Insel eine neue Ausbaustufe erreicht hat
+local function checkIslandLevel(player, session)
+	local level = Config.islandLevel(session.data.allTime)
+	if level > session.lastLevel then
+		session.lastLevel = level
+		MapBuilder.updatePlot(session.plot, session.data)
+		notify(player, "🏗️ Deine Insel wächst: " .. Config.ISLAND_LEVELS[level].name .. "!", "build")
+	end
+end
+
+-- Spieler betreten / verlassen ------------------------------------------
+
+local function onCharacterAdded(player, character)
+	local session = sessions[player]
+	if not session then
+		return
+	end
+	local humanoid = character:WaitForChild("Humanoid")
+	character:WaitForChild("HumanoidRootPart")
+	humanoid.Died:Connect(function()
+		task.delay(2, function()
+			if player.Parent == Players and player.Character == character then
+				player:LoadCharacter()
+			end
+		end)
+	end)
+	task.wait()
+	if character.Parent then
+		character:PivotTo(session.plot.spawnCF)
+	end
+end
+
+local function onPlayerAdded(player)
+	local plot = MapBuilder.claimPlot(player)
+	if not plot then
+		player:Kick("Dieser Server ist voll. Bitte versuch es auf einem anderen Server.")
+		return
+	end
+
+	local data = PlayerData.load(player)
+	if player.Parent ~= Players then
+		MapBuilder.releasePlot(plot)
+		PlayerData.release(player)
+		return
+	end
+
+	local session = {
+		data = data,
+		plot = plot,
+		tokens = Config.CLICKS_PER_SECOND,
+		frenzyEnd = 0,
+		nextGolden = 0,
+		golden = nil,
+		lastLevel = Config.islandLevel(data.allTime),
+	}
+	sessions[player] = session
+	scheduleGolden(session)
+	MapBuilder.updatePlot(plot, data)
+
+	player.CharacterAdded:Connect(function(character)
+		onCharacterAdded(player, character)
+	end)
+	player:LoadCharacter()
+
+	-- Offline-Einnahmen
+	local offlineSeconds = data.lastSeen > 0 and math.clamp(os.time() - data.lastSeen, 0, Config.OFFLINE_MAX_SECONDS) or 0
+	local factor = Config.hasUpgrade(data, "offline") and 1 or Config.OFFLINE_FACTOR
+	local offlineGain = Config.perSecond(data) * offlineSeconds * factor
+	sendState(player)
+	task.delay(3, function()
+		if sessions[player] ~= session then
+			return
+		end
+		if offlineGain >= 1 then
+			earn(session, offlineGain)
+			notify(player, "😴 Während du weg warst, haben deine Helfer " .. Config.format(offlineGain) .. " 💎 gesammelt!", "gold")
+			checkIslandLevel(player, session)
+		else
+			notify(player, "Willkommen bei " .. Config.GAME_NAME .. "! Klick den Kristall 💎", "info")
+		end
+	end)
+end
+
+local function onPlayerRemoving(player)
+	local session = sessions[player]
+	sessions[player] = nil
+	if session then
+		if session.golden then
+			session.golden:Destroy()
+		end
+		MapBuilder.releasePlot(session.plot)
+	end
+	PlayerData.release(player)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+Players.PlayerRemoving:Connect(onPlayerRemoving)
+for _, player in Players:GetPlayers() do
+	task.spawn(onPlayerAdded, player)
+end
+PlayerData.startAutosave()
+
+-- Klicken ---------------------------------------------------------------
+
+mineEvent.OnServerEvent:Connect(function(player)
+	local session = sessions[player]
+	if not session or session.tokens < 1 then
+		return
+	end
+	session.tokens -= 1
+	earn(session, Config.clickValue(session.data) * frenzyMultiplier(session))
+end)
+
+-- Goldene Kristalle -----------------------------------------------------
+
+local function collectGolden(player, session)
+	local golden = session.golden
+	if not golden then
+		return
+	end
+	session.golden = nil
+	golden:Destroy()
+
+	local data = session.data
+	local rewardMult = Config.hasUpgrade(data, "goldenReward") and 3 or 1
+	if math.random() < 0.55 then
+		local amount = math.max(Config.perSecond(data) * 90, Config.clickValue(data) * 40, 50) * rewardMult
+		earn(session, amount)
+		notify(player, "🍀 Glücksfund! +" .. Config.format(amount) .. " 💎", "gold")
+	else
+		local duration = Config.FRENZY_DURATION * rewardMult
+		session.frenzyEnd = now() + duration
+		notify(player, "🔥 KRISTALLRAUSCH! Alles x" .. Config.FRENZY_MULTIPLIER .. " für " .. duration .. " Sekunden!", "frenzy")
+	end
+	sendState(player)
+end
+
+local function spawnGolden(player, session)
+	local golden, click = MapBuilder.spawnGolden(session.plot)
+	session.golden = golden
+	click.MouseClick:Connect(function(clicker)
+		if clicker == player and sessions[player] == session and session.golden == golden then
+			collectGolden(player, session)
+		end
+	end)
+	golden.Touched:Connect(function(hit)
+		local character = player.Character
+		if character and hit:IsDescendantOf(character) and session.golden == golden then
+			collectGolden(player, session)
+		end
+	end)
+	notify(player, "✨ Ein goldener Kristall ist auf deiner Insel erschienen!", "gold")
+	task.delay(Config.GOLDEN_LIFETIME, function()
+		if session.golden == golden then
+			session.golden = nil
+			golden:Destroy()
+		end
+	end)
+end
+
+-- Spielschleife ---------------------------------------------------------
+
+local sendTimer, slowTimer = 0, 0
+
+RunService.Heartbeat:Connect(function(dt)
+	sendTimer += dt
+	slowTimer += dt
+	local sendNow = sendTimer >= 0.25
+	local slowNow = slowTimer >= 1
+	if sendNow then
+		sendTimer = 0
+	end
+	if slowNow then
+		slowTimer = 0
+	end
+
+	for player, session in sessions do
+		session.tokens = math.min(Config.CLICKS_PER_SECOND, session.tokens + Config.CLICKS_PER_SECOND * dt)
+		earn(session, Config.perSecond(session.data) * frenzyMultiplier(session) * dt)
+
+		if not session.golden and os.clock() >= session.nextGolden then
+			scheduleGolden(session)
+			spawnGolden(player, session)
+		end
+		if sendNow then
+			sendState(player)
+		end
+		if slowNow then
+			checkIslandLevel(player, session)
+			PlayerData.updateLeaderstats(player)
+			session.plot.sign.Text = "🏝️ " .. player.DisplayName .. "\n💎 " .. Config.format(Config.perSecond(session.data)) .. "/Sek"
+		end
+	end
+end)
+
+-- Shop ------------------------------------------------------------------
+
+local function buyGenerator(player, session, id, amount)
+	local gen = Config.GENERATORS_BY_ID[id]
+	if not gen then
+		return false, "Unbekannter Helfer."
+	end
+	local data = session.data
+	local owned = data.gens[id] or 0
+	local count
+	if amount == "max" then
+		count = Config.maxAffordable(gen, owned, data.crystals, data)
+	elseif amount == 1 or amount == 10 or amount == 100 then
+		count = amount
+	else
+		return false, "Ungültige Menge."
+	end
+	if count < 1 then
+		return false, "Nicht genug Kristalle."
+	end
+	local cost = Config.generatorCost(gen, owned, count, data)
+	if cost > data.crystals then
+		return false, "Nicht genug Kristalle."
+	end
+
+	data.crystals -= cost
+	data.gens[id] = owned + count
+	MapBuilder.updatePlot(session.plot, data)
+
+	local before, after = Config.milestonesReached(owned), Config.milestonesReached(owned + count)
+	if after > before then
+		notify(player, "🎉 Meilenstein! " .. gen.name .. " produziert jetzt x" .. Config.milestoneMultiplier(owned + count) .. "!", "build")
+	end
+	return true, gen.icon .. " +" .. count .. " " .. gen.name
+end
+
+local function buyUpgrade(session, id)
+	local upgrade = Config.UPGRADES_BY_ID[id]
+	local data = session.data
+	if not upgrade then
+		return false, "Unbekanntes Upgrade."
+	end
+	if data.upgrades[id] then
+		return false, "Schon gekauft."
+	end
+	if data.crystals < upgrade.cost then
+		return false, "Nicht genug Kristalle."
+	end
+	data.crystals -= upgrade.cost
+	data.upgrades[id] = true
+	if upgrade.kind == "luck" then
+		scheduleGolden(session)
+	end
+	return true, upgrade.icon .. " " .. upgrade.name .. " gekauft!"
+end
+
+local function buyStarUpgrade(session, id)
+	local upgrade = Config.STAR_UPGRADES_BY_ID[id]
+	local data = session.data
+	if not upgrade then
+		return false, "Unbekanntes Upgrade."
+	end
+	local level = Config.starLevel(data, id)
+	if level >= upgrade.maxLevel then
+		return false, "Schon auf der höchsten Stufe."
+	end
+	local cost = Config.starUpgradeCost(upgrade, level)
+	if Config.availableStardust(data) < cost then
+		return false, "Nicht genug Sternenstaub."
+	end
+	data.stardustSpent += cost
+	data.star[id] = level + 1
+	return true, upgrade.icon .. " " .. upgrade.name .. " ist jetzt Stufe " .. (level + 1) .. "!"
+end
+
+buyFunction.OnServerInvoke = function(player, kind, id, amount)
+	local session = sessions[player]
+	if not session or type(id) ~= "string" then
+		return false, "Fehler."
+	end
+	local ok, message
+	if kind == "gen" then
+		ok, message = buyGenerator(player, session, id, amount)
+	elseif kind == "upgrade" then
+		ok, message = buyUpgrade(session, id)
+	elseif kind == "star" then
+		ok, message = buyStarUpgrade(session, id)
+	else
+		return false, "Fehler."
+	end
+	sendState(player)
+	return ok, message
+end
+
+-- Wiedergeburt ----------------------------------------------------------
+
+rebirthFunction.OnServerInvoke = function(player)
+	local session = sessions[player]
+	if not session then
+		return false, "Fehler."
+	end
+	local data = session.data
+	local gain = Config.stardustForRun(data.runTotal)
+	if gain < 1 then
+		return false, "Sammle erst " .. Config.format(Config.REBIRTH_BASE) .. " 💎 in dieser Runde."
+	end
+
+	data.stardust += gain
+	data.rebirths += 1
+	data.runTotal = 0
+	data.gens = {}
+	data.upgrades = {}
+	data.crystals = Config.startCrystals(data)
+	session.frenzyEnd = 0
+
+	MapBuilder.updatePlot(session.plot, data)
+	PlayerData.updateLeaderstats(player)
+	sendState(player)
+	task.spawn(PlayerData.save, player)
+	notifyEvent:FireAllClients("🌟 " .. player.DisplayName .. " ist wiedergeboren! (Rebirth " .. data.rebirths .. ")", "frenzy")
+	return true, "✨ +" .. gain .. " Sternenstaub! Dein Kristall leuchtet in neuer Farbe."
+end
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000000000000000000000000000005"><Properties><string name="Name">MapBuilder</string><ProtectedString name="Source"><![CDATA[-- Baut die Welt: schwebende Inseln mit Riesenkristall und Sockeln für die Helfer.
+
+local CollectionService = game:GetService("CollectionService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local MapBuilder = {}
+MapBuilder.plots = {}
+
+local CRYSTAL_COLOR = Color3.fromRGB(90, 200, 255)
+local GOLD = Color3.fromRGB(255, 205, 60)
+local STONE = Color3.fromRGB(120, 120, 135)
+local DARK_STONE = Color3.fromRGB(70, 70, 85)
+local GRASS = Color3.fromRGB(100, 190, 90)
+local ROCK = Color3.fromRGB(120, 95, 75)
+local WOOD = Color3.fromRGB(120, 80, 50)
+
+local SLOT_RADIUS = 22
+local ISLAND_SIZE = 96
+
+----------------------------------------------------------------------
+-- Helfer
+----------------------------------------------------------------------
+
+local function makePart(parent, props, className)
+	local p = Instance.new(className or "Part")
+	p.Anchored = true
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Material = Enum.Material.SmoothPlastic
+	for key, value in props do
+		p[key] = value
+	end
+	p.Parent = parent
+	return p
+end
+
+-- Zylinder mit senkrechter Achse (Roblox-Zylinder liegen sonst auf der X-Achse)
+local function vCylinder(parent, height, diameter, cframe, color, material)
+	return makePart(parent, {
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(height, diameter, diameter),
+		CFrame = cframe * CFrame.Angles(0, 0, math.rad(90)),
+		Color = color,
+		Material = material or Enum.Material.SmoothPlastic,
+	})
+end
+
+local function ball(parent, diameter, cframe, color, material)
+	return makePart(parent, {
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.new(diameter, diameter, diameter),
+		CFrame = cframe,
+		Color = color,
+		Material = material or Enum.Material.SmoothPlastic,
+	})
+end
+
+local function billboard(parent, size, offsetY, maxDistance)
+	local gui = Instance.new("BillboardGui")
+	gui.Size = size
+	gui.StudsOffset = Vector3.new(0, offsetY, 0)
+	gui.MaxDistance = maxDistance or 120
+	gui.LightInfluence = 0
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.TextScaled = true
+	label.Font = Enum.Font.FredokaOne
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextStrokeTransparency = 0.2
+	label.Parent = gui
+	gui.Parent = parent
+	return label
+end
+
+----------------------------------------------------------------------
+-- Die 3D-Modelle der Helfer. `cf` = Oberseite des Sockels, Blick zur Inselmitte.
+----------------------------------------------------------------------
+
+local MODEL_BUILDERS = {}
+
+MODEL_BUILDERS.Pickaxe = function(m, cf)
+	local handleCF = cf * CFrame.new(0, 2.6, 0) * CFrame.Angles(0, 0, math.rad(70))
+	makePart(m, {
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(5, 0.5, 0.5),
+		CFrame = handleCF,
+		Color = WOOD,
+		Material = Enum.Material.Wood,
+	})
+	makePart(m, {
+		Size = Vector3.new(0.7, 0.7, 3.8),
+		CFrame = handleCF * CFrame.new(2.3, 0, 0),
+		Color = Color3.fromRGB(190, 195, 205),
+		Material = Enum.Material.Metal,
+	})
+	ball(m, 1, cf * CFrame.new(1.4, 0.5, 0.8), CRYSTAL_COLOR, Enum.Material.Neon)
+end
+
+MODEL_BUILDERS.Dwarf = function(m, cf)
+	vCylinder(m, 2.4, 2.4, cf * CFrame.new(0, 1.2, 0), Color3.fromRGB(70, 110, 200))
+	makePart(m, { Size = Vector3.new(2.5, 0.4, 2.5), CFrame = cf * CFrame.new(0, 1.6, 0), Color = Color3.fromRGB(90, 60, 40) })
+	ball(m, 1.9, cf * CFrame.new(0, 3.2, 0), Color3.fromRGB(240, 195, 160))
+	makePart(m, { Size = Vector3.new(1.4, 1.4, 0.5), CFrame = cf * CFrame.new(0, 2.6, -0.75), Color = Color3.fromRGB(240, 240, 240) })
+	ball(m, 0.55, cf * CFrame.new(0, 3.25, -0.95), Color3.fromRGB(230, 150, 130))
+	vCylinder(m, 0.3, 2.3, cf * CFrame.new(0, 3.95, 0), Color3.fromRGB(200, 40, 50))
+	makePart(m, {
+		Size = Vector3.new(1.2, 1.2, 1.2),
+		CFrame = cf * CFrame.new(0, 4.5, 0) * CFrame.Angles(math.rad(45), 0, math.rad(45)),
+		Color = Color3.fromRGB(200, 40, 50),
+	})
+end
+
+MODEL_BUILDERS.Drill = function(m, cf)
+	local copper = Color3.fromRGB(200, 120, 70)
+	vCylinder(m, 2, 3.6, cf * CFrame.new(0, 1, 0), DARK_STONE, Enum.Material.Metal)
+	vCylinder(m, 1.8, 2.8, cf * CFrame.new(0, 2.9, 0), copper, Enum.Material.Metal)
+	vCylinder(m, 1.6, 1.8, cf * CFrame.new(0, 4.6, 0), copper, Enum.Material.Metal)
+	vCylinder(m, 1, 0.8, cf * CFrame.new(0, 5.9, 0), Color3.fromRGB(220, 220, 230), Enum.Material.Metal)
+	vCylinder(m, 3, 0.8, cf * CFrame.new(1.9, 3, 0), DARK_STONE, Enum.Material.Metal)
+	ball(m, 0.9, cf * CFrame.new(1.9, 4.6, 0), Color3.fromRGB(255, 140, 60), Enum.Material.Neon)
+end
+
+MODEL_BUILDERS.Mine = function(m, cf)
+	for _, x in { -1.9, 1.9 } do
+		makePart(m, { Size = Vector3.new(1.4, 4, 1.6), CFrame = cf * CFrame.new(x, 2, 0), Color = ROCK, Material = Enum.Material.Slate })
+	end
+	makePart(m, { Size = Vector3.new(5.4, 1, 2), CFrame = cf * CFrame.new(0, 4.5, 0), Color = WOOD, Material = Enum.Material.Wood })
+	makePart(m, { Size = Vector3.new(2.4, 3.6, 0.4), CFrame = cf * CFrame.new(0, 1.8, 0.4), Color = Color3.fromRGB(20, 20, 25) })
+	makePart(m, { Size = Vector3.new(1.8, 1, 1.3), CFrame = cf * CFrame.new(0, 0.5, -1.8), Color = STONE, Material = Enum.Material.Metal })
+	for i = -1, 1 do
+		ball(m, 0.7, cf * CFrame.new(i * 0.5, 1.15, -1.8), CRYSTAL_COLOR, Enum.Material.Neon)
+	end
+end
+
+MODEL_BUILDERS.Laser = function(m, cf)
+	makePart(m, { Size = Vector3.new(2.8, 1, 2.8), CFrame = cf * CFrame.new(0, 0.5, 0), Color = DARK_STONE, Material = Enum.Material.Metal })
+	vCylinder(m, 6, 1.2, cf * CFrame.new(0, 4, 0), Color3.fromRGB(200, 200, 215), Enum.Material.Metal)
+	vCylinder(m, 0.3, 2.8, cf * CFrame.new(0, 5.6, 0), DARK_STONE, Enum.Material.Metal)
+	local orb = ball(m, 1.7, cf * CFrame.new(0, 7.4, 0), Color3.fromRGB(255, 60, 80), Enum.Material.Neon)
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(255, 60, 80)
+	light.Range = 10
+	light.Parent = orb
+end
+
+MODEL_BUILDERS.Portal = function(m, cf)
+	local violet = Color3.fromRGB(170, 90, 255)
+	makePart(m, { Size = Vector3.new(4, 1, 2), CFrame = cf * CFrame.new(0, 0.5, 0), Color = DARK_STONE, Material = Enum.Material.Slate })
+	local center = cf * CFrame.new(0, 3.8, 0)
+	for k = 0, 11 do
+		local angle = k / 12 * math.pi * 2
+		makePart(m, {
+			Size = Vector3.new(1, 1, 1),
+			CFrame = center * CFrame.new(math.cos(angle) * 2.7, math.sin(angle) * 2.7, 0) * CFrame.Angles(0, 0, angle),
+			Color = violet,
+			Material = Enum.Material.Neon,
+		})
+	end
+	makePart(m, {
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.2, 4.8, 4.8),
+		CFrame = center * CFrame.Angles(0, math.rad(90), 0),
+		Color = Color3.fromRGB(120, 60, 220),
+		Material = Enum.Material.Neon,
+		Transparency = 0.45,
+	})
+end
+
+MODEL_BUILDERS.Forge = function(m, cf)
+	local iron = Color3.fromRGB(60, 60, 70)
+	makePart(m, { Size = Vector3.new(2.2, 1.2, 1.6), CFrame = cf * CFrame.new(0, 0.6, 0), Color = iron, Material = Enum.Material.Metal })
+	makePart(m, { Size = Vector3.new(1.1, 1, 1), CFrame = cf * CFrame.new(0, 1.7, 0), Color = iron, Material = Enum.Material.Metal })
+	makePart(m, { Size = Vector3.new(3.4, 0.8, 1.5), CFrame = cf * CFrame.new(0, 2.6, 0), Color = iron, Material = Enum.Material.Metal })
+	makePart(m, { Size = Vector3.new(1.3, 0.3, 0.7), CFrame = cf * CFrame.new(0, 3.15, 0), Color = Color3.fromRGB(255, 130, 40), Material = Enum.Material.Neon })
+	local star = ball(m, 1.2, cf * CFrame.new(0, 5, 0), Color3.fromRGB(255, 230, 90), Enum.Material.Neon)
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(255, 200, 80)
+	light.Range = 12
+	light.Parent = star
+end
+
+MODEL_BUILDERS.Core = function(m, cf)
+	local center = cf * CFrame.new(0, 4, 0)
+	makePart(m, { Size = Vector3.new(2, 1, 2), CFrame = cf * CFrame.new(0, 0.5, 0), Color = DARK_STONE, Material = Enum.Material.Metal })
+	local glass = ball(m, 4.2, center, Color3.fromRGB(40, 50, 120), Enum.Material.Glass)
+	glass.Transparency = 0.45
+	ball(m, 2.2, center, Color3.fromRGB(255, 110, 220), Enum.Material.Neon)
+	for _, tilt in { 20, -35 } do
+		makePart(m, {
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(0.15, 6.4, 6.4),
+			CFrame = center * CFrame.Angles(math.rad(tilt), 0, math.rad(90)),
+			Color = Color3.fromRGB(110, 220, 255),
+			Material = Enum.Material.Neon,
+			Transparency = 0.5,
+		})
+	end
+end
+
+local function buildGeneratorModel(slot, gen)
+	local model = Instance.new("Model")
+	model.Name = gen.id
+	MODEL_BUILDERS[gen.id](model, slot.top)
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+			part.CastShadow = true
+		end
+	end
+	model.WorldPivot = slot.top
+	model.Parent = slot.folder
+	CollectionService:AddTag(model, "GenModel")
+	return model
+end
+
+----------------------------------------------------------------------
+-- Ausbaustufen der Insel (Config.ISLAND_LEVELS). Jede Funktion baut eine Stufe.
+----------------------------------------------------------------------
+
+local function spinModel(parent, name)
+	local model = Instance.new("Model")
+	model.Name = name
+	model.Parent = parent
+	return model
+end
+
+local DECOR_BUILDERS = {
+	-- 1 Steinweg: Ring aus Steinplatten um den Kristall
+	function(folder, plot)
+		local c = CFrame.new(plot.center)
+		for k = 0, 27 do
+			local a = k / 28 * math.pi * 2
+			makePart(folder, {
+				Size = Vector3.new(3.2, 0.3, 2.6),
+				CFrame = c * CFrame.Angles(0, -a, 0) * CFrame.new(14, 0.15, 0),
+				Color = Color3.fromRGB(175, 170, 160),
+				Material = Enum.Material.Cobblestone,
+			})
+		end
+	end,
+
+	-- 2 Laternen zwischen den Sockeln
+	function(folder, plot)
+		for k = 0, 7 do
+			local a = (k + 0.5) / 8 * math.pi * 2
+			local pos = plot.center + Vector3.new(math.cos(a) * 30, 0, math.sin(a) * 30)
+			vCylinder(folder, 6, 0.6, CFrame.new(pos + Vector3.new(0, 3, 0)), Color3.fromRGB(40, 40, 50), Enum.Material.Metal)
+			local lamp = ball(folder, 1.4, CFrame.new(pos + Vector3.new(0, 6.6, 0)), Color3.fromRGB(255, 220, 140), Enum.Material.Neon)
+			local light = Instance.new("PointLight")
+			light.Color = Color3.fromRGB(255, 210, 130)
+			light.Range = 14
+			light.Brightness = 1.5
+			light.Parent = lamp
+		end
+	end,
+
+	-- 3 Blumenwiese
+	function(folder, plot)
+		local rng = Random.new(plot.index * 31)
+		local colors = {
+			Color3.fromRGB(255, 90, 120), Color3.fromRGB(255, 220, 80), Color3.fromRGB(180, 120, 255),
+			Color3.fromRGB(255, 255, 255), Color3.fromRGB(90, 180, 255),
+		}
+		for _ = 1, 45 do
+			local a = rng:NextNumber(0, math.pi * 2)
+			local r = rng:NextNumber(26, 34)
+			local pos = plot.center + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r)
+			vCylinder(folder, 1.2, 0.2, CFrame.new(pos + Vector3.new(0, 0.6, 0)), Color3.fromRGB(60, 140, 60)).CanCollide = false
+			ball(folder, 0.8, CFrame.new(pos + Vector3.new(0, 1.3, 0)), colors[rng:NextInteger(1, #colors)]).CanCollide = false
+		end
+	end,
+
+	-- 4 Wasserfälle am Inselrand
+	function(folder, plot)
+		for k = 0, 3 do
+			local a = k / 4 * math.pi * 2 + 0.4
+			local dir = Vector3.new(math.cos(a), 0, math.sin(a))
+			local pos = plot.center + dir * (ISLAND_SIZE / 2 + 0.6) + Vector3.new(0, -20, 0)
+			makePart(folder, {
+				Size = Vector3.new(7, 40, 0.6),
+				CFrame = CFrame.lookAt(pos, pos + dir),
+				Color = Color3.fromRGB(110, 190, 255),
+				Material = Enum.Material.Neon,
+				Transparency = 0.35,
+				CanCollide = false,
+			})
+			local pool = plot.center + dir * 40
+			vCylinder(folder, 0.4, 8, CFrame.new(pool + Vector3.new(0, 0.2, 0)), Color3.fromRGB(80, 160, 255), Enum.Material.Glass).Transparency = 0.3
+		end
+	end,
+
+	-- 5 Kristalltürme
+	function(folder, plot)
+		for k = 0, 3 do
+			local a = k / 4 * math.pi * 2 + math.pi / 4
+			local pos = plot.center + Vector3.new(math.cos(a) * 33, 0, math.sin(a) * 33)
+			for j, h in { 18, 11, 8 } do
+				local offset = (j == 1) and Vector3.zero or Vector3.new(math.cos(a + j) * 2.5, 0, math.sin(a + j) * 2.5)
+				makePart(folder, {
+					Size = Vector3.new(3 - j * 0.5, h, 3 - j * 0.5),
+					CFrame = CFrame.new(pos + offset + Vector3.new(0, h / 2, 0)) * CFrame.Angles(0, math.rad(45), (j - 1) * 0.2),
+					Color = Color3.fromRGB(150, 230, 255),
+					Material = Enum.Material.Glass,
+					Transparency = 0.25,
+				})
+			end
+		end
+	end,
+
+	-- 6 Schwebende Mini-Inseln
+	function(folder, plot)
+		for k = 0, 2 do
+			local a = k / 3 * math.pi * 2
+			local pos = plot.center + Vector3.new(math.cos(a) * 30, 26 + k * 4, math.sin(a) * 30)
+			local model = spinModel(folder, "MiniIsland")
+			vCylinder(model, 1.5, 9, CFrame.new(pos), GRASS, Enum.Material.Grass)
+			vCylinder(model, 3, 6, CFrame.new(pos - Vector3.new(0, 2, 0)), ROCK, Enum.Material.Rock)
+			makePart(model, {
+				Size = Vector3.new(1.5, 4, 1.5),
+				CFrame = CFrame.new(pos + Vector3.new(0, 2.7, 0)) * CFrame.Angles(0, math.rad(45), 0),
+				Color = CRYSTAL_COLOR,
+				Material = Enum.Material.Neon,
+			})
+			model.WorldPivot = CFrame.new(pos)
+			CollectionService:AddTag(model, "GenModel")
+		end
+	end,
+
+	-- 7 Sternenringe um den Kristall
+	function(folder, plot)
+		for r, height in { [12] = 16, [15] = 21 } do
+			local model = spinModel(folder, "StarRing")
+			local c = CFrame.new(plot.center + Vector3.new(0, height, 0))
+			for k = 0, 23 do
+				local a = k / 24 * math.pi * 2
+				makePart(model, {
+					Size = Vector3.new(0.6, 0.6, 3.4),
+					CFrame = c * CFrame.Angles(0, a, 0) * CFrame.new(r, 0, 0),
+					Color = Color3.fromRGB(255, 230, 120),
+					Material = Enum.Material.Neon,
+					CanCollide = false,
+				})
+			end
+			model.WorldPivot = c
+			CollectionService:AddTag(model, "GenModel")
+		end
+	end,
+
+	-- 8 Regenbogen über der Insel
+	function(folder, plot)
+		local colors = {
+			Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 160, 50), Color3.fromRGB(255, 235, 70),
+			Color3.fromRGB(80, 220, 100), Color3.fromRGB(70, 150, 255), Color3.fromRGB(160, 90, 255),
+		}
+		local toCenter = (Vector3.zero - plot.center).Unit
+		local side = Vector3.new(-toCenter.Z, 0, toCenter.X)
+		local base = CFrame.fromMatrix(plot.center, side, Vector3.yAxis)
+		for band, color in colors do
+			local radius = 46 - band * 1.6
+			for k = 0, 23 do
+				local a = (k + 0.5) / 24 * math.pi
+				makePart(folder, {
+					Size = Vector3.new(1.6, radius * math.pi / 24 + 0.3, 1.2),
+					CFrame = base * CFrame.new(math.cos(a) * radius, math.sin(a) * radius, 0) * CFrame.Angles(0, 0, a),
+					Color = color,
+					Material = Enum.Material.Neon,
+					Transparency = 0.25,
+					CanCollide = false,
+				})
+			end
+		end
+	end,
+
+	-- 9 Kristallkrone über dem Kristall
+	function(folder, plot)
+		local model = spinModel(folder, "Crown")
+		local c = CFrame.new(plot.center + Vector3.new(0, 26, 0))
+		for k = 0, 7 do
+			local a = k / 8 * math.pi * 2
+			makePart(model, {
+				Size = Vector3.new(1.2, 4, 1.2),
+				CFrame = c * CFrame.Angles(0, a, 0) * CFrame.new(5, 1.5, 0) * CFrame.Angles(0, math.rad(45), 0),
+				Color = GOLD,
+				Material = Enum.Material.Neon,
+				CanCollide = false,
+			})
+			ball(model, 1.1, c * CFrame.Angles(0, a, 0) * CFrame.new(5, 4, 0), Color3.fromRGB(255, 80, 160), Enum.Material.Neon).CanCollide = false
+		end
+		vCylinder(model, 1, 11, c, GOLD, Enum.Material.Neon).CanCollide = false
+		model.WorldPivot = c
+		CollectionService:AddTag(model, "GenModel")
+	end,
+}
+
+----------------------------------------------------------------------
+-- Insel
+----------------------------------------------------------------------
+
+local function buildTree(parent, cf, rng)
+	local height = rng:NextNumber(6, 9)
+	vCylinder(parent, height, 1.4, cf * CFrame.new(0, height / 2, 0), WOOD, Enum.Material.Wood)
+	local leafColor = Color3.fromHSV(rng:NextNumber(0.25, 0.38), 0.6, rng:NextNumber(0.55, 0.75))
+	ball(parent, rng:NextNumber(5, 7), cf * CFrame.new(0, height + 1.5, 0), leafColor, Enum.Material.Grass)
+	ball(parent, rng:NextNumber(3.5, 5), cf * CFrame.new(1.6, height + 0.4, 0.8), leafColor, Enum.Material.Grass)
+end
+
+local function buildPlot(index, root)
+	local angle = (index - 1) / Config.PLOT_COUNT * math.pi * 2
+	local center = Vector3.new(math.cos(angle) * Config.PLOT_RADIUS, 0, math.sin(angle) * Config.PLOT_RADIUS)
+	local centerCF = CFrame.new(center)
+	local rng = Random.new(index * 7919)
+
+	local folder = Instance.new("Folder")
+	folder.Name = "Plot" .. index
+	folder:SetAttribute("OwnerId", 0)
+	folder.Parent = root
+
+	-- Insel (Gras oben, Felsen nach unten schmaler werdend)
+	vCylinder(folder, 4, ISLAND_SIZE, centerCF * CFrame.new(0, -2, 0), GRASS, Enum.Material.Grass)
+	vCylinder(folder, 10, ISLAND_SIZE - 14, centerCF * CFrame.new(0, -9, 0), ROCK, Enum.Material.Rock)
+	vCylinder(folder, 10, ISLAND_SIZE - 40, centerCF * CFrame.new(0, -18, 0), ROCK, Enum.Material.Rock)
+	vCylinder(folder, 10, ISLAND_SIZE - 70, centerCF * CFrame.new(0, -27, 0), ROCK, Enum.Material.Rock)
+
+	-- Bäume am Rand
+	for _ = 1, 7 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local r = rng:NextNumber(36, 43)
+		buildTree(folder, centerCF * CFrame.new(math.cos(a) * r, 0, math.sin(a) * r), rng)
+	end
+
+	-- Sockel und Kristall in der Mitte
+	vCylinder(folder, 1.5, 16, centerCF * CFrame.new(0, 0.75, 0), STONE, Enum.Material.Slate)
+	vCylinder(folder, 1, 12, centerCF * CFrame.new(0, 2, 0), DARK_STONE, Enum.Material.Slate)
+
+	local crystal = makePart(folder, {
+		Name = "Crystal",
+		Size = Vector3.new(6, 12, 6),
+		CFrame = centerCF * CFrame.new(0, 9.5, 0) * CFrame.Angles(0, math.rad(45), 0),
+		Color = CRYSTAL_COLOR,
+		Material = Enum.Material.Neon,
+		Transparency = 0.1,
+	})
+	CollectionService:AddTag(crystal, "MainCrystal")
+	local click = Instance.new("ClickDetector")
+	click.MaxActivationDistance = 300
+	click.Parent = crystal
+	local light = Instance.new("PointLight")
+	light.Color = CRYSTAL_COLOR
+	light.Range = 24
+	light.Brightness = 2
+	light.Parent = crystal
+
+	local burst = Instance.new("ParticleEmitter")
+	burst.Name = "Burst"
+	burst.Rate = 0
+	burst.Color = ColorSequence.new(CRYSTAL_COLOR, Color3.new(1, 1, 1))
+	burst.LightEmission = 1
+	burst.Size = NumberSequence.new(0.8, 0)
+	burst.Lifetime = NumberRange.new(0.5, 0.9)
+	burst.Speed = NumberRange.new(14, 24)
+	burst.SpreadAngle = Vector2.new(180, 180)
+	burst.Parent = crystal
+
+	local ambient = Instance.new("ParticleEmitter")
+	ambient.Name = "Ambient"
+	ambient.Rate = 4
+	ambient.Color = ColorSequence.new(CRYSTAL_COLOR)
+	ambient.LightEmission = 1
+	ambient.Size = NumberSequence.new(0.4, 0)
+	ambient.Lifetime = NumberRange.new(2, 3)
+	ambient.Speed = NumberRange.new(1, 3)
+	ambient.SpreadAngle = Vector2.new(180, 180)
+	ambient.Parent = crystal
+
+	-- Kleine Begleitkristalle
+	for k = 0, 3 do
+		local a = k * math.pi / 2 + math.pi / 4
+		makePart(folder, {
+			Size = Vector3.new(1.6, 4, 1.6),
+			CFrame = centerCF * CFrame.new(math.cos(a) * 5, 3.5, math.sin(a) * 5)
+				* CFrame.Angles(math.sin(a) * 0.4, 0, -math.cos(a) * 0.4),
+			Color = CRYSTAL_COLOR,
+			Material = Enum.Material.Glass,
+			Transparency = 0.2,
+		})
+	end
+
+	local signAnchor = makePart(folder, {
+		Name = "Sign",
+		Size = Vector3.new(1, 1, 1),
+		CFrame = centerCF * CFrame.new(0, 18, 0),
+		Transparency = 1,
+		CanCollide = false,
+	})
+	local sign = billboard(signAnchor, UDim2.fromOffset(320, 70), 2, 400)
+	sign.Text = "🏝️ Freie Insel"
+
+	-- Sockel für die Helfer im Kreis um den Kristall
+	local slots = {}
+	for i, gen in Config.GENERATORS do
+		local a = (i - 1) / #Config.GENERATORS * math.pi * 2
+		local pos = center + Vector3.new(math.cos(a) * SLOT_RADIUS, 0, math.sin(a) * SLOT_RADIUS)
+		local base = vCylinder(folder, 1, 9, CFrame.new(pos + Vector3.new(0, 0.5, 0)), DARK_STONE, Enum.Material.Slate)
+		local ring = vCylinder(folder, 0.2, 9.6, CFrame.new(pos + Vector3.new(0, 0.1, 0)), STONE, Enum.Material.Neon)
+		local top = CFrame.lookAt(pos + Vector3.new(0, 1, 0), center + Vector3.new(0, 1, 0))
+		local labelAnchor = makePart(folder, {
+			Size = Vector3.new(1, 1, 1),
+			CFrame = top * CFrame.new(0, 9, 0),
+			Transparency = 1,
+			CanCollide = false,
+		})
+		local label = billboard(labelAnchor, UDim2.fromOffset(200, 60), 0, 90)
+		local slotFolder = Instance.new("Folder")
+		slotFolder.Name = gen.id
+		slotFolder.Parent = folder
+		slots[gen.id] = { base = base, ring = ring, top = top, label = label, folder = slotFolder, model = nil }
+	end
+
+	-- Spawnpunkt am Inselrand mit Blick zum Kristall
+	local spawnPos = center + (Vector3.zero - center).Unit * 36 + Vector3.new(0, 4, 0)
+	local spawnCF = CFrame.lookAt(spawnPos, center + Vector3.new(0, 4, 0))
+
+	local decor = Instance.new("Folder")
+	decor.Name = "Decor"
+	decor.Parent = folder
+
+	return {
+		index = index,
+		decor = decor,
+		islandLevel = 0,
+		rebirths = -1,
+		crystalBaseSize = crystal.Size,
+		folder = folder,
+		center = center,
+		spawnCF = spawnCF,
+		crystal = crystal,
+		sign = sign,
+		slots = slots,
+		owner = nil,
+	}
+end
+
+----------------------------------------------------------------------
+-- Öffentliche Funktionen
+----------------------------------------------------------------------
+
+function MapBuilder.build()
+	-- Teile der Studio-Vorlage entfernen
+	for _, child in workspace:GetChildren() do
+		if child.Name == "Baseplate" or child:IsA("SpawnLocation") or child.Name == "Plots" then
+			child:Destroy()
+		end
+	end
+	workspace.FallenPartsDestroyHeight = -120
+
+	-- Stimmungsvolles Licht
+	Lighting.ClockTime = 16.8
+	Lighting.Brightness = 2.2
+	Lighting.EnvironmentDiffuseScale = 1
+	Lighting.EnvironmentSpecularScale = 1
+	local function ensure(className, props)
+		local inst = Lighting:FindFirstChildOfClass(className) or Instance.new(className)
+		for key, value in props do
+			inst[key] = value
+		end
+		inst.Parent = Lighting
+	end
+	ensure("Atmosphere", { Density = 0.3, Offset = 0.25, Color = Color3.fromRGB(200, 220, 255), Decay = Color3.fromRGB(120, 140, 200), Glare = 0.3, Haze = 1.5 })
+	ensure("BloomEffect", { Intensity = 0.6, Size = 30, Threshold = 1.6 })
+	ensure("ColorCorrectionEffect", { Saturation = 0.15, Contrast = 0.05 })
+	ensure("SunRaysEffect", { Intensity = 0.06, Spread = 0.6 })
+
+	local root = Instance.new("Folder")
+	root.Name = "Plots"
+	root.Parent = workspace
+
+	for i = 1, Config.PLOT_COUNT do
+		local plot = buildPlot(i, root)
+		MapBuilder.plots[i] = plot
+		MapBuilder.updatePlot(plot, nil)
+	end
+
+	-- Leuchtende Wolkeninseln in der Mitte als Deko
+	local rng = Random.new(42)
+	for _ = 1, 14 do
+		local pos = Vector3.new(rng:NextNumber(-90, 90), rng:NextNumber(-40, -10), rng:NextNumber(-90, 90))
+		ball(root, rng:NextNumber(10, 22), CFrame.new(pos), Color3.fromRGB(240, 245, 255), Enum.Material.SmoothPlastic).CanCollide = false
+	end
+end
+
+function MapBuilder.claimPlot(player)
+	for _, plot in MapBuilder.plots do
+		if not plot.owner then
+			plot.owner = player
+			plot.folder:SetAttribute("OwnerId", player.UserId)
+			plot.sign.Text = "🏝️ " .. player.DisplayName
+			return plot
+		end
+	end
+	return nil
+end
+
+function MapBuilder.releasePlot(plot)
+	plot.owner = nil
+	plot.folder:SetAttribute("OwnerId", 0)
+	plot.sign.Text = "🏝️ Freie Insel"
+	MapBuilder.updatePlot(plot, nil)
+end
+
+-- Zeigt die gekauften Helfer als Modelle auf den Sockeln an
+function MapBuilder.updatePlot(plot, data)
+	for i, gen in Config.GENERATORS do
+		local slot = plot.slots[gen.id]
+		local owned = data and data.gens[gen.id] or 0
+		if owned > 0 then
+			if not slot.model then
+				slot.model = buildGeneratorModel(slot, gen)
+				slot.ring.Color = GOLD
+				slot.scale = 1
+			end
+			-- Jeder Meilenstein lässt das Modell wachsen
+			local scale = 1 + 0.12 * Config.milestonesReached(owned)
+			if slot.scale ~= scale then
+				slot.model:ScaleTo(scale)
+				slot.scale = scale
+			end
+			slot.label.Text = gen.icon .. " " .. gen.name .. "\nx" .. owned
+			slot.label.TextColor3 = Color3.new(1, 1, 1)
+		else
+			if slot.model then
+				slot.model:Destroy()
+				slot.model = nil
+			end
+			slot.ring.Color = STONE
+			local previousOwned = (i == 1) or (data and (data.gens[Config.GENERATORS[i - 1].id] or 0) > 0)
+			slot.label.Text = previousOwned and (gen.icon .. " " .. gen.name .. "\n🔒 im Shop") or "🔒 ???"
+			slot.label.TextColor3 = Color3.fromRGB(180, 180, 190)
+		end
+	end
+
+	-- Ausbaustufen der Insel
+	local level = data and Config.islandLevel(data.allTime) or 0
+	if level < plot.islandLevel then
+		plot.decor:ClearAllChildren()
+		plot.islandLevel = 0
+	end
+	for i = plot.islandLevel + 1, level do
+		local stage = Instance.new("Folder")
+		stage.Name = "Level" .. i
+		DECOR_BUILDERS[i](stage, plot)
+		stage.Parent = plot.decor
+	end
+	plot.islandLevel = level
+
+	-- Der Kristall wächst mit der Insel und ändert bei Wiedergeburt die Farbe
+	local rebirths = data and data.rebirths or 0
+	if plot.rebirths ~= rebirths or plot.crystalLevel ~= level then
+		plot.rebirths = rebirths
+		plot.crystalLevel = level
+		local color = Config.rebirthColor(rebirths)
+		local crystal = plot.crystal
+		local size = plot.crystalBaseSize * (1 + 0.07 * level)
+		local bottom = plot.center.Y + 2.5
+		local cframe = CFrame.new(plot.center.X, bottom + size.Y / 2, plot.center.Z) * CFrame.Angles(0, math.rad(45), 0)
+		crystal.Size = size
+		crystal.CFrame = cframe
+		crystal:SetAttribute("BaseSize", size)
+		crystal:SetAttribute("BaseCFrame", cframe)
+		crystal.Color = color
+		crystal.PointLight.Color = color
+		crystal.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+		crystal.Ambient.Color = ColorSequence.new(color)
+	end
+end
+
+-- Goldener Kristall an einer zufälligen Stelle der Insel
+function MapBuilder.spawnGolden(plot)
+	local a = math.random() * math.pi * 2
+	local r = 8 + math.random() * 26
+	local pos = plot.center + Vector3.new(math.cos(a) * r, 3.5, math.sin(a) * r)
+	local golden = makePart(plot.folder, {
+		Name = "GoldenCrystal",
+		Size = Vector3.new(2.2, 3.6, 2.2),
+		CFrame = CFrame.new(pos) * CFrame.Angles(0, math.rad(45), 0),
+		Color = GOLD,
+		Material = Enum.Material.Neon,
+		CanCollide = false,
+	})
+	local light = Instance.new("PointLight")
+	light.Color = GOLD
+	light.Range = 16
+	light.Brightness = 3
+	light.Parent = golden
+	local sparkles = Instance.new("Sparkles")
+	sparkles.SparkleColor = GOLD
+	sparkles.Parent = golden
+	local click = Instance.new("ClickDetector")
+	click.MaxActivationDistance = 300
+	click.Parent = golden
+	CollectionService:AddTag(golden, "Golden")
+	return golden, click
+end
+
+return MapBuilder
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000000000000000000000000000006"><Properties><string name="Name">PlayerData</string><ProtectedString name="Source"><![CDATA[-- Spielerdaten: laden, speichern und in der Bestenliste anzeigen.
+
+local DataStoreService = game:GetService("DataStoreService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local PlayerData = {}
+
+local store = nil
+do
+	local ok, result = pcall(function()
+		return DataStoreService:GetDataStore(Config.DATASTORE_NAME)
+	end)
+	if ok then
+		store = result
+	else
+		warn("[Kristall-Imperium] DataStore nicht verfügbar, Fortschritt wird nicht gespeichert:", result)
+	end
+end
+
+local profiles = {}
+
+local function defaultData()
+	return {
+		crystals = 0,
+		runTotal = 0, -- gesammelt seit der letzten Wiedergeburt
+		allTime = 0, -- insgesamt je gesammelt (für die Insel-Ausbaustufen)
+		gens = {},
+		upgrades = {},
+		star = {},
+		stardust = 0,
+		stardustSpent = 0,
+		rebirths = 0,
+		lastSeen = 0,
+	}
+end
+
+local function keyFor(player)
+	return "u_" .. player.UserId
+end
+
+local function sanitize(data)
+	local clean = defaultData()
+	for key, default in clean do
+		local value = data[key]
+		if type(value) == type(default) then
+			clean[key] = value
+		end
+	end
+	return clean
+end
+
+function PlayerData.load(player)
+	local data = defaultData()
+	if store then
+		local ok, saved = pcall(store.GetAsync, store, keyFor(player))
+		if ok and type(saved) == "table" then
+			data = sanitize(saved)
+		elseif not ok then
+			warn("[Kristall-Imperium] Laden fehlgeschlagen für", player.Name, saved)
+		end
+	end
+	profiles[player] = data
+
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	local perSecond = Instance.new("StringValue")
+	perSecond.Name = "💎/Sek"
+	perSecond.Parent = leaderstats
+	local rebirths = Instance.new("IntValue")
+	rebirths.Name = "Rebirths"
+	rebirths.Parent = leaderstats
+	leaderstats.Parent = player
+	PlayerData.updateLeaderstats(player)
+
+	return data
+end
+
+function PlayerData.get(player)
+	return profiles[player]
+end
+
+function PlayerData.updateLeaderstats(player)
+	local data = profiles[player]
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if not (data and leaderstats) then
+		return
+	end
+	leaderstats["💎/Sek"].Value = Config.format(Config.perSecond(data))
+	leaderstats.Rebirths.Value = data.rebirths
+end
+
+function PlayerData.save(player)
+	local data = profiles[player]
+	if not (data and store) then
+		return
+	end
+	data.lastSeen = os.time()
+	local ok, err = pcall(store.SetAsync, store, keyFor(player), data)
+	if not ok then
+		warn("[Kristall-Imperium] Speichern fehlgeschlagen für", player.Name, err)
+	end
+end
+
+function PlayerData.release(player)
+	PlayerData.save(player)
+	profiles[player] = nil
+end
+
+function PlayerData.startAutosave()
+	task.spawn(function()
+		while true do
+			task.wait(Config.AUTOSAVE_INTERVAL)
+			for player in profiles do
+				task.spawn(PlayerData.save, player)
+			end
+		end
+	end)
+
+	game:BindToClose(function()
+		local pending = 0
+		for player in profiles do
+			pending += 1
+			task.spawn(function()
+				PlayerData.save(player)
+				pending -= 1
+			end)
+		end
+		local started = os.clock()
+		while pending > 0 and os.clock() - started < 25 do
+			task.wait(0.1)
+		end
+	end)
+end
+
+return PlayerData
+]]></ProtectedString></Properties></Item></Item></Item><Item class="StarterPlayer" referent="RBX0000000000000000000000000000000B"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX0000000000000000000000000000000A"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="LocalScript" referent="RBX00000000000000000000000000000009"><Properties><string name="Name">HUD</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Oberfläche, Shop, Effekte (Client).
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local remotes = ReplicatedStorage:WaitForChild("Remotes")
+local mineEvent = remotes:WaitForChild("Mine")
+local stateEvent = remotes:WaitForChild("State")
+local notifyEvent = remotes:WaitForChild("Notify")
+local buyFunction = remotes:WaitForChild("Buy")
+local rebirthFunction = remotes:WaitForChild("Rebirth")
+
+local player = Players.LocalPlayer
+local format = Config.format
+
+-- Farben ---------------------------------------------------------------
+
+local C = {
+	panel = Color3.fromRGB(18, 20, 38),
+	card = Color3.fromRGB(34, 38, 66),
+	cardLocked = Color3.fromRGB(26, 28, 46),
+	text = Color3.fromRGB(240, 244, 255),
+	muted = Color3.fromRGB(160, 168, 200),
+	cyan = Color3.fromRGB(90, 200, 255),
+	gold = Color3.fromRGB(255, 205, 60),
+	green = Color3.fromRGB(60, 200, 110),
+	grey = Color3.fromRGB(80, 84, 110),
+	purple = Color3.fromRGB(170, 110, 255),
+	red = Color3.fromRGB(255, 90, 80),
+	orange = Color3.fromRGB(255, 140, 40),
+}
+
+-- Zustand vom Server -----------------------------------------------------
+
+local state = nil
+local stateClock = 0
+local clientTokens = Config.CLICKS_PER_SECOND
+
+local function frenzyLeft()
+	if not state then
+		return 0
+	end
+	return math.max(0, (state.frenzyEnd or 0) - workspace:GetServerTimeNow())
+end
+
+local function frenzyMult()
+	return frenzyLeft() > 0 and Config.FRENZY_MULTIPLIER or 1
+end
+
+local function perSecond()
+	return state and Config.perSecond(state) * frenzyMult() or 0
+end
+
+-- Kristalle inkl. Vorhersage seit dem letzten Server-Update
+local function currentCrystals()
+	if not state then
+		return 0
+	end
+	return state.crystals + perSecond() * (os.clock() - stateClock)
+end
+
+-- Sounds (eingebaute Roblox-Sounds) --------------------------------------
+
+local function makeSound(id, volume)
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = volume
+	sound.Parent = script
+	return sound
+end
+local sounds = {
+	click = makeSound("rbxasset://sounds/clickfast.wav", 0.35),
+	buy = makeSound("rbxasset://sounds/electronicpingshort.wav", 0.45),
+	big = makeSound("rbxasset://sounds/swoosh.wav", 0.6),
+}
+local function play(name)
+	SoundService:PlayLocalSound(sounds[name])
+end
+
+-- UI-Helfer ---------------------------------------------------------------
+
+local function create(className, props, parent)
+	local inst = Instance.new(className)
+	for key, value in props do
+		inst[key] = value
+	end
+	inst.Parent = parent
+	return inst
+end
+
+local function corner(parent, radius)
+	create("UICorner", { CornerRadius = UDim.new(0, radius or 12) }, parent)
+end
+
+local function stroke(parent, color, thickness, transparency)
+	create("UIStroke", {
+		Color = color,
+		Thickness = thickness or 2,
+		Transparency = transparency or 0,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+	}, parent)
+end
+
+local function padding(parent, px)
+	create("UIPadding", {
+		PaddingLeft = UDim.new(0, px),
+		PaddingRight = UDim.new(0, px),
+		PaddingTop = UDim.new(0, px),
+		PaddingBottom = UDim.new(0, px),
+	}, parent)
+end
+
+local function text(props, parent)
+	local base = {
+		BackgroundTransparency = 1,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = C.text,
+		TextScaled = true,
+		RichText = true,
+	}
+	for key, value in props do
+		base[key] = value
+	end
+	return create("TextLabel", base, parent)
+end
+
+local function button(props, parent)
+	local base = {
+		Font = Enum.Font.FredokaOne,
+		TextColor3 = Color3.new(1, 1, 1),
+		TextScaled = true,
+		AutoButtonColor = true,
+		BackgroundColor3 = C.green,
+	}
+	for key, value in props do
+		base[key] = value
+	end
+	local b = create("TextButton", base, parent)
+	corner(b, 10)
+	return b
+end
+
+local function hex(color)
+	local function byte(x)
+		return math.clamp(math.floor(x * 255 + 0.5), 0, 255)
+	end
+	return string.format("#%02X%02X%02X", byte(color.R), byte(color.G), byte(color.B))
+end
+
+-- Fortschrittsbalken: gibt Funktion set(Anteil, Text) zurück
+local function progressBar(props, parent, fillColor)
+	local bar = create("Frame", props, parent)
+	bar.BackgroundColor3 = Color3.fromRGB(12, 14, 26)
+	corner(bar, 8)
+	local fill = create("Frame", {
+		Size = UDim2.fromScale(0, 1),
+		BackgroundColor3 = fillColor,
+		BorderSizePixel = 0,
+	}, bar)
+	corner(fill, 8)
+	local label = text({
+		Size = UDim2.fromScale(1, 1),
+		Font = Enum.Font.GothamBold,
+		ZIndex = 2,
+	}, bar)
+	create("UIPadding", { PaddingTop = UDim.new(0, 2), PaddingBottom = UDim.new(0, 2) }, label)
+	return function(alpha, caption)
+		fill.Size = UDim2.fromScale(math.clamp(alpha, 0, 1), 1)
+		label.Text = caption
+	end, bar
+end
+
+-- Bildschirm -------------------------------------------------------------
+
+local gui = create("ScreenGui", {
+	Name = "KristallHUD",
+	ResetOnSpawn = false,
+	IgnoreGuiInset = true,
+	ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+}, player:WaitForChild("PlayerGui"))
+
+-- Alles passt sich der Bildschirmgröße an (auch Handy)
+local scaled = {}
+local function autoScale(guiObject)
+	table.insert(scaled, create("UIScale", {}, guiObject))
+end
+
+---------------------------------------------------------------------------
+-- Oben: Kristallanzeige
+---------------------------------------------------------------------------
+
+local top = create("Frame", {
+	AnchorPoint = Vector2.new(0.5, 0),
+	Position = UDim2.new(0.5, 0, 0, 12),
+	Size = UDim2.fromOffset(440, 100),
+	BackgroundColor3 = C.panel,
+	BackgroundTransparency = 0.1,
+}, gui)
+corner(top, 18)
+stroke(top, C.cyan, 2, 0.4)
+autoScale(top)
+
+local crystalLabel = text({
+	Position = UDim2.fromOffset(12, 6),
+	Size = UDim2.new(1, -24, 0, 54),
+	Font = Enum.Font.FredokaOne,
+	Text = "💎 0",
+}, top)
+local perSecondLabel = text({
+	Position = UDim2.fromOffset(12, 62),
+	Size = UDim2.new(1, -24, 0, 26),
+	Font = Enum.Font.GothamBold,
+	TextColor3 = C.cyan,
+	Text = "0 pro Sekunde",
+}, top)
+
+local frenzyBanner = text({
+	AnchorPoint = Vector2.new(0.5, 0),
+	Position = UDim2.new(0.5, 0, 1, 8),
+	Size = UDim2.fromOffset(380, 38),
+	BackgroundTransparency = 0,
+	BackgroundColor3 = C.orange,
+	Font = Enum.Font.FredokaOne,
+	Visible = false,
+}, top)
+corner(frenzyBanner, 12)
+
+---------------------------------------------------------------------------
+-- Links: Insel-Fortschritt und Sternenstaub
+---------------------------------------------------------------------------
+
+local info = create("Frame", {
+	Position = UDim2.fromOffset(12, 12),
+	Size = UDim2.fromOffset(290, 130),
+	BackgroundColor3 = C.panel,
+	BackgroundTransparency = 0.1,
+}, gui)
+corner(info, 16)
+stroke(info, C.green, 2, 0.5)
+padding(info, 12)
+autoScale(info)
+
+local islandTitle = text({ Size = UDim2.new(1, 0, 0, 26), Font = Enum.Font.FredokaOne, TextXAlignment = Enum.TextXAlignment.Left }, info)
+local islandNext = text({
+	Position = UDim2.fromOffset(0, 30),
+	Size = UDim2.new(1, 0, 0, 18),
+	Font = Enum.Font.GothamMedium,
+	TextColor3 = C.muted,
+	TextXAlignment = Enum.TextXAlignment.Left,
+}, info)
+local setIslandBar = progressBar({ Position = UDim2.fromOffset(0, 52), Size = UDim2.new(1, 0, 0, 20) }, info, C.green)
+local stardustLabel = text({
+	Position = UDim2.fromOffset(0, 80),
+	Size = UDim2.new(1, 0, 0, 24),
+	Font = Enum.Font.FredokaOne,
+	TextColor3 = C.gold,
+	TextXAlignment = Enum.TextXAlignment.Left,
+}, info)
+
+---------------------------------------------------------------------------
+-- Unten: großer Abbau-Knopf
+---------------------------------------------------------------------------
+
+local mineButton = button({
+	AnchorPoint = Vector2.new(0.5, 1),
+	Position = UDim2.new(0.5, 0, 1, -18),
+	Size = UDim2.fromOffset(280, 74),
+	BackgroundColor3 = C.cyan,
+	Text = "",
+}, gui)
+stroke(mineButton, Color3.new(1, 1, 1), 3, 0.3)
+autoScale(mineButton)
+local mineTitle = text({
+	Position = UDim2.fromOffset(0, 6),
+	Size = UDim2.new(1, 0, 0, 38),
+	Font = Enum.Font.FredokaOne,
+	Text = "⛏️ ABBAUEN",
+	TextColor3 = Color3.fromRGB(10, 30, 60),
+}, mineButton)
+local mineValue = text({
+	Position = UDim2.fromOffset(0, 44),
+	Size = UDim2.new(1, 0, 0, 22),
+	Font = Enum.Font.GothamBold,
+	TextColor3 = Color3.fromRGB(10, 30, 60),
+	Text = "+1",
+}, mineButton)
+local _ = mineTitle
+
+---------------------------------------------------------------------------
+-- Meldungen
+---------------------------------------------------------------------------
+
+local toastHolder = create("Frame", {
+	AnchorPoint = Vector2.new(0.5, 0),
+	Position = UDim2.new(0.5, 0, 0, 170),
+	Size = UDim2.fromOffset(520, 200),
+	BackgroundTransparency = 1,
+}, gui)
+autoScale(toastHolder)
+create("UIListLayout", {
+	Padding = UDim.new(0, 6),
+	HorizontalAlignment = Enum.HorizontalAlignment.Center,
+	SortOrder = Enum.SortOrder.LayoutOrder,
+}, toastHolder)
+
+local TOAST_COLORS = { info = C.card, gold = Color3.fromRGB(150, 110, 20), frenzy = Color3.fromRGB(200, 80, 30), build = Color3.fromRGB(40, 130, 80), error = Color3.fromRGB(150, 40, 50) }
+local toastCount = 0
+
+local function toast(message, kind)
+	toastCount += 1
+	local children = {}
+	for _, child in toastHolder:GetChildren() do
+		if child:IsA("TextLabel") then
+			table.insert(children, child)
+		end
+	end
+	if #children >= 3 then
+		table.sort(children, function(a, b)
+			return a.LayoutOrder < b.LayoutOrder
+		end)
+		children[1]:Destroy()
+	end
+	local label = text({
+		LayoutOrder = toastCount,
+		Size = UDim2.fromOffset(500, 42),
+		BackgroundTransparency = 0.05,
+		BackgroundColor3 = TOAST_COLORS[kind or "info"] or C.card,
+		Font = Enum.Font.GothamBold,
+		Text = message,
+	}, toastHolder)
+	corner(label, 12)
+	create("UIPadding", { PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8), PaddingLeft = UDim.new(0, 12), PaddingRight = UDim.new(0, 12) }, label)
+	task.delay(3.5, function()
+		if label.Parent then
+			local fade = TweenService:Create(label, TweenInfo.new(0.4), { TextTransparency = 1, BackgroundTransparency = 1 })
+			fade:Play()
+			fade.Completed:Wait()
+			label:Destroy()
+		end
+	end)
+end
+
+notifyEvent.OnClientEvent:Connect(function(message, kind)
+	toast(message, kind)
+	if kind == "gold" or kind == "frenzy" or kind == "build" then
+		play("big")
+	end
+end)
+
+---------------------------------------------------------------------------
+-- Schwebende Zahlen beim Klicken
+---------------------------------------------------------------------------
+
+local function popup(message, screenPos, color)
+	local label = text({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromOffset(screenPos.X + math.random(-30, 30), screenPos.Y + math.random(-10, 10)),
+		Size = UDim2.fromOffset(160, 40),
+		Font = Enum.Font.FredokaOne,
+		Text = message,
+		TextColor3 = color or C.text,
+		TextStrokeTransparency = 0.3,
+		ZIndex = 20,
+	}, gui)
+	local tween = TweenService:Create(label, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = label.Position - UDim2.fromOffset(0, 90),
+		TextTransparency = 1,
+		TextStrokeTransparency = 1,
+	})
+	tween:Play()
+	tween.Completed:Connect(function()
+		label:Destroy()
+	end)
+end
+
+---------------------------------------------------------------------------
+-- Shop rechts
+---------------------------------------------------------------------------
+
+local shop = create("Frame", {
+	AnchorPoint = Vector2.new(1, 0),
+	Position = UDim2.new(1, -12, 0, 12),
+	Size = UDim2.new(0, 400, 1, -24),
+	BackgroundColor3 = C.panel,
+	BackgroundTransparency = 0.08,
+}, gui)
+corner(shop, 18)
+stroke(shop, C.purple, 2, 0.4)
+padding(shop, 12)
+local shopScale = create("UIScale", {}, shop)
+
+local shopToggle = button({
+	AnchorPoint = Vector2.new(1, 1),
+	Position = UDim2.new(1, -12, 1, -18),
+	Size = UDim2.fromOffset(120, 50),
+	BackgroundColor3 = C.purple,
+	Text = "🛒 Shop",
+	Visible = false,
+}, gui)
+autoScale(shopToggle)
+
+local closeShop = button({
+	AnchorPoint = Vector2.new(1, 0),
+	Position = UDim2.fromScale(1, 0),
+	Size = UDim2.fromOffset(36, 36),
+	BackgroundColor3 = C.grey,
+	Text = "✕",
+}, shop)
+closeShop.Activated:Connect(function()
+	shop.Visible = false
+	shopToggle.Visible = true
+end)
+shopToggle.Activated:Connect(function()
+	shop.Visible = true
+	shopToggle.Visible = false
+end)
+
+-- Reiter
+local tabs = {}
+local pages = {}
+local currentTab = "gens"
+local TAB_DEFS = { { id = "gens", label = "⛏️ Helfer" }, { id = "upgrades", label = "⚡ Upgrades" }, { id = "rebirth", label = "🌟 Rebirth" } }
+
+local tabRow = create("Frame", { Size = UDim2.new(1, -44, 0, 36), BackgroundTransparency = 1 }, shop)
+create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6) }, tabRow)
+
+local function selectTab(id)
+	currentTab = id
+	for tabId, tab in tabs do
+		tab.BackgroundColor3 = (tabId == id) and C.purple or C.card
+	end
+	for pageId, page in pages do
+		page.Visible = pageId == id
+	end
+end
+
+for _, def in TAB_DEFS do
+	local tab = button({ Size = UDim2.new(1 / 3, -4, 1, 0), BackgroundColor3 = C.card, Text = def.label, Font = Enum.Font.GothamBold }, tabRow)
+	create("UIPadding", { PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8) }, tab)
+	tabs[def.id] = tab
+	tab.Activated:Connect(function()
+		selectTab(def.id)
+	end)
+end
+
+local function makePage(id, topOffset)
+	local page = create("ScrollingFrame", {
+		Position = UDim2.fromOffset(0, topOffset),
+		Size = UDim2.new(1, 0, 1, -topOffset),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 6,
+		ScrollBarImageColor3 = C.purple,
+		CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		ScrollingDirection = Enum.ScrollingDirection.Y,
+	}, shop)
+	create("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }, page)
+	create("UIPadding", { PaddingRight = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10) }, page)
+	pages[id] = page
+	return page
+end
+
+-- Menge x1 / x10 / Max (nur Helfer-Reiter)
+local buyAmount = 1
+local amountRow = create("Frame", { Position = UDim2.fromOffset(0, 44), Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1 }, shop)
+create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), HorizontalAlignment = Enum.HorizontalAlignment.Right }, amountRow)
+text({ Size = UDim2.new(0, 120, 1, 0), Text = "Menge:", TextColor3 = C.muted, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Right }, amountRow)
+local amountButtons = {}
+for _, amount in { 1, 10, "max" } do
+	local b = button({ Size = UDim2.fromOffset(64, 30), BackgroundColor3 = C.card, Text = amount == "max" and "Max" or ("x" .. amount), Font = Enum.Font.GothamBold }, amountRow)
+	create("UIPadding", { PaddingTop = UDim.new(0, 6), PaddingBottom = UDim.new(0, 6) }, b)
+	amountButtons[amount] = b
+	b.Activated:Connect(function()
+		buyAmount = amount
+		for a, other in amountButtons do
+			other.BackgroundColor3 = (a == amount) and C.cyan or C.card
+		end
+	end)
+end
+amountButtons[1].BackgroundColor3 = C.cyan
+
+local genPage = makePage("gens", 82)
+local upgradePage = makePage("upgrades", 44)
+local rebirthPage = makePage("rebirth", 44)
+
+local function updateAmountRowVisibility()
+	amountRow.Visible = currentTab == "gens"
+end
+
+-- Kaufen
+local busy = false
+local function purchase(kind, id, amount)
+	if busy then
+		return
+	end
+	busy = true
+	local ok, success, message = pcall(buyFunction.InvokeServer, buyFunction, kind, id, amount)
+	busy = false
+	if ok and success then
+		play("buy")
+		toast(message, "build")
+	else
+		toast(ok and message or "Kauf fehlgeschlagen.", "error")
+	end
+end
+
+-- Zeilen für Helfer
+local genRows = {}
+for index, gen in Config.GENERATORS do
+	local row = create("Frame", { LayoutOrder = index, Size = UDim2.new(1, 0, 0, 96), BackgroundColor3 = C.card }, genPage)
+	corner(row, 12)
+	local icon = text({ Position = UDim2.fromOffset(8, 18), Size = UDim2.fromOffset(56, 56), Font = Enum.Font.GothamBold }, row)
+	local name = text({ Position = UDim2.fromOffset(72, 8), Size = UDim2.new(1, -200, 0, 24), Font = Enum.Font.FredokaOne, TextXAlignment = Enum.TextXAlignment.Left }, row)
+	local detail = text({ Position = UDim2.fromOffset(72, 36), Size = UDim2.new(1, -200, 0, 16), Font = Enum.Font.GothamMedium, TextColor3 = C.muted, TextXAlignment = Enum.TextXAlignment.Left }, row)
+	local setBar, bar = progressBar({ Position = UDim2.fromOffset(72, 62), Size = UDim2.new(1, -200, 0, 22) }, row, C.gold)
+	local buy = button({ AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(112, 76), Text = "" }, row)
+	local buyTop = text({ Position = UDim2.fromOffset(4, 8), Size = UDim2.new(1, -8, 0, 22), Font = Enum.Font.FredokaOne, Text = "Kaufen" }, buy)
+	local buyCost = text({ Position = UDim2.fromOffset(4, 36), Size = UDim2.new(1, -8, 0, 30), Font = Enum.Font.FredokaOne }, buy)
+	buy.Activated:Connect(function()
+		purchase("gen", gen.id, buyAmount)
+	end)
+	genRows[gen.id] = { row = row, icon = icon, name = name, detail = detail, setBar = setBar, bar = bar, buy = buy, buyTop = buyTop, buyCost = buyCost, index = index }
+end
+
+-- Zeilen für Upgrades
+local function simpleRow(parent, order, iconText, title, desc, onBuy)
+	local row = create("Frame", { LayoutOrder = order, Size = UDim2.new(1, 0, 0, 74), BackgroundColor3 = C.card }, parent)
+	corner(row, 12)
+	text({ Position = UDim2.fromOffset(8, 12), Size = UDim2.fromOffset(50, 50), Text = iconText, Font = Enum.Font.GothamBold }, row)
+	local titleLabel = text({ Position = UDim2.fromOffset(66, 10), Size = UDim2.new(1, -190, 0, 24), Text = title, Font = Enum.Font.FredokaOne, TextXAlignment = Enum.TextXAlignment.Left }, row)
+	local descLabel = text({ Position = UDim2.fromOffset(66, 38), Size = UDim2.new(1, -190, 0, 26), Text = desc, Font = Enum.Font.GothamMedium, TextColor3 = C.muted, TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true }, row)
+	local buy = button({ AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(112, 54), Font = Enum.Font.FredokaOne }, row)
+	create("UIPadding", { PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6) }, buy)
+	buy.Activated:Connect(onBuy)
+	return { row = row, title = titleLabel, desc = descLabel, buy = buy }
+end
+
+local upgradeRows = {}
+for index, upgrade in Config.UPGRADES do
+	upgradeRows[upgrade.id] = simpleRow(upgradePage, index, upgrade.icon, upgrade.name, upgrade.desc, function()
+		purchase("upgrade", upgrade.id)
+	end)
+	upgradeRows[upgrade.id].index = index
+end
+
+-- Rebirth-Seite
+local rebirthCard = create("Frame", { LayoutOrder = 0, Size = UDim2.new(1, 0, 0, 250), BackgroundColor3 = Color3.fromRGB(44, 34, 80) }, rebirthPage)
+corner(rebirthCard, 14)
+stroke(rebirthCard, C.gold, 2, 0.3)
+padding(rebirthCard, 12)
+text({ Size = UDim2.new(1, 0, 0, 30), Text = "🌟 Wiedergeburt", Font = Enum.Font.FredokaOne, TextColor3 = C.gold }, rebirthCard)
+text({
+	Position = UDim2.fromOffset(0, 36),
+	Size = UDim2.new(1, 0, 0, 54),
+	Font = Enum.Font.GothamMedium,
+	TextColor3 = C.muted,
+	TextWrapped = true,
+	Text = "Fang neu an und bekomme <b>Sternenstaub</b>: +" .. math.floor(Config.STARDUST_BONUS * 100)
+		.. " % Produktion pro Stück für immer! Deine Insel und der Sternen-Shop bleiben erhalten.",
+}, rebirthCard)
+local rebirthGainLabel = text({ Position = UDim2.fromOffset(0, 96), Size = UDim2.new(1, 0, 0, 28), Font = Enum.Font.FredokaOne }, rebirthCard)
+local setRebirthBar = progressBar({ Position = UDim2.fromOffset(0, 130), Size = UDim2.new(1, 0, 0, 22) }, rebirthCard, C.gold)
+local rebirthButton = button({ Position = UDim2.fromOffset(0, 162), Size = UDim2.new(1, 0, 0, 60), BackgroundColor3 = C.gold, TextColor3 = Color3.fromRGB(60, 40, 0) }, rebirthCard)
+create("UIPadding", { PaddingTop = UDim.new(0, 12), PaddingBottom = UDim.new(0, 12) }, rebirthButton)
+
+local starHeader = text({ LayoutOrder = 1, Size = UDim2.new(1, 0, 0, 34), Font = Enum.Font.FredokaOne, TextColor3 = C.gold }, rebirthPage)
+local starRows = {}
+for index, upgrade in Config.STAR_UPGRADES do
+	starRows[upgrade.id] = simpleRow(rebirthPage, 10 + index, upgrade.icon, upgrade.name, upgrade.desc, function()
+		purchase("star", upgrade.id)
+	end)
+end
+
+local confirmUntil = 0
+rebirthButton.Activated:Connect(function()
+	if not state or Config.stardustForRun(state.runTotal) < 1 then
+		toast("Sammle erst " .. format(Config.REBIRTH_BASE) .. " 💎 in dieser Runde.", "error")
+		return
+	end
+	if os.clock() > confirmUntil then
+		confirmUntil = os.clock() + 3
+		toast("Sicher? Klick nochmal zum Bestätigen!", "info")
+		return
+	end
+	confirmUntil = 0
+	local ok, success, message = pcall(rebirthFunction.InvokeServer, rebirthFunction)
+	if ok and success then
+		play("big")
+		toast(message, "frenzy")
+	else
+		toast(ok and message or "Wiedergeburt fehlgeschlagen.", "error")
+	end
+end)
+
+selectTab("gens")
+for _, tab in tabs do
+	tab.Activated:Connect(updateAmountRowVisibility)
+end
+
+---------------------------------------------------------------------------
+-- Anzeige aktualisieren
+---------------------------------------------------------------------------
+
+local function setBuyable(b, affordable)
+	b.BackgroundColor3 = affordable and C.green or C.grey
+	b.AutoButtonColor = affordable
+end
+
+local function refreshShop()
+	if not state then
+		return
+	end
+	local money = currentCrystals()
+
+	-- Helfer
+	for index, gen in Config.GENERATORS do
+		local r = genRows[gen.id]
+		local owned = state.gens[gen.id] or 0
+		local unlocked = index == 1 or (state.gens[Config.GENERATORS[index - 1].id] or 0) > 0
+		r.row.BackgroundColor3 = unlocked and C.card or C.cardLocked
+		r.bar.Visible = unlocked
+		r.buy.Visible = unlocked
+		if unlocked then
+			r.icon.Text = gen.icon
+			r.name.Text = gen.name .. '  <font color="' .. hex(C.gold) .. '">x' .. owned .. "</font>"
+			local unit = Config.unitRate(state, gen)
+			r.detail.Text = "+" .. format(unit) .. "/s pro Stück  •  " .. format(unit * owned) .. "/s gesamt"
+
+			local nextMilestone = Config.nextMilestone(owned)
+			if nextMilestone then
+				local previous = 0
+				for _, t in Config.MILESTONES do
+					if t < nextMilestone then
+						previous = t
+					end
+				end
+				r.setBar((owned - previous) / (nextMilestone - previous), "Meilenstein " .. owned .. "/" .. nextMilestone .. " → Produktion x2")
+			else
+				r.setBar(1, "Alle Meilensteine erreicht! 🏆")
+			end
+
+			local count = buyAmount == "max" and math.max(1, Config.maxAffordable(gen, owned, money, state)) or buyAmount
+			local cost = Config.generatorCost(gen, owned, count, state)
+			r.buyTop.Text = "Kaufen x" .. count
+			r.buyCost.Text = "💎 " .. format(cost)
+			setBuyable(r.buy, money >= cost)
+		else
+			r.icon.Text = "❓"
+			r.name.Text = "???"
+			r.detail.Text = "Kauf zuerst den Helfer darüber."
+		end
+	end
+
+	-- Upgrades
+	for index, upgrade in Config.UPGRADES do
+		local r = upgradeRows[upgrade.id]
+		if state.upgrades[upgrade.id] then
+			r.row.LayoutOrder = 1000 + index
+			r.row.BackgroundTransparency = 0.5
+			r.buy.Text = "✓ Gekauft"
+			r.buy.BackgroundColor3 = C.grey
+			r.buy.AutoButtonColor = false
+		else
+			r.row.LayoutOrder = index
+			r.row.BackgroundTransparency = 0
+			r.buy.Text = "💎 " .. format(upgrade.cost)
+			setBuyable(r.buy, money >= upgrade.cost)
+		end
+	end
+
+	-- Wiedergeburt
+	local gain = Config.stardustForRun(state.runTotal)
+	local nextTotal = Config.runTotalForStardust(gain + 1)
+	local prevTotal = Config.runTotalForStardust(gain)
+	rebirthGainLabel.Text = "Du bekommst: <font color=\"" .. hex(C.gold) .. "\">+" .. gain .. " ✨</font>"
+	setRebirthBar((state.runTotal - prevTotal) / (nextTotal - prevTotal), format(state.runTotal) .. " / " .. format(nextTotal) .. " für +" .. (gain + 1))
+	rebirthButton.Text = gain >= 1 and ("🌟 Wiedergeburt (+" .. gain .. " ✨)") or "🔒 Noch nicht bereit"
+	rebirthButton.BackgroundColor3 = gain >= 1 and C.gold or C.grey
+	tabs.rebirth.TextColor3 = gain >= 1 and C.gold or Color3.new(1, 1, 1)
+
+	local available = Config.availableStardust(state)
+	starHeader.Text = "✨ Sternen-Shop  (verfügbar: " .. available .. ")"
+	for _, upgrade in Config.STAR_UPGRADES do
+		local r = starRows[upgrade.id]
+		local level = Config.starLevel(state, upgrade.id)
+		r.title.Text = upgrade.name .. '  <font color="' .. hex(C.gold) .. '">' .. level .. "/" .. upgrade.maxLevel .. "</font>"
+		if level >= upgrade.maxLevel then
+			r.buy.Text = "MAX"
+			r.buy.BackgroundColor3 = C.grey
+		else
+			local cost = Config.starUpgradeCost(upgrade, level)
+			r.buy.Text = "✨ " .. format(cost)
+			setBuyable(r.buy, available >= cost)
+		end
+	end
+
+	-- Insel und Sternenstaub links
+	local level = Config.islandLevel(state.allTime)
+	local levels = Config.ISLAND_LEVELS
+	islandTitle.Text = "🏗️ Insel-Stufe " .. level .. "/" .. #levels
+	if level < #levels then
+		local nextLevel = levels[level + 1]
+		local prev = level > 0 and levels[level].total or 0
+		islandNext.Text = "Nächster Ausbau: <b>" .. nextLevel.name .. "</b>"
+		setIslandBar((state.allTime - prev) / (nextLevel.total - prev), format(state.allTime) .. " / " .. format(nextLevel.total))
+	else
+		islandNext.Text = "Deine Insel ist komplett ausgebaut! 👑"
+		setIslandBar(1, format(state.allTime))
+	end
+	stardustLabel.Text = "✨ " .. state.stardust .. " Sternenstaub  (+" .. math.floor(state.stardust * Config.STARDUST_BONUS * 100) .. " %)"
+end
+
+stateEvent.OnClientEvent:Connect(function(newState)
+	state = newState
+	stateClock = os.clock()
+end)
+
+---------------------------------------------------------------------------
+-- Kristall klicken
+---------------------------------------------------------------------------
+
+local punchTweens = {}
+
+local function punchCrystal(crystal)
+	local baseSize = crystal:GetAttribute("BaseSize")
+	if typeof(baseSize) ~= "Vector3" then
+		return
+	end
+	if punchTweens[crystal] then
+		punchTweens[crystal]:Cancel()
+	end
+	crystal.Size = baseSize * 1.12
+	local tween = TweenService:Create(crystal, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Size = baseSize })
+	punchTweens[crystal] = tween
+	tween:Play()
+	local burst = crystal:FindFirstChild("Burst")
+	if burst then
+		burst:Emit(8)
+	end
+end
+
+local function myCrystal()
+	local plots = workspace:FindFirstChild("Plots")
+	if not plots then
+		return nil
+	end
+	for _, plot in plots:GetChildren() do
+		if plot:GetAttribute("OwnerId") == player.UserId then
+			return plot:FindFirstChild("Crystal")
+		end
+	end
+	return nil
+end
+
+local function mine(screenPos)
+	if not state or clientTokens < 1 then
+		return
+	end
+	clientTokens -= 1
+	mineEvent:FireServer()
+	local value = Config.clickValue(state) * frenzyMult()
+	state.crystals += value
+	state.runTotal += value
+	state.allTime += value
+	popup("+" .. format(value), screenPos, frenzyMult() > 1 and C.orange or C.cyan)
+	play("click")
+	local crystal = myCrystal()
+	if crystal then
+		punchCrystal(crystal)
+	end
+end
+
+mineButton.Activated:Connect(function()
+	local pos = mineButton.AbsolutePosition + mineButton.AbsoluteSize / 2
+	mine(Vector2.new(pos.X, pos.Y - 50))
+end)
+
+local function hookCrystal(crystal)
+	local detector = crystal:WaitForChild("ClickDetector", 10)
+	if not detector then
+		return
+	end
+	detector.MouseClick:Connect(function()
+		local plot = crystal.Parent
+		if plot and plot:GetAttribute("OwnerId") == player.UserId then
+			mine(UserInputService:GetMouseLocation())
+		else
+			toast("Das ist nicht deine Insel! 🏝️", "error")
+		end
+	end)
+end
+for _, crystal in CollectionService:GetTagged("MainCrystal") do
+	task.spawn(hookCrystal, crystal)
+end
+CollectionService:GetInstanceAddedSignal("MainCrystal"):Connect(hookCrystal)
+
+---------------------------------------------------------------------------
+-- Animationen: Kristalle schweben, Helfer drehen sich
+---------------------------------------------------------------------------
+
+local spinning = {}
+local function trackModel(model)
+	if model:IsA("Model") then
+		spinning[model] = { pivot = model:GetPivot(), offset = math.random() * 10 }
+	end
+end
+for _, model in CollectionService:GetTagged("GenModel") do
+	trackModel(model)
+end
+CollectionService:GetInstanceAddedSignal("GenModel"):Connect(trackModel)
+CollectionService:GetInstanceRemovedSignal("GenModel"):Connect(function(model)
+	spinning[model] = nil
+end)
+
+local goldens = {}
+CollectionService:GetInstanceAddedSignal("Golden"):Connect(function(part)
+	goldens[part] = part.CFrame
+end)
+CollectionService:GetInstanceRemovedSignal("Golden"):Connect(function(part)
+	goldens[part] = nil
+end)
+for _, part in CollectionService:GetTagged("Golden") do
+	goldens[part] = part.CFrame
+end
+
+RunService.RenderStepped:Connect(function(dt)
+	local t = os.clock()
+	clientTokens = math.min(Config.CLICKS_PER_SECOND, clientTokens + Config.CLICKS_PER_SECOND * dt)
+
+	for _, crystal in CollectionService:GetTagged("MainCrystal") do
+		local base = crystal:GetAttribute("BaseCFrame")
+		if typeof(base) == "CFrame" then
+			crystal.CFrame = CFrame.new(0, math.sin(t * 1.5) * 0.5, 0) * base * CFrame.Angles(0, t * 0.5, 0)
+		end
+	end
+	for model, info in spinning do
+		if model.Parent then
+			model:PivotTo(info.pivot * CFrame.new(0, math.sin(t * 2 + info.offset) * 0.25, 0) * CFrame.Angles(0, t * 0.6 + info.offset, 0))
+		end
+	end
+	for part, base in goldens do
+		part.CFrame = base * CFrame.new(0, math.sin(t * 3) * 0.6, 0) * CFrame.Angles(0, t * 2, 0)
+	end
+
+	if state then
+		crystalLabel.Text = "💎 " .. format(math.floor(currentCrystals()))
+		perSecondLabel.Text = "+" .. format(perSecond()) .. " pro Sekunde"
+		mineValue.Text = "+" .. format(Config.clickValue(state) * frenzyMult()) .. " pro Klick"
+		local left = frenzyLeft()
+		frenzyBanner.Visible = left > 0
+		if left > 0 then
+			frenzyBanner.Text = "🔥 KRISTALLRAUSCH x" .. Config.FRENZY_MULTIPLIER .. "  –  " .. math.ceil(left) .. "s"
+		end
+	end
+end)
+
+-- Shop regelmäßig aktualisieren
+task.spawn(function()
+	while true do
+		refreshShop()
+		task.wait(0.15)
+	end
+end)
+
+local function updateScale()
+	local camera = workspace.CurrentCamera
+	local height = camera and camera.ViewportSize.Y or 900
+	local scale = math.clamp(height / 900, 0.55, 1.15)
+	for _, s in scaled do
+		s.Scale = scale
+	end
+	-- Der Shop füllt immer die ganze Bildschirmhöhe aus
+	shopScale.Scale = scale
+	shop.Size = UDim2.fromOffset(400, (height - 24) / scale)
+end
+
+if workspace.CurrentCamera then
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+end
+updateScale()
+]]></ProtectedString></Properties></Item></Item></Item></roblox>
