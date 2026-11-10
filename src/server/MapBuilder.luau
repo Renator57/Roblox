@@ -58,9 +58,9 @@ local function ball(parent, diameter, cframe, color, material)
 	})
 end
 
-local function billboard(parent, size, offsetY, maxDistance)
+local function billboard(parent, widthStuds, heightStuds, offsetY, maxDistance)
 	local gui = Instance.new("BillboardGui")
-	gui.Size = size
+	gui.Size = UDim2.new(widthStuds, 0, heightStuds, 0) -- in Studs: wird mit Entfernung kleiner
 	gui.StudsOffset = Vector3.new(0, offsetY, 0)
 	gui.MaxDistance = maxDistance or 120
 	gui.LightInfluence = 0
@@ -74,6 +74,34 @@ local function billboard(parent, size, offsetY, maxDistance)
 	label.Parent = gui
 	gui.Parent = parent
 	return label
+end
+
+-- Facettierter Kristall: Prisma mit Spitze oben und unten (Würfel auf der Ecke).
+-- Gibt das mittlere Teil zurück.
+local TIP_ROTATION = CFrame.Angles(0, 0, math.rad(35.264)) * CFrame.Angles(math.rad(-45), 0, 0)
+
+local function crystalShape(parent, cf, width, height, color, material, transparency)
+	local props = { Color = color, Material = material or Enum.Material.Neon, Transparency = transparency or 0 }
+	local function withProps(extra)
+		for key, value in props do
+			extra[key] = value
+		end
+		return extra
+	end
+	local core = makePart(parent, withProps({
+		Name = "Core",
+		Size = Vector3.new(width, height, width),
+		CFrame = cf * CFrame.Angles(0, math.rad(45), 0),
+	}))
+	local tip = width * 0.74
+	for _, direction in { 1, -1 } do
+		makePart(parent, withProps({
+			Name = "Tip",
+			Size = Vector3.new(tip, tip, tip),
+			CFrame = cf * CFrame.new(0, direction * height / 2, 0) * TIP_ROTATION,
+		}))
+	end
+	return core
 end
 
 ----------------------------------------------------------------------
@@ -436,23 +464,22 @@ local function buildPlot(index, root)
 	vCylinder(folder, 1.5, 16, centerCF * CFrame.new(0, 0.75, 0), STONE, Enum.Material.Slate)
 	vCylinder(folder, 1, 12, centerCF * CFrame.new(0, 2, 0), DARK_STONE, Enum.Material.Slate)
 
-	local crystal = makePart(folder, {
-		Name = "Crystal",
-		Size = Vector3.new(6, 12, 6),
-		CFrame = centerCF * CFrame.new(0, 9.5, 0) * CFrame.Angles(0, math.rad(45), 0),
-		Color = CRYSTAL_COLOR,
-		Material = Enum.Material.Neon,
-		Transparency = 0.1,
-	})
+	-- Der große Kristall (Modell aus mehreren Teilen, schwebt über dem Sockel)
+	local crystal = Instance.new("Model")
+	crystal.Name = "Crystal"
+	local crystalCF = centerCF * CFrame.new(0, 11, 0)
+	local core = crystalShape(crystal, crystalCF, 6, 9, CRYSTAL_COLOR, Enum.Material.Neon, 0.05)
+	crystal.WorldPivot = crystalCF
+	crystal.Parent = folder
 	CollectionService:AddTag(crystal, "MainCrystal")
 	local click = Instance.new("ClickDetector")
 	click.MaxActivationDistance = 300
 	click.Parent = crystal
 	local light = Instance.new("PointLight")
 	light.Color = CRYSTAL_COLOR
-	light.Range = 24
+	light.Range = 26
 	light.Brightness = 2
-	light.Parent = crystal
+	light.Parent = core
 
 	local burst = Instance.new("ParticleEmitter")
 	burst.Name = "Burst"
@@ -463,7 +490,7 @@ local function buildPlot(index, root)
 	burst.Lifetime = NumberRange.new(0.5, 0.9)
 	burst.Speed = NumberRange.new(14, 24)
 	burst.SpreadAngle = Vector2.new(180, 180)
-	burst.Parent = crystal
+	burst.Parent = core
 
 	local ambient = Instance.new("ParticleEmitter")
 	ambient.Name = "Ambient"
@@ -474,19 +501,15 @@ local function buildPlot(index, root)
 	ambient.Lifetime = NumberRange.new(2, 3)
 	ambient.Speed = NumberRange.new(1, 3)
 	ambient.SpreadAngle = Vector2.new(180, 180)
-	ambient.Parent = crystal
+	ambient.Parent = core
 
-	-- Kleine Begleitkristalle
-	for k = 0, 3 do
-		local a = k * math.pi / 2 + math.pi / 4
-		makePart(folder, {
-			Size = Vector3.new(1.6, 4, 1.6),
-			CFrame = centerCF * CFrame.new(math.cos(a) * 5, 3.5, math.sin(a) * 5)
-				* CFrame.Angles(math.sin(a) * 0.4, 0, -math.cos(a) * 0.4),
-			Color = CRYSTAL_COLOR,
-			Material = Enum.Material.Glass,
-			Transparency = 0.2,
-		})
+	-- Kleine Begleitkristalle am Sockel
+	for k = 0, 5 do
+		local a = k * math.pi / 3
+		local tilt = CFrame.Angles(math.sin(a) * 0.45, 0, -math.cos(a) * 0.45)
+		local size = (k % 2 == 0) and 1 or 0.75
+		crystalShape(folder, centerCF * CFrame.new(math.cos(a) * 5.2, 3.6 * size + 1.2, math.sin(a) * 5.2) * tilt,
+			1.8 * size, 3.5 * size, CRYSTAL_COLOR, Enum.Material.Glass, 0.15)
 	end
 
 	local signAnchor = makePart(folder, {
@@ -496,7 +519,7 @@ local function buildPlot(index, root)
 		Transparency = 1,
 		CanCollide = false,
 	})
-	local sign = billboard(signAnchor, UDim2.fromOffset(320, 70), 2, 400)
+	local sign = billboard(signAnchor, 24, 6, 4, 400)
 	sign.Text = "🏝️ Freie Insel"
 
 	-- Sockel für die Helfer im Kreis um den Kristall
@@ -513,7 +536,7 @@ local function buildPlot(index, root)
 			Transparency = 1,
 			CanCollide = false,
 		})
-		local label = billboard(labelAnchor, UDim2.fromOffset(200, 60), 0, 90)
+		local label = billboard(labelAnchor, 10, 3, 0, 90)
 		local slotFolder = Instance.new("Folder")
 		slotFolder.Name = gen.id
 		slotFolder.Parent = folder
@@ -533,7 +556,8 @@ local function buildPlot(index, root)
 		decor = decor,
 		islandLevel = 0,
 		rebirths = -1,
-		crystalBaseSize = crystal.Size,
+		crystalCF = crystalCF,
+		core = core,
 		folder = folder,
 		center = center,
 		spawnCF = spawnCF,
@@ -629,6 +653,7 @@ function MapBuilder.updatePlot(plot, data)
 			end
 			slot.label.Text = gen.icon .. " " .. gen.name .. "\nx" .. owned
 			slot.label.TextColor3 = Color3.new(1, 1, 1)
+			slot.label.Parent.Enabled = true
 		else
 			if slot.model then
 				slot.model:Destroy()
@@ -636,8 +661,9 @@ function MapBuilder.updatePlot(plot, data)
 			end
 			slot.ring.Color = STONE
 			local previousOwned = (i == 1) or (data and (data.gens[Config.GENERATORS[i - 1].id] or 0) > 0)
-			slot.label.Text = previousOwned and (gen.icon .. " " .. gen.name .. "\n🔒 im Shop") or "🔒 ???"
-			slot.label.TextColor3 = Color3.fromRGB(180, 180, 190)
+			slot.label.Text = "🔒 " .. gen.name
+			slot.label.TextColor3 = Color3.fromRGB(190, 190, 200)
+			slot.label.Parent.Enabled = previousOwned and true or false
 		end
 	end
 
@@ -662,17 +688,20 @@ function MapBuilder.updatePlot(plot, data)
 		plot.crystalLevel = level
 		local color = Config.rebirthColor(rebirths)
 		local crystal = plot.crystal
-		local size = plot.crystalBaseSize * (1 + 0.07 * level)
-		local bottom = plot.center.Y + 2.5
-		local cframe = CFrame.new(plot.center.X, bottom + size.Y / 2, plot.center.Z) * CFrame.Angles(0, math.rad(45), 0)
-		crystal.Size = size
-		crystal.CFrame = cframe
-		crystal:SetAttribute("BaseSize", size)
-		crystal:SetAttribute("BaseCFrame", cframe)
-		crystal.Color = color
-		crystal.PointLight.Color = color
-		crystal.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
-		crystal.Ambient.Color = ColorSequence.new(color)
+		local scale = 1 + 0.07 * level
+		crystal:PivotTo(plot.crystalCF)
+		crystal:ScaleTo(scale)
+		crystal:SetAttribute("BaseScale", scale)
+		crystal:SetAttribute("BaseCFrame", plot.crystalCF * CFrame.new(0, 8.4 * (scale - 1), 0))
+		crystal:PivotTo(plot.crystalCF * CFrame.new(0, 8.4 * (scale - 1), 0))
+		for _, part in crystal:GetDescendants() do
+			if part:IsA("BasePart") then
+				part.Color = color
+			end
+		end
+		plot.core.PointLight.Color = color
+		plot.core.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+		plot.core.Ambient.Color = ColorSequence.new(color)
 	end
 end
 
@@ -681,27 +710,27 @@ function MapBuilder.spawnGolden(plot)
 	local a = math.random() * math.pi * 2
 	local r = 8 + math.random() * 26
 	local pos = plot.center + Vector3.new(math.cos(a) * r, 3.5, math.sin(a) * r)
-	local golden = makePart(plot.folder, {
-		Name = "GoldenCrystal",
-		Size = Vector3.new(2.2, 3.6, 2.2),
-		CFrame = CFrame.new(pos) * CFrame.Angles(0, math.rad(45), 0),
-		Color = GOLD,
-		Material = Enum.Material.Neon,
-		CanCollide = false,
-	})
+	local golden = Instance.new("Model")
+	golden.Name = "GoldenCrystal"
+	local core = crystalShape(golden, CFrame.new(pos), 2, 2.6, GOLD, Enum.Material.Neon, 0)
+	for _, part in golden:GetChildren() do
+		part.CanCollide = false
+	end
+	golden.WorldPivot = CFrame.new(pos)
+	golden.Parent = plot.folder
 	local light = Instance.new("PointLight")
 	light.Color = GOLD
 	light.Range = 16
 	light.Brightness = 3
-	light.Parent = golden
+	light.Parent = core
 	local sparkles = Instance.new("Sparkles")
 	sparkles.SparkleColor = GOLD
-	sparkles.Parent = golden
+	sparkles.Parent = core
 	local click = Instance.new("ClickDetector")
 	click.MaxActivationDistance = 300
 	click.Parent = golden
 	CollectionService:AddTag(golden, "Golden")
-	return golden, click
+	return golden, click, core
 end
 
 return MapBuilder

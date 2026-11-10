@@ -236,7 +236,8 @@ corner(frenzyBanner, 12)
 ---------------------------------------------------------------------------
 
 local info = create("Frame", {
-	Position = UDim2.fromOffset(12, 12),
+	AnchorPoint = Vector2.new(0, 1),
+	Position = UDim2.new(0, 12, 1, -18),
 	Size = UDim2.fromOffset(290, 130),
 	BackgroundColor3 = C.panel,
 	BackgroundTransparency = 0.1,
@@ -385,8 +386,8 @@ end
 
 local shop = create("Frame", {
 	AnchorPoint = Vector2.new(1, 0),
-	Position = UDim2.new(1, -12, 0, 12),
-	Size = UDim2.new(0, 400, 1, -24),
+	Position = UDim2.new(1, -12, 0, 64),
+	Size = UDim2.new(0, 400, 1, -76),
 	BackgroundColor3 = C.panel,
 	BackgroundTransparency = 0.08,
 }, gui)
@@ -409,8 +410,8 @@ local closeShop = button({
 	AnchorPoint = Vector2.new(1, 0),
 	Position = UDim2.fromScale(1, 0),
 	Size = UDim2.fromOffset(36, 36),
-	BackgroundColor3 = C.grey,
-	Text = "✕",
+	BackgroundColor3 = C.red,
+	Text = "X",
 }, shop)
 closeShop.Activated:Connect(function()
 	shop.Visible = false
@@ -471,7 +472,7 @@ end
 local buyAmount = 1
 local amountRow = create("Frame", { Position = UDim2.fromOffset(0, 44), Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1 }, shop)
 create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), HorizontalAlignment = Enum.HorizontalAlignment.Right }, amountRow)
-text({ Size = UDim2.new(0, 120, 1, 0), Text = "Menge:", TextColor3 = C.muted, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Right }, amountRow)
+text({ Size = UDim2.new(0, 90, 0.8, 0), Text = "Menge:", TextColor3 = C.muted, Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Right }, amountRow)
 local amountButtons = {}
 for _, amount in { 1, 10, "max" } do
 	local b = button({ Size = UDim2.fromOffset(64, 30), BackgroundColor3 = C.card, Text = amount == "max" and "Max" or ("x" .. amount), Font = Enum.Font.GothamBold }, amountRow)
@@ -624,6 +625,8 @@ local function refreshShop()
 		local r = genRows[gen.id]
 		local owned = state.gens[gen.id] or 0
 		local unlocked = index == 1 or (state.gens[Config.GENERATORS[index - 1].id] or 0) > 0
+		local previousVisible = index <= 2 or (state.gens[Config.GENERATORS[index - 2].id] or 0) > 0
+		r.row.Visible = unlocked or previousVisible
 		r.row.BackgroundColor3 = unlocked and C.card or C.cardLocked
 		r.bar.Visible = unlocked
 		r.buy.Visible = unlocked
@@ -726,21 +729,12 @@ end)
 -- Kristall klicken
 ---------------------------------------------------------------------------
 
-local punchTweens = {}
+local punchStart = {}
 
 local function punchCrystal(crystal)
-	local baseSize = crystal:GetAttribute("BaseSize")
-	if typeof(baseSize) ~= "Vector3" then
-		return
-	end
-	if punchTweens[crystal] then
-		punchTweens[crystal]:Cancel()
-	end
-	crystal.Size = baseSize * 1.12
-	local tween = TweenService:Create(crystal, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Size = baseSize })
-	punchTweens[crystal] = tween
-	tween:Play()
-	local burst = crystal:FindFirstChild("Burst")
+	punchStart[crystal] = os.clock()
+	local core = crystal:FindFirstChild("Core")
+	local burst = core and core:FindFirstChild("Burst")
 	if burst then
 		burst:Emit(8)
 	end
@@ -820,14 +814,15 @@ CollectionService:GetInstanceRemovedSignal("GenModel"):Connect(function(model)
 end)
 
 local goldens = {}
-CollectionService:GetInstanceAddedSignal("Golden"):Connect(function(part)
-	goldens[part] = part.CFrame
+local function trackGolden(model)
+	goldens[model] = model:GetPivot()
+end
+CollectionService:GetInstanceAddedSignal("Golden"):Connect(trackGolden)
+CollectionService:GetInstanceRemovedSignal("Golden"):Connect(function(model)
+	goldens[model] = nil
 end)
-CollectionService:GetInstanceRemovedSignal("Golden"):Connect(function(part)
-	goldens[part] = nil
-end)
-for _, part in CollectionService:GetTagged("Golden") do
-	goldens[part] = part.CFrame
+for _, model in CollectionService:GetTagged("Golden") do
+	trackGolden(model)
 end
 
 RunService.RenderStepped:Connect(function(dt)
@@ -836,8 +831,16 @@ RunService.RenderStepped:Connect(function(dt)
 
 	for _, crystal in CollectionService:GetTagged("MainCrystal") do
 		local base = crystal:GetAttribute("BaseCFrame")
-		if typeof(base) == "CFrame" then
-			crystal.CFrame = CFrame.new(0, math.sin(t * 1.5) * 0.5, 0) * base * CFrame.Angles(0, t * 0.5, 0)
+		local baseScale = crystal:GetAttribute("BaseScale")
+		if typeof(base) == "CFrame" and type(baseScale) == "number" and crystal:IsA("Model") then
+			-- kurzes "Aufploppen" nach einem Klick
+			local since = punchStart[crystal] and (t - punchStart[crystal]) or 1
+			local pop = since < 0.25 and math.sin(since / 0.25 * math.pi) * 0.12 or 0
+			local target = baseScale * (1 + pop)
+			if math.abs(crystal:GetScale() - target) > 0.001 then
+				crystal:ScaleTo(target)
+			end
+			crystal:PivotTo(CFrame.new(0, math.sin(t * 1.5) * 0.6, 0) * base * CFrame.Angles(0, t * 0.5, 0))
 		end
 	end
 	for model, info in spinning do
@@ -845,8 +848,10 @@ RunService.RenderStepped:Connect(function(dt)
 			model:PivotTo(info.pivot * CFrame.new(0, math.sin(t * 2 + info.offset) * 0.25, 0) * CFrame.Angles(0, t * 0.6 + info.offset, 0))
 		end
 	end
-	for part, base in goldens do
-		part.CFrame = base * CFrame.new(0, math.sin(t * 3) * 0.6, 0) * CFrame.Angles(0, t * 2, 0)
+	for model, base in goldens do
+		if model.Parent then
+			model:PivotTo(base * CFrame.new(0, math.sin(t * 3) * 0.6, 0) * CFrame.Angles(0, t * 2, 0))
+		end
 	end
 
 	if state then
@@ -878,7 +883,7 @@ local function updateScale()
 	end
 	-- Der Shop füllt immer die ganze Bildschirmhöhe aus
 	shopScale.Scale = scale
-	shop.Size = UDim2.fromOffset(400, (height - 24) / scale)
+	shop.Size = UDim2.fromOffset(400, (height - 76) / scale)
 end
 
 if workspace.CurrentCamera then

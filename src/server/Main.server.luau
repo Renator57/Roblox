@@ -215,14 +215,14 @@ local function collectGolden(player, session)
 end
 
 local function spawnGolden(player, session)
-	local golden, click = MapBuilder.spawnGolden(session.plot)
+	local golden, click, core = MapBuilder.spawnGolden(session.plot)
 	session.golden = golden
 	click.MouseClick:Connect(function(clicker)
 		if clicker == player and sessions[player] == session and session.golden == golden then
 			collectGolden(player, session)
 		end
 	end)
-	golden.Touched:Connect(function(hit)
+	core.Touched:Connect(function(hit)
 		local character = player.Character
 		if character and hit:IsDescendantOf(character) and session.golden == golden then
 			collectGolden(player, session)
