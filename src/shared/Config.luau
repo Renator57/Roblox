@@ -99,6 +99,152 @@ Config.REBIRTH_COLORS = {
 	Color3.fromRGB(240, 245, 255),
 }
 
+----------------------------------------------------------------------
+-- Hub-Insel, Likes und Kristallgolem
+----------------------------------------------------------------------
+
+Config.HUB_RADIUS = 42
+Config.LIKE_COOLDOWN = 600 -- Sekunden, bis man dieselbe Insel wieder liken kann
+Config.LIKE_BOOST = 1.25 -- Besitzer bekommt +25 % ...
+Config.LIKE_BOOST_DURATION = 300 -- ... für 5 Minuten
+
+Config.GOLEM_INTERVAL = 180 -- alle 3 Minuten kommt ein Golem
+Config.GOLEM_DURATION = 90 -- so lange hat man Zeit, ihn zu besiegen
+Config.GOLEM_HP_CLICKS = 120 -- Lebenspunkte = so viele Klicks pro Spieler
+Config.GOLEM_REWARD_SECONDS = 180 -- Belohnung = so viele Sekunden Produktion
+
+----------------------------------------------------------------------
+-- Haustiere
+----------------------------------------------------------------------
+
+Config.MAX_EQUIPPED = 3
+Config.MAX_PETS = 60
+Config.GOLDEN_PET_FACTOR = 3 -- goldene Haustiere (aus 3 gleichen) haben x3 Bonus
+
+Config.RARITIES = {
+	Common = { name = "Gewöhnlich", color = Color3.fromRGB(190, 190, 205), order = 1 },
+	Rare = { name = "Selten", color = Color3.fromRGB(80, 160, 255), order = 2 },
+	Epic = { name = "Episch", color = Color3.fromRGB(185, 95, 255), order = 3 },
+	Legendary = { name = "Legendär", color = Color3.fromRGB(255, 200, 40), order = 4 },
+	Exclusive = { name = "Exklusiv", color = Color3.fromRGB(255, 80, 130), order = 5 },
+}
+
+-- boost: 0.10 = +10 % auf Produktion und Klicks
+-- style: Aussehen des 3D-Haustiers (ears, longears, horns, horn, wings, halo, spikes, none)
+Config.PETS = {
+	{ id = "Mouse", name = "Kristallmaus", icon = "🐭", rarity = "Common", boost = 0.10, color = Color3.fromRGB(175, 175, 195), style = "ears" },
+	{ id = "Cat", name = "Steinkatze", icon = "🐱", rarity = "Common", boost = 0.15, color = Color3.fromRGB(150, 140, 130), style = "ears" },
+	{ id = "Bunny", name = "Glitzerhase", icon = "🐰", rarity = "Rare", boost = 0.30, color = Color3.fromRGB(255, 200, 230), style = "longears" },
+	{ id = "Fox", name = "Edelsteinfuchs", icon = "🦊", rarity = "Epic", boost = 0.75, color = Color3.fromRGB(255, 140, 50), style = "ears" },
+	{ id = "Dragon", name = "Diamantdrache", icon = "🐲", rarity = "Legendary", boost = 2.0, color = Color3.fromRGB(90, 220, 255), style = "horns" },
+
+	{ id = "Frog", name = "Moosfrosch", icon = "🐸", rarity = "Common", boost = 0.4, color = Color3.fromRGB(100, 200, 90), style = "none" },
+	{ id = "Hedgehog", name = "Pilzigel", icon = "🦔", rarity = "Common", boost = 0.6, color = Color3.fromRGB(150, 100, 70), style = "spikes" },
+	{ id = "Owl", name = "Waldeule", icon = "🦉", rarity = "Rare", boost = 1.2, color = Color3.fromRGB(160, 120, 80), style = "wings" },
+	{ id = "Spirit", name = "Baumgeist", icon = "🌳", rarity = "Epic", boost = 3, color = Color3.fromRGB(120, 255, 160), style = "halo" },
+	{ id = "Phoenix", name = "Phönix", icon = "🔥", rarity = "Legendary", boost = 8, color = Color3.fromRGB(255, 110, 40), style = "wings" },
+
+	{ id = "Jelly", name = "Sternenqualle", icon = "🪼", rarity = "Common", boost = 2, color = Color3.fromRGB(200, 140, 255), style = "halo" },
+	{ id = "Comet", name = "Kometenkatze", icon = "☄️", rarity = "Common", boost = 3, color = Color3.fromRGB(80, 90, 160), style = "ears" },
+	{ id = "Wolf", name = "Mondwolf", icon = "🐺", rarity = "Rare", boost = 6, color = Color3.fromRGB(200, 210, 235), style = "ears" },
+	{ id = "Nebula", name = "Nebeldrache", icon = "🐉", rarity = "Epic", boost = 15, color = Color3.fromRGB(150, 60, 220), style = "horns" },
+	{ id = "Unicorn", name = "Galaxie-Einhorn", icon = "🦄", rarity = "Legendary", boost = 50, color = Color3.fromRGB(255, 120, 230), style = "horn" },
+
+	-- Exklusiv: nur im Robux-Shop
+	{ id = "RainbowUnicorn", name = "Regenbogen-Einhorn", icon = "🌈", rarity = "Exclusive", boost = 10, color = Color3.fromRGB(255, 255, 255), style = "horn" },
+	{ id = "ShadowGriffin", name = "Schattengreif", icon = "🦅", rarity = "Exclusive", boost = 30, color = Color3.fromRGB(60, 50, 90), style = "wings" },
+}
+
+-- Eier: werden mit Kristallen gekauft, die Chancen stehen im Spiel
+Config.EGGS = {
+	{
+		id = "Crystal", name = "Kristall-Ei", icon = "🥚", cost = 1000, color = Color3.fromRGB(120, 210, 255),
+		pets = { { pet = "Mouse", chance = 50 }, { pet = "Cat", chance = 30 }, { pet = "Bunny", chance = 15 }, { pet = "Fox", chance = 4.5 }, { pet = "Dragon", chance = 0.5 } },
+	},
+	{
+		id = "Forest", name = "Wald-Ei", icon = "🌿", cost = 1e6, color = Color3.fromRGB(110, 220, 110),
+		pets = { { pet = "Frog", chance = 50 }, { pet = "Hedgehog", chance = 30 }, { pet = "Owl", chance = 15 }, { pet = "Spirit", chance = 4.5 }, { pet = "Phoenix", chance = 0.5 } },
+	},
+	{
+		id = "Galaxy", name = "Galaxie-Ei", icon = "🌌", cost = 1e10, color = Color3.fromRGB(170, 100, 255),
+		pets = { { pet = "Jelly", chance = 50 }, { pet = "Comet", chance = 30 }, { pet = "Wolf", chance = 15 }, { pet = "Nebula", chance = 4.5 }, { pet = "Unicorn", chance = 0.5 } },
+	},
+}
+
+----------------------------------------------------------------------
+-- Kristall-Skins
+-- unlock.kind: free, crystals (cost), likes / golem / rebirths (amount), robux
+----------------------------------------------------------------------
+
+Config.SKINS = {
+	{ id = "Default", name = "Standard", icon = "💎", desc = "Wechselt bei jeder Wiedergeburt die Farbe.", unlock = { kind = "free" } },
+	{ id = "Ruby", name = "Rubin", icon = "❤️", color = Color3.fromRGB(255, 50, 80), unlock = { kind = "crystals", cost = 25000 } },
+	{ id = "Emerald", name = "Smaragd", icon = "💚", color = Color3.fromRGB(40, 230, 120), unlock = { kind = "crystals", cost = 5e5 } },
+	{ id = "Amethyst", name = "Amethyst", icon = "💜", color = Color3.fromRGB(170, 80, 255), unlock = { kind = "crystals", cost = 1e7 } },
+	{ id = "Ice", name = "Eiskristall", icon = "❄️", color = Color3.fromRGB(200, 240, 255), material = "Glass", unlock = { kind = "likes", amount = 10 } },
+	{ id = "Fire", name = "Feuerkristall", icon = "🔥", color = Color3.fromRGB(255, 120, 30), effect = "fire", unlock = { kind = "golem", amount = 5 } },
+	{ id = "Gold", name = "Goldkristall", icon = "👑", color = Color3.fromRGB(255, 205, 60), effect = "sparkles", unlock = { kind = "rebirths", amount = 5 } },
+	{ id = "Galaxy", name = "Galaxie", icon = "🌌", color = Color3.fromRGB(70, 30, 140), effect = "sparkles", unlock = { kind = "rebirths", amount = 15 } },
+	{ id = "Rainbow", name = "Regenbogen", icon = "🌈", effect = "rainbow", unlock = { kind = "robux" } },
+}
+
+----------------------------------------------------------------------
+-- Tägliche Belohnung, Glücksrad, Glücksautomat
+----------------------------------------------------------------------
+
+-- Tag 1-7: so viele Minuten deiner Produktion. Tag 7 gibt zusätzlich 1 Sternenstaub.
+Config.DAILY_REWARDS = { 5, 10, 20, 30, 45, 60, 120 }
+Config.DAILY_MIN = 500
+
+Config.WHEEL_COOLDOWN = 4 * 3600
+Config.WHEEL = {
+	{ label = "5 Min 💎", kind = "minutes", value = 5, weight = 30, color = Color3.fromRGB(90, 200, 255) },
+	{ label = "15 Min 💎", kind = "minutes", value = 15, weight = 20, color = Color3.fromRGB(60, 200, 110) },
+	{ label = "Rausch 60s", kind = "frenzy", value = 60, weight = 15, color = Color3.fromRGB(255, 140, 40) },
+	{ label = "Kristall-Ei", kind = "egg", value = "Crystal", weight = 15, color = Color3.fromRGB(120, 210, 255) },
+	{ label = "1 Std 💎", kind = "minutes", value = 60, weight = 8, color = Color3.fromRGB(255, 205, 60) },
+	{ label = "Wald-Ei", kind = "egg", value = "Forest", weight = 7, color = Color3.fromRGB(110, 220, 110) },
+	{ label = "+1 ✨", kind = "stardust", value = 1, weight = 4, color = Color3.fromRGB(185, 95, 255) },
+	{ label = "JACKPOT 3 Std", kind = "minutes", value = 180, weight = 1, color = Color3.fromRGB(255, 80, 130) },
+}
+
+-- Glücksautomat (nur mit Kristallen). Auszahlung ca. 95 %.
+Config.SLOT_SYMBOLS = { "💎", "⭐", "🍀", "🔔", "🍒" }
+Config.SLOT_TRIPLE = { ["💎"] = 15, ["⭐"] = 8, ["🍀"] = 4, ["🔔"] = 4, ["🍒"] = 4 }
+Config.SLOT_PAIR = 1.4
+Config.SLOT_BETS = { 0.1, 0.25, 0.5, 1 } -- Anteil deiner Kristalle
+Config.SLOT_MIN_BET = 10
+
+----------------------------------------------------------------------
+-- Robux-Shop. Trage hier die IDs aus dem Creator Dashboard ein
+-- (0 = noch nicht eingerichtet). Anleitung steht in der README.
+----------------------------------------------------------------------
+
+Config.PRODUCTS = {
+	{ key = "RainbowUnicorn", productId = 0, name = "Regenbogen-Einhorn", icon = "🌈", desc = "Exklusives Haustier: +1000 %", reward = { kind = "pet", pet = "RainbowUnicorn" } },
+	{ key = "ShadowGriffin", productId = 0, name = "Schattengreif", icon = "🦅", desc = "Exklusives Haustier: +3000 %", reward = { kind = "pet", pet = "ShadowGriffin" } },
+	{ key = "RainbowSkin", productId = 0, name = "Regenbogen-Kristall", icon = "🌈", desc = "Dein Kristall leuchtet in allen Farben", reward = { kind = "skin", skin = "Rainbow" } },
+	{ key = "Frenzy", productId = 0, name = "Kristallrausch 10 Min", icon = "🔥", desc = "Alles x7 für 10 Minuten", reward = { kind = "frenzy", seconds = 600 } },
+}
+
+Config.GAMEPASSES = {
+	{ key = "VIP", passId = 0, name = "VIP: x2 Kristalle", icon = "👑", desc = "Alles bringt doppelt so viel – für immer" },
+	{ key = "PetSlots", passId = 0, name = "+2 Haustier-Plätze", icon = "🐾", desc = "Rüste 5 statt 3 Haustiere aus" },
+}
+
+Config.PETS_BY_ID = {}
+for _, pet in Config.PETS do
+	Config.PETS_BY_ID[pet.id] = pet
+end
+Config.EGGS_BY_ID = {}
+for _, egg in Config.EGGS do
+	Config.EGGS_BY_ID[egg.id] = egg
+end
+Config.SKINS_BY_ID = {}
+for _, skin in Config.SKINS do
+	Config.SKINS_BY_ID[skin.id] = skin
+end
+
 Config.STAR_UPGRADES_BY_ID = {}
 for _, upgrade in Config.STAR_UPGRADES do
 	Config.STAR_UPGRADES_BY_ID[upgrade.id] = upgrade
@@ -269,7 +415,7 @@ function Config.globalMultiplier(data)
 		end
 	end
 	mult *= 1.5 ^ Config.starLevel(data, "StarEngine")
-	return mult * Config.stardustMultiplier(data)
+	return mult * Config.stardustMultiplier(data) * Config.bonusMultiplier(data)
 end
 
 -- Produktion eines einzelnen Helfers dieser Sorte (inkl. aller Boni)
@@ -302,7 +448,7 @@ function Config.clickValue(data)
 		end
 	end
 	mult *= 2 ^ Config.starLevel(data, "StarClick")
-	return mult * Config.stardustMultiplier(data) + Config.production(data) * percent
+	return mult * Config.stardustMultiplier(data) * Config.bonusMultiplier(data) + Config.production(data) * percent
 end
 
 -- Automatische Klicks der Kristall-Drohne pro Sekunde
@@ -313,6 +459,86 @@ end
 -- Gesamte Kristalle pro Sekunde (Helfer + Drohne, ohne Kristallrausch)
 function Config.perSecond(data)
 	return Config.production(data) + Config.droneClicks(data) * Config.clickValue(data)
+end
+
+-- Haustiere: Eintrag "Cat" = normal, "Cat*" = golden
+function Config.parsePet(entry)
+	if type(entry) ~= "string" then
+		return nil, false
+	end
+	local golden = string.sub(entry, -1) == "*"
+	local id = golden and string.sub(entry, 1, -2) or entry
+	return Config.PETS_BY_ID[id], golden
+end
+
+function Config.petBoost(entry)
+	local pet, golden = Config.parsePet(entry)
+	if not pet then
+		return 0
+	end
+	return pet.boost * (golden and Config.GOLDEN_PET_FACTOR or 1)
+end
+
+function Config.maxEquipped(data)
+	return Config.MAX_EQUIPPED + ((data.passes and data.passes.PetSlots) and 2 or 0)
+end
+
+function Config.petMultiplier(data)
+	local total = 1
+	if data.pets and data.equipped then
+		for _, uid in data.equipped do
+			total += Config.petBoost(data.pets[uid])
+		end
+	end
+	return total
+end
+
+-- Haustiere und VIP-Pass
+function Config.bonusMultiplier(data)
+	local vip = (data.passes and data.passes.VIP) and 2 or 1
+	return Config.petMultiplier(data) * vip
+end
+
+-- Zeitlich begrenzte Boosts (Kristallrausch, Like-Boost). `boosts` hat frenzyEnd und likeEnd.
+function Config.tempMultiplier(boosts, serverTime)
+	local mult = 1
+	if (boosts.frenzyEnd or 0) > serverTime then
+		mult *= Config.FRENZY_MULTIPLIER
+	end
+	if (boosts.likeEnd or 0) > serverTime then
+		mult *= Config.LIKE_BOOST
+	end
+	return mult
+end
+
+function Config.skinUnlocked(data, skin)
+	local unlock = skin.unlock
+	if unlock.kind == "free" or (data.skins and data.skins[skin.id]) then
+		return true
+	elseif unlock.kind == "likes" then
+		return (data.likes or 0) >= unlock.amount
+	elseif unlock.kind == "golem" then
+		return (data.golemKills or 0) >= unlock.amount
+	elseif unlock.kind == "rebirths" then
+		return (data.rebirths or 0) >= unlock.amount
+	end
+	return false
+end
+
+function Config.skinRequirement(skin)
+	local unlock = skin.unlock
+	if unlock.kind == "crystals" then
+		return "💎 " .. Config.format(unlock.cost)
+	elseif unlock.kind == "likes" then
+		return "❤️ " .. unlock.amount .. " Likes erhalten"
+	elseif unlock.kind == "golem" then
+		return "⚔️ " .. unlock.amount .. " Golems besiegen"
+	elseif unlock.kind == "rebirths" then
+		return "🌟 " .. unlock.amount .. " Wiedergeburten"
+	elseif unlock.kind == "robux" then
+		return "🛍️ Robux-Shop"
+	end
+	return ""
 end
 
 function Config.stardustForRun(runTotal)

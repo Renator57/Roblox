@@ -99,6 +99,152 @@ Config.REBIRTH_COLORS = {
 	Color3.fromRGB(240, 245, 255),
 }
 
+----------------------------------------------------------------------
+-- Hub-Insel, Likes und Kristallgolem
+----------------------------------------------------------------------
+
+Config.HUB_RADIUS = 42
+Config.LIKE_COOLDOWN = 600 -- Sekunden, bis man dieselbe Insel wieder liken kann
+Config.LIKE_BOOST = 1.25 -- Besitzer bekommt +25 % ...
+Config.LIKE_BOOST_DURATION = 300 -- ... für 5 Minuten
+
+Config.GOLEM_INTERVAL = 180 -- alle 3 Minuten kommt ein Golem
+Config.GOLEM_DURATION = 90 -- so lange hat man Zeit, ihn zu besiegen
+Config.GOLEM_HP_CLICKS = 120 -- Lebenspunkte = so viele Klicks pro Spieler
+Config.GOLEM_REWARD_SECONDS = 180 -- Belohnung = so viele Sekunden Produktion
+
+----------------------------------------------------------------------
+-- Haustiere
+----------------------------------------------------------------------
+
+Config.MAX_EQUIPPED = 3
+Config.MAX_PETS = 60
+Config.GOLDEN_PET_FACTOR = 3 -- goldene Haustiere (aus 3 gleichen) haben x3 Bonus
+
+Config.RARITIES = {
+	Common = { name = "Gewöhnlich", color = Color3.fromRGB(190, 190, 205), order = 1 },
+	Rare = { name = "Selten", color = Color3.fromRGB(80, 160, 255), order = 2 },
+	Epic = { name = "Episch", color = Color3.fromRGB(185, 95, 255), order = 3 },
+	Legendary = { name = "Legendär", color = Color3.fromRGB(255, 200, 40), order = 4 },
+	Exclusive = { name = "Exklusiv", color = Color3.fromRGB(255, 80, 130), order = 5 },
+}
+
+-- boost: 0.10 = +10 % auf Produktion und Klicks
+-- style: Aussehen des 3D-Haustiers (ears, longears, horns, horn, wings, halo, spikes, none)
+Config.PETS = {
+	{ id = "Mouse", name = "Kristallmaus", icon = "🐭", rarity = "Common", boost = 0.10, color = Color3.fromRGB(175, 175, 195), style = "ears" },
+	{ id = "Cat", name = "Steinkatze", icon = "🐱", rarity = "Common", boost = 0.15, color = Color3.fromRGB(150, 140, 130), style = "ears" },
+	{ id = "Bunny", name = "Glitzerhase", icon = "🐰", rarity = "Rare", boost = 0.30, color = Color3.fromRGB(255, 200, 230), style = "longears" },
+	{ id = "Fox", name = "Edelsteinfuchs", icon = "🦊", rarity = "Epic", boost = 0.75, color = Color3.fromRGB(255, 140, 50), style = "ears" },
+	{ id = "Dragon", name = "Diamantdrache", icon = "🐲", rarity = "Legendary", boost = 2.0, color = Color3.fromRGB(90, 220, 255), style = "horns" },
+
+	{ id = "Frog", name = "Moosfrosch", icon = "🐸", rarity = "Common", boost = 0.4, color = Color3.fromRGB(100, 200, 90), style = "none" },
+	{ id = "Hedgehog", name = "Pilzigel", icon = "🦔", rarity = "Common", boost = 0.6, color = Color3.fromRGB(150, 100, 70), style = "spikes" },
+	{ id = "Owl", name = "Waldeule", icon = "🦉", rarity = "Rare", boost = 1.2, color = Color3.fromRGB(160, 120, 80), style = "wings" },
+	{ id = "Spirit", name = "Baumgeist", icon = "🌳", rarity = "Epic", boost = 3, color = Color3.fromRGB(120, 255, 160), style = "halo" },
+	{ id = "Phoenix", name = "Phönix", icon = "🔥", rarity = "Legendary", boost = 8, color = Color3.fromRGB(255, 110, 40), style = "wings" },
+
+	{ id = "Jelly", name = "Sternenqualle", icon = "🪼", rarity = "Common", boost = 2, color = Color3.fromRGB(200, 140, 255), style = "halo" },
+	{ id = "Comet", name = "Kometenkatze", icon = "☄️", rarity = "Common", boost = 3, color = Color3.fromRGB(80, 90, 160), style = "ears" },
+	{ id = "Wolf", name = "Mondwolf", icon = "🐺", rarity = "Rare", boost = 6, color = Color3.fromRGB(200, 210, 235), style = "ears" },
+	{ id = "Nebula", name = "Nebeldrache", icon = "🐉", rarity = "Epic", boost = 15, color = Color3.fromRGB(150, 60, 220), style = "horns" },
+	{ id = "Unicorn", name = "Galaxie-Einhorn", icon = "🦄", rarity = "Legendary", boost = 50, color = Color3.fromRGB(255, 120, 230), style = "horn" },
+
+	-- Exklusiv: nur im Robux-Shop
+	{ id = "RainbowUnicorn", name = "Regenbogen-Einhorn", icon = "🌈", rarity = "Exclusive", boost = 10, color = Color3.fromRGB(255, 255, 255), style = "horn" },
+	{ id = "ShadowGriffin", name = "Schattengreif", icon = "🦅", rarity = "Exclusive", boost = 30, color = Color3.fromRGB(60, 50, 90), style = "wings" },
+}
+
+-- Eier: werden mit Kristallen gekauft, die Chancen stehen im Spiel
+Config.EGGS = {
+	{
+		id = "Crystal", name = "Kristall-Ei", icon = "🥚", cost = 1000, color = Color3.fromRGB(120, 210, 255),
+		pets = { { pet = "Mouse", chance = 50 }, { pet = "Cat", chance = 30 }, { pet = "Bunny", chance = 15 }, { pet = "Fox", chance = 4.5 }, { pet = "Dragon", chance = 0.5 } },
+	},
+	{
+		id = "Forest", name = "Wald-Ei", icon = "🌿", cost = 1e6, color = Color3.fromRGB(110, 220, 110),
+		pets = { { pet = "Frog", chance = 50 }, { pet = "Hedgehog", chance = 30 }, { pet = "Owl", chance = 15 }, { pet = "Spirit", chance = 4.5 }, { pet = "Phoenix", chance = 0.5 } },
+	},
+	{
+		id = "Galaxy", name = "Galaxie-Ei", icon = "🌌", cost = 1e10, color = Color3.fromRGB(170, 100, 255),
+		pets = { { pet = "Jelly", chance = 50 }, { pet = "Comet", chance = 30 }, { pet = "Wolf", chance = 15 }, { pet = "Nebula", chance = 4.5 }, { pet = "Unicorn", chance = 0.5 } },
+	},
+}
+
+----------------------------------------------------------------------
+-- Kristall-Skins
+-- unlock.kind: free, crystals (cost), likes / golem / rebirths (amount), robux
+----------------------------------------------------------------------
+
+Config.SKINS = {
+	{ id = "Default", name = "Standard", icon = "💎", desc = "Wechselt bei jeder Wiedergeburt die Farbe.", unlock = { kind = "free" } },
+	{ id = "Ruby", name = "Rubin", icon = "❤️", color = Color3.fromRGB(255, 50, 80), unlock = { kind = "crystals", cost = 25000 } },
+	{ id = "Emerald", name = "Smaragd", icon = "💚", color = Color3.fromRGB(40, 230, 120), unlock = { kind = "crystals", cost = 5e5 } },
+	{ id = "Amethyst", name = "Amethyst", icon = "💜", color = Color3.fromRGB(170, 80, 255), unlock = { kind = "crystals", cost = 1e7 } },
+	{ id = "Ice", name = "Eiskristall", icon = "❄️", color = Color3.fromRGB(200, 240, 255), material = "Glass", unlock = { kind = "likes", amount = 10 } },
+	{ id = "Fire", name = "Feuerkristall", icon = "🔥", color = Color3.fromRGB(255, 120, 30), effect = "fire", unlock = { kind = "golem", amount = 5 } },
+	{ id = "Gold", name = "Goldkristall", icon = "👑", color = Color3.fromRGB(255, 205, 60), effect = "sparkles", unlock = { kind = "rebirths", amount = 5 } },
+	{ id = "Galaxy", name = "Galaxie", icon = "🌌", color = Color3.fromRGB(70, 30, 140), effect = "sparkles", unlock = { kind = "rebirths", amount = 15 } },
+	{ id = "Rainbow", name = "Regenbogen", icon = "🌈", effect = "rainbow", unlock = { kind = "robux" } },
+}
+
+----------------------------------------------------------------------
+-- Tägliche Belohnung, Glücksrad, Glücksautomat
+----------------------------------------------------------------------
+
+-- Tag 1-7: so viele Minuten deiner Produktion. Tag 7 gibt zusätzlich 1 Sternenstaub.
+Config.DAILY_REWARDS = { 5, 10, 20, 30, 45, 60, 120 }
+Config.DAILY_MIN = 500
+
+Config.WHEEL_COOLDOWN = 4 * 3600
+Config.WHEEL = {
+	{ label = "5 Min 💎", kind = "minutes", value = 5, weight = 30, color = Color3.fromRGB(90, 200, 255) },
+	{ label = "15 Min 💎", kind = "minutes", value = 15, weight = 20, color = Color3.fromRGB(60, 200, 110) },
+	{ label = "Rausch 60s", kind = "frenzy", value = 60, weight = 15, color = Color3.fromRGB(255, 140, 40) },
+	{ label = "Kristall-Ei", kind = "egg", value = "Crystal", weight = 15, color = Color3.fromRGB(120, 210, 255) },
+	{ label = "1 Std 💎", kind = "minutes", value = 60, weight = 8, color = Color3.fromRGB(255, 205, 60) },
+	{ label = "Wald-Ei", kind = "egg", value = "Forest", weight = 7, color = Color3.fromRGB(110, 220, 110) },
+	{ label = "+1 ✨", kind = "stardust", value = 1, weight = 4, color = Color3.fromRGB(185, 95, 255) },
+	{ label = "JACKPOT 3 Std", kind = "minutes", value = 180, weight = 1, color = Color3.fromRGB(255, 80, 130) },
+}
+
+-- Glücksautomat (nur mit Kristallen). Auszahlung ca. 95 %.
+Config.SLOT_SYMBOLS = { "💎", "⭐", "🍀", "🔔", "🍒" }
+Config.SLOT_TRIPLE = { ["💎"] = 15, ["⭐"] = 8, ["🍀"] = 4, ["🔔"] = 4, ["🍒"] = 4 }
+Config.SLOT_PAIR = 1.4
+Config.SLOT_BETS = { 0.1, 0.25, 0.5, 1 } -- Anteil deiner Kristalle
+Config.SLOT_MIN_BET = 10
+
+----------------------------------------------------------------------
+-- Robux-Shop. Trage hier die IDs aus dem Creator Dashboard ein
+-- (0 = noch nicht eingerichtet). Anleitung steht in der README.
+----------------------------------------------------------------------
+
+Config.PRODUCTS = {
+	{ key = "RainbowUnicorn", productId = 0, name = "Regenbogen-Einhorn", icon = "🌈", desc = "Exklusives Haustier: +1000 %", reward = { kind = "pet", pet = "RainbowUnicorn" } },
+	{ key = "ShadowGriffin", productId = 0, name = "Schattengreif", icon = "🦅", desc = "Exklusives Haustier: +3000 %", reward = { kind = "pet", pet = "ShadowGriffin" } },
+	{ key = "RainbowSkin", productId = 0, name = "Regenbogen-Kristall", icon = "🌈", desc = "Dein Kristall leuchtet in allen Farben", reward = { kind = "skin", skin = "Rainbow" } },
+	{ key = "Frenzy", productId = 0, name = "Kristallrausch 10 Min", icon = "🔥", desc = "Alles x7 für 10 Minuten", reward = { kind = "frenzy", seconds = 600 } },
+}
+
+Config.GAMEPASSES = {
+	{ key = "VIP", passId = 0, name = "VIP: x2 Kristalle", icon = "👑", desc = "Alles bringt doppelt so viel – für immer" },
+	{ key = "PetSlots", passId = 0, name = "+2 Haustier-Plätze", icon = "🐾", desc = "Rüste 5 statt 3 Haustiere aus" },
+}
+
+Config.PETS_BY_ID = {}
+for _, pet in Config.PETS do
+	Config.PETS_BY_ID[pet.id] = pet
+end
+Config.EGGS_BY_ID = {}
+for _, egg in Config.EGGS do
+	Config.EGGS_BY_ID[egg.id] = egg
+end
+Config.SKINS_BY_ID = {}
+for _, skin in Config.SKINS do
+	Config.SKINS_BY_ID[skin.id] = skin
+end
+
 Config.STAR_UPGRADES_BY_ID = {}
 for _, upgrade in Config.STAR_UPGRADES do
 	Config.STAR_UPGRADES_BY_ID[upgrade.id] = upgrade
@@ -269,7 +415,7 @@ function Config.globalMultiplier(data)
 		end
 	end
 	mult *= 1.5 ^ Config.starLevel(data, "StarEngine")
-	return mult * Config.stardustMultiplier(data)
+	return mult * Config.stardustMultiplier(data) * Config.bonusMultiplier(data)
 end
 
 -- Produktion eines einzelnen Helfers dieser Sorte (inkl. aller Boni)
@@ -302,7 +448,7 @@ function Config.clickValue(data)
 		end
 	end
 	mult *= 2 ^ Config.starLevel(data, "StarClick")
-	return mult * Config.stardustMultiplier(data) + Config.production(data) * percent
+	return mult * Config.stardustMultiplier(data) * Config.bonusMultiplier(data) + Config.production(data) * percent
 end
 
 -- Automatische Klicks der Kristall-Drohne pro Sekunde
@@ -315,6 +461,86 @@ function Config.perSecond(data)
 	return Config.production(data) + Config.droneClicks(data) * Config.clickValue(data)
 end
 
+-- Haustiere: Eintrag "Cat" = normal, "Cat*" = golden
+function Config.parsePet(entry)
+	if type(entry) ~= "string" then
+		return nil, false
+	end
+	local golden = string.sub(entry, -1) == "*"
+	local id = golden and string.sub(entry, 1, -2) or entry
+	return Config.PETS_BY_ID[id], golden
+end
+
+function Config.petBoost(entry)
+	local pet, golden = Config.parsePet(entry)
+	if not pet then
+		return 0
+	end
+	return pet.boost * (golden and Config.GOLDEN_PET_FACTOR or 1)
+end
+
+function Config.maxEquipped(data)
+	return Config.MAX_EQUIPPED + ((data.passes and data.passes.PetSlots) and 2 or 0)
+end
+
+function Config.petMultiplier(data)
+	local total = 1
+	if data.pets and data.equipped then
+		for _, uid in data.equipped do
+			total += Config.petBoost(data.pets[uid])
+		end
+	end
+	return total
+end
+
+-- Haustiere und VIP-Pass
+function Config.bonusMultiplier(data)
+	local vip = (data.passes and data.passes.VIP) and 2 or 1
+	return Config.petMultiplier(data) * vip
+end
+
+-- Zeitlich begrenzte Boosts (Kristallrausch, Like-Boost). `boosts` hat frenzyEnd und likeEnd.
+function Config.tempMultiplier(boosts, serverTime)
+	local mult = 1
+	if (boosts.frenzyEnd or 0) > serverTime then
+		mult *= Config.FRENZY_MULTIPLIER
+	end
+	if (boosts.likeEnd or 0) > serverTime then
+		mult *= Config.LIKE_BOOST
+	end
+	return mult
+end
+
+function Config.skinUnlocked(data, skin)
+	local unlock = skin.unlock
+	if unlock.kind == "free" or (data.skins and data.skins[skin.id]) then
+		return true
+	elseif unlock.kind == "likes" then
+		return (data.likes or 0) >= unlock.amount
+	elseif unlock.kind == "golem" then
+		return (data.golemKills or 0) >= unlock.amount
+	elseif unlock.kind == "rebirths" then
+		return (data.rebirths or 0) >= unlock.amount
+	end
+	return false
+end
+
+function Config.skinRequirement(skin)
+	local unlock = skin.unlock
+	if unlock.kind == "crystals" then
+		return "💎 " .. Config.format(unlock.cost)
+	elseif unlock.kind == "likes" then
+		return "❤️ " .. unlock.amount .. " Likes erhalten"
+	elseif unlock.kind == "golem" then
+		return "⚔️ " .. unlock.amount .. " Golems besiegen"
+	elseif unlock.kind == "rebirths" then
+		return "🌟 " .. unlock.amount .. " Wiedergeburten"
+	elseif unlock.kind == "robux" then
+		return "🛍️ Robux-Shop"
+	end
+	return ""
+end
+
 function Config.stardustForRun(runTotal)
 	return math.floor(math.sqrt((runTotal or 0) / Config.REBIRTH_BASE))
 end
@@ -325,7 +551,7 @@ function Config.runTotalForStardust(stardust)
 end
 
 return Config
-]]></ProtectedString></Properties></Item></Item></Item><Item class="ServerScriptService" referent="RBX00000000000000000000000000000008"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX00000000000000000000000000000007"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000000000000000000000000000004"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Hauptskript (Server).
+]]></ProtectedString></Properties></Item></Item></Item><Item class="ServerScriptService" referent="RBX0000000000000000000000000000000B"><Properties><string name="Name">ServerScriptService</string></Properties><Item class="Folder" referent="RBX0000000000000000000000000000000A"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000000000000000000000000000004"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Hauptskript (Server).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -334,6 +560,9 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapBuilder = require(script.Parent.MapBuilder)
 local PlayerData = require(script.Parent.PlayerData)
+local Hub = require(script.Parent.Hub)
+local Pets = require(script.Parent.Pets)
+local Fun = require(script.Parent.Fun)
 
 -- Remotes ---------------------------------------------------------------
 
@@ -364,8 +593,9 @@ local function now()
 	return workspace:GetServerTimeNow()
 end
 
+-- Kristallrausch und Like-Boost
 local function frenzyMultiplier(session)
-	return (session.frenzyEnd > now()) and Config.FRENZY_MULTIPLIER or 1
+	return Config.tempMultiplier(session, now())
 end
 
 local function notify(player, text, kind)
@@ -389,6 +619,17 @@ local function sendState(player)
 		stardustSpent = data.stardustSpent,
 		rebirths = data.rebirths,
 		frenzyEnd = session.frenzyEnd,
+		likeEnd = session.likeEnd,
+		pets = data.pets,
+		equipped = data.equipped,
+		skins = data.skins,
+		skin = data.skin,
+		likes = data.likes,
+		golemKills = data.golemKills,
+		dailyDay = data.dailyDay,
+		dailyStreak = data.dailyStreak,
+		lastSpin = data.lastSpin,
+		passes = data.passes,
 	})
 end
 
@@ -455,6 +696,7 @@ local function onPlayerAdded(player)
 		plot = plot,
 		tokens = Config.CLICKS_PER_SECOND,
 		frenzyEnd = 0,
+		likeEnd = 0,
 		nextGolden = 0,
 		golden = nil,
 		lastLevel = Config.islandLevel(data.allTime),
@@ -462,6 +704,7 @@ local function onPlayerAdded(player)
 	sessions[player] = session
 	scheduleGolden(session)
 	MapBuilder.updatePlot(plot, data)
+	Pets.onJoin(player, session)
 
 	player.CharacterAdded:Connect(function(character)
 		onCharacterAdded(player, character)
@@ -498,6 +741,26 @@ local function onPlayerRemoving(player)
 	end
 	PlayerData.release(player)
 end
+
+-- Zusatz-Module (Hub-Insel, Haustiere, Robux, Glücksrad, Casino, Skins) ----
+
+local ctx = {
+	sessions = sessions,
+	now = now,
+	earn = earn,
+	notify = notify,
+	notifyAll = function(text, kind)
+		notifyEvent:FireAllClients(text, kind)
+	end,
+	sendState = sendState,
+	remote = remote,
+	PlayerData = PlayerData,
+	MapBuilder = MapBuilder,
+	boost = frenzyMultiplier,
+}
+Hub.init(ctx)
+Pets.init(ctx)
+Fun.init(ctx)
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 Players.PlayerRemoving:Connect(onPlayerRemoving)
@@ -602,7 +865,7 @@ RunService.Heartbeat:Connect(function(dt)
 		if slowNow then
 			checkIslandLevel(player, session)
 			PlayerData.updateLeaderstats(player)
-			session.plot.sign.Text = "🏝️ " .. player.DisplayName .. "\n💎 " .. Config.format(Config.perSecond(session.data)) .. "/Sek"
+			session.plot.sign.Text = "🏝️ " .. player.DisplayName .. "\n💎 " .. Config.format(Config.perSecond(session.data)) .. "/Sek  •  ❤️ " .. session.data.likes
 		end
 	end
 end)
@@ -739,6 +1002,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 
 local MapBuilder = {}
 MapBuilder.plots = {}
+MapBuilder.ISLAND_SIZE = 96
 
 local CRYSTAL_COLOR = Color3.fromRGB(90, 200, 255)
 local GOLD = Color3.fromRGB(255, 205, 60)
@@ -1341,7 +1605,7 @@ function MapBuilder.build()
 	-- Leuchtende Wolkeninseln in der Mitte als Deko
 	local rng = Random.new(42)
 	for _ = 1, 14 do
-		local pos = Vector3.new(rng:NextNumber(-90, 90), rng:NextNumber(-40, -10), rng:NextNumber(-90, 90))
+		local pos = Vector3.new(rng:NextNumber(-90, 90), rng:NextNumber(-80, -50), rng:NextNumber(-90, 90))
 		ball(root, rng:NextNumber(10, 22), CFrame.new(pos), Color3.fromRGB(240, 245, 255), Enum.Material.SmoothPlastic).CanCollide = false
 	end
 end
@@ -1412,27 +1676,57 @@ function MapBuilder.updatePlot(plot, data)
 	end
 	plot.islandLevel = level
 
-	-- Der Kristall wächst mit der Insel und ändert bei Wiedergeburt die Farbe
+	-- Der Kristall wächst mit der Insel, ändert bei Wiedergeburt die Farbe und zeigt den Skin
 	local rebirths = data and data.rebirths or 0
-	if plot.rebirths ~= rebirths or plot.crystalLevel ~= level then
+	local skinId = data and data.skin or "Default"
+	if plot.rebirths ~= rebirths or plot.crystalLevel ~= level or plot.skin ~= skinId then
 		plot.rebirths = rebirths
 		plot.crystalLevel = level
-		local color = Config.rebirthColor(rebirths)
+		plot.skin = skinId
+		local skin = Config.SKINS_BY_ID[skinId] or Config.SKINS_BY_ID.Default
+		local color = skin.color or Config.rebirthColor(rebirths)
+		local material = skin.material == "Glass" and Enum.Material.Glass or Enum.Material.Neon
 		local crystal = plot.crystal
 		local scale = 1 + 0.07 * level
 		crystal:PivotTo(plot.crystalCF)
 		crystal:ScaleTo(scale)
 		crystal:SetAttribute("BaseScale", scale)
 		crystal:SetAttribute("BaseCFrame", plot.crystalCF * CFrame.new(0, 8.4 * (scale - 1), 0))
+		crystal:SetAttribute("Rainbow", skin.effect == "rainbow")
 		crystal:PivotTo(plot.crystalCF * CFrame.new(0, 8.4 * (scale - 1), 0))
 		for _, part in crystal:GetDescendants() do
 			if part:IsA("BasePart") then
 				part.Color = color
+				part.Material = material
+				part.Transparency = (material == Enum.Material.Glass) and 0.25 or 0.05
 			end
 		end
-		plot.core.PointLight.Color = color
-		plot.core.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
-		plot.core.Ambient.Color = ColorSequence.new(color)
+		local core = plot.core
+		core.PointLight.Color = color
+		core.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+		core.Ambient.Color = ColorSequence.new(color)
+
+		-- Spezialeffekte der Skins
+		for _, name in { "SkinFire", "SkinSparkles" } do
+			local old = core:FindFirstChild(name)
+			if old then
+				old:Destroy()
+			end
+		end
+		if skin.effect == "fire" then
+			local fire = Instance.new("Fire")
+			fire.Name = "SkinFire"
+			fire.Size = 10
+			fire.Heat = 12
+			fire.Color = Color3.fromRGB(255, 140, 40)
+			fire.SecondaryColor = Color3.fromRGB(255, 60, 20)
+			fire.Parent = core
+		elseif skin.effect == "sparkles" or skin.effect == "rainbow" then
+			local sparkles = Instance.new("Sparkles")
+			sparkles.Name = "SkinSparkles"
+			sparkles.SparkleColor = skin.effect == "rainbow" and Color3.new(1, 1, 1) or color
+			sparkles.Parent = core
+		end
 	end
 end
 
@@ -1463,6 +1757,15 @@ function MapBuilder.spawnGolden(plot)
 	CollectionService:AddTag(golden, "Golden")
 	return golden, click, core
 end
+
+-- Bau-Helfer auch für andere Module (Hub-Insel)
+MapBuilder.helpers = {
+	makePart = makePart,
+	vCylinder = vCylinder,
+	ball = ball,
+	billboard = billboard,
+	crystalShape = crystalShape,
+}
 
 return MapBuilder
 ]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000000000000000000000000000006"><Properties><string name="Name">PlayerData</string><ProtectedString name="Source"><![CDATA[-- Spielerdaten: laden, speichern und in der Bestenliste anzeigen.
@@ -1501,6 +1804,22 @@ local function defaultData()
 		stardustSpent = 0,
 		rebirths = 0,
 		lastSeen = 0,
+		-- Haustiere: pets = { [uid] = "Cat" / "Cat*" (golden) }, equipped = { uid, ... }
+		pets = {},
+		equipped = {},
+		nextPet = 1,
+		-- Skins, Likes, Golem
+		skins = { Default = true },
+		skin = "Default",
+		likes = 0,
+		golemKills = 0,
+		-- Tägliche Belohnung und Glücksrad
+		dailyDay = 0,
+		dailyStreak = 0,
+		lastSpin = 0,
+		-- Robux: bereits verarbeitete Käufe, Gamepässe (werden bei jedem Start neu geprüft)
+		receipts = {},
+		passes = {},
 	}
 end
 
@@ -1525,6 +1844,7 @@ function PlayerData.load(player)
 		local ok, saved = pcall(store.GetAsync, store, keyFor(player))
 		if ok and type(saved) == "table" then
 			data = sanitize(saved)
+			data.skins.Default = true
 		elseif not ok then
 			warn("[Kristall-Imperium] Laden fehlgeschlagen für", player.Name, saved)
 		end
@@ -1539,6 +1859,9 @@ function PlayerData.load(player)
 	local rebirths = Instance.new("IntValue")
 	rebirths.Name = "Rebirths"
 	rebirths.Parent = leaderstats
+	local likes = Instance.new("IntValue")
+	likes.Name = "❤️"
+	likes.Parent = leaderstats
 	leaderstats.Parent = player
 	PlayerData.updateLeaderstats(player)
 
@@ -1557,18 +1880,24 @@ function PlayerData.updateLeaderstats(player)
 	end
 	leaderstats["💎/Sek"].Value = Config.format(Config.perSecond(data))
 	leaderstats.Rebirths.Value = data.rebirths
+	leaderstats["❤️"].Value = data.likes
 end
 
+-- Gibt true zurück, wenn gespeichert wurde (oder es keinen DataStore gibt)
 function PlayerData.save(player)
 	local data = profiles[player]
-	if not (data and store) then
-		return
+	if not data then
+		return false
+	end
+	if not store then
+		return true
 	end
 	data.lastSeen = os.time()
 	local ok, err = pcall(store.SetAsync, store, keyFor(player), data)
 	if not ok then
 		warn("[Kristall-Imperium] Speichern fehlgeschlagen für", player.Name, err)
 	end
+	return ok
 end
 
 function PlayerData.release(player)
@@ -1603,7 +1932,924 @@ function PlayerData.startAutosave()
 end
 
 return PlayerData
-]]></ProtectedString></Properties></Item></Item></Item><Item class="StarterPlayer" referent="RBX0000000000000000000000000000000B"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX0000000000000000000000000000000A"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="LocalScript" referent="RBX00000000000000000000000000000009"><Properties><string name="Name">HUD</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Oberfläche, Shop, Effekte (Client).
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000000000000000000000000000007"><Properties><string name="Name">Hub</string><ProtectedString name="Source"><![CDATA[-- Hub-Insel in der Mitte: Brücken zu allen Inseln, Eier, Casino, Glücksrad,
+-- tägliche Belohnung, Likes und der Kristallgolem.
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local Hub = {}
+
+local STONE = Color3.fromRGB(150, 145, 140)
+local DARK = Color3.fromRGB(70, 70, 85)
+local GRASS = Color3.fromRGB(100, 190, 90)
+local ROCK = Color3.fromRGB(120, 95, 75)
+local WOOD = Color3.fromRGB(150, 105, 65)
+local GOLD = Color3.fromRGB(255, 205, 60)
+local CYAN = Color3.fromRGB(90, 200, 255)
+
+local HUB_SPAWN = CFrame.lookAt(Vector3.new(0, 4, 26), Vector3.new(0, 4, 0))
+
+function Hub.init(ctx)
+	local h = ctx.MapBuilder.helpers
+	local makePart, vCylinder, ball, billboard, crystalShape = h.makePart, h.vCylinder, h.ball, h.billboard, h.crystalShape
+
+	local root = Instance.new("Folder")
+	root.Name = "Hub"
+	root.Parent = workspace
+
+	local R = Config.HUB_RADIUS
+
+	------------------------------------------------------------------
+	-- Insel
+	------------------------------------------------------------------
+	vCylinder(root, 4, R * 2, CFrame.new(0, -2, 0), GRASS, Enum.Material.Grass)
+	vCylinder(root, 10, R * 2 - 12, CFrame.new(0, -9, 0), ROCK, Enum.Material.Rock)
+	vCylinder(root, 10, R * 2 - 34, CFrame.new(0, -18, 0), ROCK, Enum.Material.Rock)
+	vCylinder(root, 0.4, R * 2 - 20, CFrame.new(0, 0.2, 0), STONE, Enum.Material.Cobblestone)
+	vCylinder(root, 0.2, 30, CFrame.new(0, 0.45, 0), CYAN, Enum.Material.Neon)
+	vCylinder(root, 0.25, 28, CFrame.new(0, 0.5, 0), DARK, Enum.Material.Slate)
+
+	local signAnchor = makePart(root, { Size = Vector3.one, CFrame = CFrame.new(0, 30, 0), Transparency = 1, CanCollide = false })
+	billboard(signAnchor, 30, 7, 0, 600).Text = "🌐 HUB-INSEL"
+
+	------------------------------------------------------------------
+	-- Brücken zu allen Spieler-Inseln
+	------------------------------------------------------------------
+	local islandRadius = ctx.MapBuilder.ISLAND_SIZE / 2
+	for _, plot in ctx.MapBuilder.plots do
+		local dir = Vector3.new(plot.center.X, 0, plot.center.Z).Unit
+		local a = dir * (R - 2)
+		local b = plot.center - dir * (islandRadius - 2)
+		local length = (b - a).Magnitude
+		local mid = (a + b) / 2
+		local cf = CFrame.lookAt(mid, b)
+		makePart(root, {
+			Name = "Bridge",
+			Size = Vector3.new(7, 0.6, length),
+			CFrame = cf * CFrame.new(0, -0.3, 0),
+			Color = WOOD,
+			Material = Enum.Material.WoodPlanks,
+		})
+		for _, x in { -3.4, 3.4 } do
+			makePart(root, {
+				Size = Vector3.new(0.4, 0.4, length),
+				CFrame = cf * CFrame.new(x, 1.3, 0),
+				Color = CYAN,
+				Material = Enum.Material.Neon,
+			})
+		end
+		-- Schild am Brückenanfang mit dem Namen des Besitzers
+		local signPart = makePart(root, { Size = Vector3.one, CFrame = CFrame.new(a + dir * 3 + Vector3.new(0, 6, 0)), Transparency = 1, CanCollide = false })
+		local label = billboard(signPart, 12, 2.6, 0, 150)
+		local function refresh()
+			local owner = plot.owner
+			label.Text = owner and ("🏝️ " .. owner.DisplayName) or "🏝️ Freie Insel"
+		end
+		refresh()
+		plot.folder:GetAttributeChangedSignal("OwnerId"):Connect(refresh)
+	end
+
+	------------------------------------------------------------------
+	-- Stationen (öffnen Fenster auf dem Bildschirm)
+	------------------------------------------------------------------
+	local function prompt(parent, actionText, objectText, openUI, extra)
+		local p = Instance.new("ProximityPrompt")
+		p.ActionText = actionText
+		p.ObjectText = objectText
+		p.HoldDuration = 0
+		p.MaxActivationDistance = 12
+		p.RequiresLineOfSight = false
+		p:SetAttribute("OpenUI", openUI)
+		if extra then
+			p:SetAttribute("Extra", extra)
+		end
+		p.Parent = parent
+		return p
+	end
+
+	local function stationCF(angleDeg, radius)
+		local a = math.rad(angleDeg)
+		local pos = Vector3.new(math.cos(a) * radius, 0, math.sin(a) * radius)
+		return CFrame.lookAt(pos, Vector3.new(0, 0, 0))
+	end
+
+	-- Eier
+	do
+		local base = stationCF(22.5, 30)
+		for i, egg in Config.EGGS do
+			local cf = base * CFrame.new((i - 2) * 6, 0, 0)
+			vCylinder(root, 1.5, 4.5, cf * CFrame.new(0, 0.75, 0), DARK, Enum.Material.Slate)
+			local eggPart = makePart(root, {
+				Name = "Egg",
+				Size = Vector3.new(3, 4, 3),
+				CFrame = cf * CFrame.new(0, 3.6, 0),
+				Color = egg.color,
+				Material = Enum.Material.SmoothPlastic,
+			})
+			local mesh = Instance.new("SpecialMesh")
+			mesh.MeshType = Enum.MeshType.Sphere
+			mesh.Parent = eggPart
+			local light = Instance.new("PointLight")
+			light.Color = egg.color
+			light.Range = 10
+			light.Parent = eggPart
+			local label = billboard(eggPart, 7, 2.4, 3.4, 80)
+			label.Text = egg.icon .. " " .. egg.name .. "\n💎 " .. Config.format(egg.cost)
+			prompt(eggPart, "Ei öffnen", egg.name, "pets", egg.id)
+		end
+	end
+
+	-- Glücksautomat (Casino)
+	do
+		local cf = stationCF(112.5, 30)
+		makePart(root, { Size = Vector3.new(5, 7, 3.5), CFrame = cf * CFrame.new(0, 3.5, 0), Color = Color3.fromRGB(200, 40, 60), Material = Enum.Material.Metal })
+		makePart(root, { Size = Vector3.new(5.6, 1, 4), CFrame = cf * CFrame.new(0, 7.5, 0), Color = GOLD, Material = Enum.Material.Neon })
+		local screen = makePart(root, { Size = Vector3.new(4, 2.2, 0.2), CFrame = cf * CFrame.new(0, 4.8, -1.8), Color = Color3.fromRGB(20, 20, 30) })
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = Enum.NormalId.Front
+		gui.CanvasSize = Vector2.new(300, 160)
+		gui.Parent = screen
+		local reel = Instance.new("TextLabel")
+		reel.Size = UDim2.fromScale(1, 1)
+		reel.BackgroundTransparency = 1
+		reel.TextScaled = true
+		reel.Text = "💎⭐🍀"
+		reel.Parent = gui
+		vCylinder(root, 3, 0.4, cf * CFrame.new(3, 5, 0), Color3.fromRGB(200, 200, 210), Enum.Material.Metal)
+		ball(root, 1, cf * CFrame.new(3, 6.8, 0), Color3.fromRGB(255, 50, 50), Enum.Material.Neon)
+		local label = billboard(screen, 10, 2.4, 5, 80)
+		label.Text = "🎰 Glücksautomat"
+		prompt(screen, "Spielen", "Glücksautomat", "casino")
+	end
+
+	-- Glücksrad
+	do
+		local cf = stationCF(202.5, 30)
+		local wheelCF = cf * CFrame.new(0, 7, 0) * CFrame.Angles(0, math.rad(90), 0)
+		makePart(root, {
+			Shape = Enum.PartType.Cylinder,
+			Size = Vector3.new(0.8, 11, 11),
+			CFrame = wheelCF,
+			Color = Color3.fromRGB(40, 40, 60),
+			Material = Enum.Material.Metal,
+		})
+		for k, segment in Config.WHEEL do
+			makePart(root, {
+				Size = Vector3.new(0.1, 4.6, 3.4),
+				CFrame = wheelCF * CFrame.Angles((k - 1) / #Config.WHEEL * math.pi * 2, 0, 0) * CFrame.new(0.45, 2.7, 0),
+				Color = segment.color,
+				Material = Enum.Material.Neon,
+			})
+		end
+		ball(root, 1.6, wheelCF * CFrame.new(0.6, 0, 0), GOLD, Enum.Material.Neon)
+		for _, x in { -2.5, 2.5 } do
+			makePart(root, { Size = Vector3.new(0.8, 7, 0.8), CFrame = cf * CFrame.new(x, 3.5, 0.8), Color = DARK, Material = Enum.Material.Metal })
+		end
+		local pointer = makePart(root, { Size = Vector3.new(1, 1.4, 1), CFrame = cf * CFrame.new(0, 13, -0.5), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon })
+		local label = billboard(pointer, 10, 2.4, 3, 80)
+		label.Text = "🎡 Glücksrad"
+		prompt(pointer, "Drehen", "Glücksrad", "wheel").MaxActivationDistance = 16
+	end
+
+	-- Tägliche Belohnung (Geschenk)
+	do
+		local cf = stationCF(292.5, 30)
+		local box = makePart(root, { Size = Vector3.new(4.5, 4.5, 4.5), CFrame = cf * CFrame.new(0, 2.25, 0), Color = Color3.fromRGB(170, 90, 255) })
+		makePart(root, { Size = Vector3.new(4.7, 4.7, 1), CFrame = cf * CFrame.new(0, 2.25, 0), Color = GOLD, Material = Enum.Material.Neon })
+		makePart(root, { Size = Vector3.new(1, 4.7, 4.7), CFrame = cf * CFrame.new(0, 2.25, 0), Color = GOLD, Material = Enum.Material.Neon })
+		ball(root, 1.6, cf * CFrame.new(0, 5, 0), GOLD, Enum.Material.Neon)
+		local label = billboard(box, 10, 2.4, 5, 80)
+		label.Text = "🎁 Tägliche Belohnung"
+		prompt(box, "Abholen", "Tägliche Belohnung", "daily")
+	end
+
+	------------------------------------------------------------------
+	-- Teleport zwischen Hub und eigener Insel
+	------------------------------------------------------------------
+	local teleport = ctx.remote("RemoteEvent", "Teleport")
+	teleport.OnServerEvent:Connect(function(player, where)
+		local session = ctx.sessions[player]
+		local character = player.Character
+		if not (session and character) then
+			return
+		end
+		if where == "hub" then
+			character:PivotTo(HUB_SPAWN)
+		elseif where == "home" then
+			character:PivotTo(session.plot.spawnCF)
+		end
+	end)
+
+	------------------------------------------------------------------
+	-- Likes: Herz auf jeder Insel
+	------------------------------------------------------------------
+	local lastLike = {}
+	for _, plot in ctx.MapBuilder.plots do
+		local pos = plot.spawnCF * CFrame.new(7, -1.5, 0)
+		local heart = ball(plot.folder, 2.6, CFrame.new(pos.Position), Color3.fromRGB(255, 60, 100), Enum.Material.Neon)
+		heart.Name = "LikeHeart"
+		vCylinder(plot.folder, 1, 3, CFrame.new(pos.Position - Vector3.new(0, 1.8, 0)), DARK, Enum.Material.Slate)
+		local likePrompt = prompt(heart, "Insel liken ❤️", "Like", "none")
+		likePrompt.Triggered:Connect(function(player)
+			local owner = plot.owner
+			if not owner then
+				ctx.notify(player, "Diese Insel ist noch frei.", "info")
+				return
+			end
+			if owner == player then
+				ctx.notify(player, "Das ist deine eigene Insel! Lass sie von anderen liken ❤️", "info")
+				return
+			end
+			local key = player.UserId .. ":" .. owner.UserId
+			if lastLike[key] and os.clock() - lastLike[key] < Config.LIKE_COOLDOWN then
+				local wait = math.ceil((Config.LIKE_COOLDOWN - (os.clock() - lastLike[key])) / 60)
+				ctx.notify(player, "Du kannst diese Insel in " .. wait .. " Min wieder liken.", "error")
+				return
+			end
+			local ownerSession = ctx.sessions[owner]
+			local likerSession = ctx.sessions[player]
+			if not (ownerSession and likerSession) then
+				return
+			end
+			lastLike[key] = os.clock()
+
+			ownerSession.data.likes += 1
+			ownerSession.likeEnd = ctx.now() + Config.LIKE_BOOST_DURATION
+			ctx.PlayerData.updateLeaderstats(owner)
+			ctx.notify(owner, "❤️ " .. player.DisplayName .. " hat deine Insel geliked! +25 % Produktion für 5 Min", "build")
+
+			local thanks = math.max(100, Config.perSecond(likerSession.data) * 60)
+			ctx.earn(likerSession, thanks)
+			ctx.notify(player, "❤️ Danke fürs Liken! Du bekommst +" .. Config.format(thanks) .. " 💎", "gold")
+			ctx.sendState(owner)
+			ctx.sendState(player)
+		end)
+	end
+
+	------------------------------------------------------------------
+	-- Kristallgolem (Gemeinschafts-Boss)
+	------------------------------------------------------------------
+	local golem = nil
+
+	local function buildGolem()
+		local model = Instance.new("Model")
+		model.Name = "KristallGolem"
+		local rock = Color3.fromRGB(95, 90, 110)
+		local base = CFrame.new(0, 0.5, 0)
+		for _, x in { -2.5, 2.5 } do
+			makePart(model, { Size = Vector3.new(3, 6, 3), CFrame = base * CFrame.new(x, 3, 0), Color = rock, Material = Enum.Material.Slate })
+		end
+		makePart(model, { Size = Vector3.new(9, 8, 5), CFrame = base * CFrame.new(0, 10, 0), Color = rock, Material = Enum.Material.Slate })
+		ball(model, 2.6, base * CFrame.new(0, 10.5, 2.4), CYAN, Enum.Material.Neon)
+		local head = makePart(model, { Name = "Head", Size = Vector3.new(5, 4, 4.5), CFrame = base * CFrame.new(0, 16, 0), Color = rock, Material = Enum.Material.Slate })
+		for _, x in { -1.1, 1.1 } do
+			makePart(model, { Size = Vector3.new(0.9, 0.6, 0.2), CFrame = base * CFrame.new(x, 16.5, 2.3), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon })
+		end
+		for _, x in { -6, 6 } do
+			makePart(model, { Size = Vector3.new(2.6, 9, 2.6), CFrame = base * CFrame.new(x, 9.5, 0), Color = rock, Material = Enum.Material.Slate })
+			crystalShape(model, base * CFrame.new(x, 15.5, 0) * CFrame.Angles(0, 0, x > 0 and -0.4 or 0.4), 1.6, 3, CYAN, Enum.Material.Neon, 0)
+		end
+		model.WorldPivot = base
+		local click = Instance.new("ClickDetector")
+		click.MaxActivationDistance = 120
+		click.Parent = model
+
+		-- Lebensleiste
+		local gui = Instance.new("BillboardGui")
+		gui.Size = UDim2.new(16, 0, 2.4, 0)
+		gui.StudsOffset = Vector3.new(0, 5, 0)
+		gui.AlwaysOnTop = true
+		gui.MaxDistance = 250
+		local back = Instance.new("Frame")
+		back.Size = UDim2.fromScale(1, 1)
+		back.BackgroundColor3 = Color3.fromRGB(30, 10, 15)
+		back.Parent = gui
+		Instance.new("UICorner").Parent = back
+		local fill = Instance.new("Frame")
+		fill.Size = UDim2.fromScale(1, 1)
+		fill.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+		fill.BorderSizePixel = 0
+		fill.Parent = back
+		Instance.new("UICorner").Parent = fill
+		local text = Instance.new("TextLabel")
+		text.Size = UDim2.fromScale(1, 1)
+		text.BackgroundTransparency = 1
+		text.TextScaled = true
+		text.Font = Enum.Font.FredokaOne
+		text.TextColor3 = Color3.new(1, 1, 1)
+		text.TextStrokeTransparency = 0.3
+		text.ZIndex = 2
+		text.Parent = back
+		gui.Parent = head
+		return model, click, fill, text
+	end
+
+	local function endGolem(defeated)
+		local g = golem
+		if not g then
+			return
+		end
+		golem = nil
+		local pos = g.model:GetPivot().Position + Vector3.new(0, 8, 0)
+		g.model:Destroy()
+
+		if not defeated then
+			ctx.notifyAll("💨 Der Kristallgolem ist entkommen! Beim nächsten Mal schneller sein.", "info")
+			return
+		end
+
+		local boom = Instance.new("Explosion")
+		boom.Position = pos
+		boom.BlastPressure = 0
+		boom.DestroyJointRadiusPercent = 0
+		boom.BlastRadius = 12
+		boom.Parent = workspace
+
+		local total, participants, mvp, mvpDamage = 0, 0, nil, 0
+		for player, damage in g.damage do
+			total += damage
+			participants += 1
+			if damage > mvpDamage then
+				mvp, mvpDamage = player, damage
+			end
+		end
+		for player, damage in g.damage do
+			local session = ctx.sessions[player]
+			if session then
+				local data = session.data
+				local share = damage / math.max(total, 1)
+				local reward = math.max(Config.perSecond(data) * Config.GOLEM_REWARD_SECONDS, Config.clickValue(data) * 300, 200) * (0.5 + share)
+				ctx.earn(session, reward)
+				data.golemKills += 1
+				local message = "⚔️ Golem besiegt! Deine Beute: +" .. Config.format(reward) .. " 💎"
+				if player == mvp and participants >= 2 then
+					data.stardust += 1
+					message ..= " und +1 ✨ (MVP!)"
+				end
+				ctx.notify(player, message, "gold")
+				ctx.sendState(player)
+			end
+		end
+		if mvp then
+			ctx.notifyAll("🏆 Der Kristallgolem wurde besiegt! MVP: " .. mvp.DisplayName, "frenzy")
+		end
+	end
+
+	local function spawnGolem()
+		local totalClick = 0
+		for _, session in ctx.sessions do
+			totalClick += Config.clickValue(session.data)
+		end
+		local maxHp = math.max(100, totalClick * Config.GOLEM_HP_CLICKS * 0.6)
+		local model, click, fill, text = buildGolem()
+		golem = { model = model, hp = maxHp, maxHp = maxHp, damage = {} }
+		local g = golem
+
+		local function updateBar()
+			fill.Size = UDim2.fromScale(math.clamp(g.hp / g.maxHp, 0, 1), 1)
+			text.Text = "⚔️ " .. Config.format(math.max(g.hp, 0)) .. " / " .. Config.format(g.maxHp)
+			model:SetAttribute("HP", g.hp)
+		end
+		model:SetAttribute("MaxHP", maxHp)
+		model:SetAttribute("EndsAt", ctx.now() + Config.GOLEM_DURATION)
+		updateBar()
+		model.Parent = root
+		CollectionService:AddTag(model, "Golem")
+
+		click.MouseClick:Connect(function(player)
+			local session = ctx.sessions[player]
+			if golem ~= g or not session or session.tokens < 1 then
+				return
+			end
+			session.tokens -= 1
+			local damage = Config.clickValue(session.data) * ctx.boost(session)
+			g.hp -= damage
+			g.damage[player] = (g.damage[player] or 0) + damage
+			updateBar()
+			if g.hp <= 0 then
+				endGolem(true)
+			end
+		end)
+
+		ctx.notifyAll("⚠️ Ein KRISTALLGOLEM greift die Hub-Insel an! Besiegt ihn gemeinsam!", "frenzy")
+		task.delay(Config.GOLEM_DURATION, function()
+			if golem == g then
+				endGolem(false)
+			end
+		end)
+	end
+
+	task.spawn(function()
+		while true do
+			task.wait(Config.GOLEM_INTERVAL)
+			if not golem and next(ctx.sessions) then
+				spawnGolem()
+			end
+		end
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		if golem then
+			golem.damage[player] = nil
+		end
+	end)
+end
+
+return Hub
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000000000000000000000000000008"><Properties><string name="Name">Pets</string><ProtectedString name="Source"><![CDATA[-- Haustiere (Eier, Ausrüsten, Verschmelzen) und Robux-Shop (Developer Products, Gamepässe).
+
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+
+local Pets = {}
+local ctx = nil
+
+local function countPets(data)
+	local n = 0
+	for _ in data.pets do
+		n += 1
+	end
+	return n
+end
+
+-- Zeigt die ausgerüsteten Haustiere allen Spielern (die Clients bauen die 3D-Modelle)
+local function updateAttribute(player, data)
+	local list = {}
+	for _, uid in data.equipped do
+		if data.pets[uid] then
+			table.insert(list, data.pets[uid])
+		end
+	end
+	player:SetAttribute("Pets", table.concat(list, ","))
+end
+
+local function changed(player, session)
+	updateAttribute(player, session.data)
+	ctx.PlayerData.updateLeaderstats(player)
+	ctx.sendState(player)
+end
+
+local function addPet(data, entry)
+	local uid = "p" .. data.nextPet
+	data.nextPet += 1
+	data.pets[uid] = entry
+	return uid
+end
+
+local function unequip(data, uid)
+	for i, equippedUid in data.equipped do
+		if equippedUid == uid then
+			table.remove(data.equipped, i)
+			return true
+		end
+	end
+	return false
+end
+
+local function isEquipped(data, uid)
+	return table.find(data.equipped, uid) ~= nil
+end
+
+local function rollEgg(egg)
+	local total = 0
+	for _, option in egg.pets do
+		total += option.chance
+	end
+	local roll = math.random() * total
+	for _, option in egg.pets do
+		roll -= option.chance
+		if roll <= 0 then
+			return option.pet
+		end
+	end
+	return egg.pets[1].pet
+end
+
+-- Öffnet ein Ei. free = true für Belohnungen (Glücksrad).
+function Pets.hatch(player, session, eggId, free)
+	local egg = Config.EGGS_BY_ID[eggId]
+	local data = session.data
+	if not egg then
+		return false, "Unbekanntes Ei."
+	end
+	if countPets(data) >= Config.MAX_PETS then
+		return false, "Dein Inventar ist voll (" .. Config.MAX_PETS .. "). Lass ein paar Haustiere frei."
+	end
+	if not free then
+		if data.crystals < egg.cost then
+			return false, "Nicht genug Kristalle."
+		end
+		data.crystals -= egg.cost
+	end
+	local petId = rollEgg(egg)
+	local uid = addPet(data, petId)
+	-- Automatisch ausrüsten, wenn noch Platz ist
+	if #data.equipped < Config.maxEquipped(data) then
+		table.insert(data.equipped, uid)
+	end
+	local pet = Config.PETS_BY_ID[petId]
+	if pet.rarity == "Legendary" then
+		ctx.notifyAll("🌟 " .. player.DisplayName .. " hat " .. pet.icon .. " " .. pet.name .. " (Legendär) geschlüpft!", "frenzy")
+	end
+	changed(player, session)
+	return true, petId
+end
+
+function Pets.give(player, session, petId)
+	addPet(session.data, petId)
+	changed(player, session)
+end
+
+function Pets.onJoin(player, session)
+	local data = session.data
+	-- Kaputte Einträge aufräumen
+	for uid, entry in data.pets do
+		if not Config.parsePet(entry) then
+			data.pets[uid] = nil
+		end
+	end
+	for i = #data.equipped, 1, -1 do
+		if not data.pets[data.equipped[i]] then
+			table.remove(data.equipped, i)
+		end
+	end
+
+	-- Gamepässe neu prüfen
+	data.passes = {}
+	for _, pass in Config.GAMEPASSES do
+		if pass.passId and pass.passId > 0 then
+			local ok, owns = pcall(MarketplaceService.UserOwnsGamePassAsync, MarketplaceService, player.UserId, pass.passId)
+			if ok and owns then
+				data.passes[pass.key] = true
+			end
+		end
+	end
+	while #data.equipped > Config.maxEquipped(data) do
+		table.remove(data.equipped)
+	end
+	updateAttribute(player, data)
+end
+
+function Pets.init(context)
+	ctx = context
+
+	local petAction = ctx.remote("RemoteFunction", "PetAction")
+	petAction.OnServerInvoke = function(player, action, arg)
+		local session = ctx.sessions[player]
+		if not session then
+			return false, "Fehler."
+		end
+		local data = session.data
+
+		if action == "hatch" and type(arg) == "string" then
+			return Pets.hatch(player, session, arg, false)
+
+		elseif action == "equip" and type(arg) == "string" then
+			if not data.pets[arg] then
+				return false, "Unbekanntes Haustier."
+			end
+			if isEquipped(data, arg) then
+				unequip(data, arg)
+				changed(player, session)
+				return true, "Abgelegt."
+			end
+			if #data.equipped >= Config.maxEquipped(data) then
+				return false, "Alle Plätze belegt (" .. Config.maxEquipped(data) .. "). Leg erst ein Haustier ab."
+			end
+			table.insert(data.equipped, arg)
+			changed(player, session)
+			return true, "Ausgerüstet!"
+
+		elseif action == "best" then
+			local list = {}
+			for uid, entry in data.pets do
+				table.insert(list, { uid = uid, boost = Config.petBoost(entry) })
+			end
+			table.sort(list, function(a, b)
+				return a.boost > b.boost
+			end)
+			data.equipped = {}
+			for i = 1, math.min(#list, Config.maxEquipped(data)) do
+				table.insert(data.equipped, list[i].uid)
+			end
+			changed(player, session)
+			return true, "Die besten Haustiere sind ausgerüstet!"
+
+		elseif action == "release" and type(arg) == "string" then
+			if not data.pets[arg] then
+				return false, "Unbekanntes Haustier."
+			end
+			unequip(data, arg)
+			data.pets[arg] = nil
+			changed(player, session)
+			return true, "Freigelassen. Tschüss! 👋"
+
+		elseif action == "merge" then
+			-- 3 gleiche normale Haustiere -> 1 goldenes
+			local groups = {}
+			for uid, entry in data.pets do
+				local _, golden = Config.parsePet(entry)
+				if not golden then
+					groups[entry] = groups[entry] or {}
+					table.insert(groups[entry], uid)
+				end
+			end
+			local bestId, bestBoost = nil, -1
+			for entry, uids in groups do
+				if #uids >= 3 and Config.petBoost(entry) > bestBoost then
+					bestId, bestBoost = entry, Config.petBoost(entry)
+				end
+			end
+			if not bestId then
+				return false, "Du brauchst 3 gleiche Haustiere zum Verschmelzen."
+			end
+			for i = 1, 3 do
+				local uid = groups[bestId][i]
+				unequip(data, uid)
+				data.pets[uid] = nil
+			end
+			local newUid = addPet(data, bestId .. "*")
+			if #data.equipped < Config.maxEquipped(data) then
+				table.insert(data.equipped, newUid)
+			end
+			changed(player, session)
+			local pet = Config.PETS_BY_ID[bestId]
+			return true, "✨ Goldener " .. pet.name .. " erschaffen! (Bonus x" .. Config.GOLDEN_PET_FACTOR .. ")"
+		end
+		return false, "Fehler."
+	end
+
+	------------------------------------------------------------------
+	-- Robux: Developer Products
+	------------------------------------------------------------------
+	local productsById = {}
+	for _, product in Config.PRODUCTS do
+		if product.productId and product.productId > 0 then
+			productsById[product.productId] = product
+		end
+	end
+
+	MarketplaceService.ProcessReceipt = function(receipt)
+		local player = Players:GetPlayerByUserId(receipt.PlayerId)
+		local session = player and ctx.sessions[player]
+		local product = productsById[receipt.ProductId]
+		if not (session and product) then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+		local data = session.data
+		if data.receipts[receipt.PurchaseId] then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+
+		local reward = product.reward
+		if reward.kind == "pet" then
+			addPet(data, reward.pet)
+			if #data.equipped < Config.maxEquipped(data) then
+				local newest = "p" .. (data.nextPet - 1)
+				table.insert(data.equipped, newest)
+			end
+		elseif reward.kind == "skin" then
+			data.skins[reward.skin] = true
+			data.skin = reward.skin
+			ctx.MapBuilder.updatePlot(session.plot, data)
+		elseif reward.kind == "frenzy" then
+			session.frenzyEnd = math.max(session.frenzyEnd, ctx.now()) + reward.seconds
+		end
+
+		-- Kauf merken, damit er nie doppelt gutgeschrieben wird (max. 100 Einträge)
+		data.receipts[receipt.PurchaseId] = os.time()
+		local count, oldestId, oldestTime = 0, nil, math.huge
+		for id, time in data.receipts do
+			count += 1
+			if time < oldestTime then
+				oldestId, oldestTime = id, time
+			end
+		end
+		if count > 100 and oldestId then
+			data.receipts[oldestId] = nil
+		end
+
+		changed(player, session)
+		ctx.notify(player, "🛍️ Danke für deinen Kauf: " .. product.icon .. " " .. product.name .. "!", "gold")
+		if not ctx.PlayerData.save(player) then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	end
+
+	------------------------------------------------------------------
+	-- Robux: Gamepässe
+	------------------------------------------------------------------
+	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
+		local session = ctx.sessions[player]
+		if not (purchased and session) then
+			return
+		end
+		for _, pass in Config.GAMEPASSES do
+			if pass.passId == passId then
+				session.data.passes[pass.key] = true
+				ctx.notify(player, "🎉 " .. pass.icon .. " " .. pass.name .. " ist jetzt aktiv!", "gold")
+				changed(player, session)
+			end
+		end
+	end)
+end
+
+return Pets
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000000000000000000000000000009"><Properties><string name="Name">Fun</string><ProtectedString name="Source"><![CDATA[-- Tägliche Belohnung, Glücksrad, Glücksautomat (nur Kristalle) und Kristall-Skins.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Pets = require(script.Parent.Pets)
+
+local Fun = {}
+
+local function minutesOfProduction(data, minutes)
+	return math.max(Config.DAILY_MIN, Config.perSecond(data) * 60 * minutes)
+end
+
+local function today()
+	return math.floor(os.time() / 86400)
+end
+
+function Fun.init(ctx)
+	------------------------------------------------------------------
+	-- Tägliche Belohnung
+	------------------------------------------------------------------
+	local daily = ctx.remote("RemoteFunction", "ClaimDaily")
+	daily.OnServerInvoke = function(player)
+		local session = ctx.sessions[player]
+		if not session then
+			return false, "Fehler."
+		end
+		local data = session.data
+		local day = today()
+		if data.dailyDay == day then
+			return false, "Heute schon abgeholt. Komm morgen wieder! 🌙"
+		end
+		local streak = (data.dailyDay == day - 1) and (data.dailyStreak % #Config.DAILY_REWARDS) + 1 or 1
+		local amount = minutesOfProduction(data, Config.DAILY_REWARDS[streak])
+		ctx.earn(session, amount)
+		local message = "🎁 Tag " .. streak .. ": +" .. Config.format(amount) .. " 💎"
+		if streak == #Config.DAILY_REWARDS then
+			data.stardust += 1
+			message ..= " und +1 ✨ Sternenstaub!"
+		end
+		data.dailyDay = day
+		data.dailyStreak = streak
+		ctx.sendState(player)
+		return true, message
+	end
+
+	------------------------------------------------------------------
+	-- Glücksrad (kostenlos alle paar Stunden)
+	------------------------------------------------------------------
+	local wheel = ctx.remote("RemoteFunction", "SpinWheel")
+	wheel.OnServerInvoke = function(player)
+		local session = ctx.sessions[player]
+		if not session then
+			return false, "Fehler."
+		end
+		local data = session.data
+		local left = Config.WHEEL_COOLDOWN - (os.time() - data.lastSpin)
+		if left > 0 then
+			return false, "Nächster Dreh in " .. math.ceil(left / 60) .. " Min."
+		end
+		data.lastSpin = os.time()
+
+		local total = 0
+		for _, segment in Config.WHEEL do
+			total += segment.weight
+		end
+		local roll = math.random() * total
+		local index = #Config.WHEEL
+		for i, segment in Config.WHEEL do
+			roll -= segment.weight
+			if roll <= 0 then
+				index = i
+				break
+			end
+		end
+
+		local segment = Config.WHEEL[index]
+		local message
+		if segment.kind == "minutes" then
+			local amount = minutesOfProduction(data, segment.value)
+			ctx.earn(session, amount)
+			message = "🎡 Gewonnen: +" .. Config.format(amount) .. " 💎"
+		elseif segment.kind == "frenzy" then
+			session.frenzyEnd = math.max(session.frenzyEnd, ctx.now()) + segment.value
+			message = "🎡 Gewonnen: Kristallrausch für " .. segment.value .. " Sekunden! 🔥"
+		elseif segment.kind == "egg" then
+			local ok, petId = Pets.hatch(player, session, segment.value, true)
+			if ok then
+				local pet = Config.PETS_BY_ID[petId]
+				message = "🎡 Gewonnen: " .. pet.icon .. " " .. pet.name .. "!"
+			else
+				local amount = minutesOfProduction(data, 15)
+				ctx.earn(session, amount)
+				message = "🎡 Inventar voll – stattdessen +" .. Config.format(amount) .. " 💎"
+			end
+		elseif segment.kind == "stardust" then
+			data.stardust += segment.value
+			message = "🎡 Gewonnen: +" .. segment.value .. " ✨ Sternenstaub!"
+		end
+		if segment.kind == "minutes" and segment.value >= 180 then
+			ctx.notifyAll("🎰 " .. player.DisplayName .. " hat den JACKPOT am Glücksrad geknackt!", "frenzy")
+		end
+		ctx.sendState(player)
+		return true, message, index
+	end
+
+	------------------------------------------------------------------
+	-- Glücksautomat: Einsatz in Kristallen, ca. 95 % Auszahlung
+	------------------------------------------------------------------
+	local lastSlot = {}
+	local slots = ctx.remote("RemoteFunction", "PlaySlots")
+	slots.OnServerInvoke = function(player, fraction)
+		local session = ctx.sessions[player]
+		if not session or not table.find(Config.SLOT_BETS, fraction) then
+			return false, "Fehler."
+		end
+		if lastSlot[player] and os.clock() - lastSlot[player] < 1.5 then
+			return false, "Nicht so schnell! 🎰"
+		end
+		local data = session.data
+		local bet = math.floor(data.crystals * fraction)
+		if bet < Config.SLOT_MIN_BET then
+			return false, "Du brauchst mindestens " .. Config.SLOT_MIN_BET .. " 💎 Einsatz."
+		end
+		lastSlot[player] = os.clock()
+
+		local symbols = {}
+		for i = 1, 3 do
+			symbols[i] = Config.SLOT_SYMBOLS[math.random(1, #Config.SLOT_SYMBOLS)]
+		end
+		local multiplier = 0
+		if symbols[1] == symbols[2] and symbols[2] == symbols[3] then
+			multiplier = Config.SLOT_TRIPLE[symbols[1]]
+		elseif symbols[1] == symbols[2] or symbols[2] == symbols[3] or symbols[1] == symbols[3] then
+			multiplier = Config.SLOT_PAIR
+		end
+		local payout = math.floor(bet * multiplier)
+		-- Gewinne zählen nicht für Wiedergeburt oder Insel-Ausbau
+		data.crystals += payout - bet
+
+		local message
+		if multiplier >= 8 then
+			message = "🎉 MEGA-GEWINN! +" .. Config.format(payout) .. " 💎"
+			ctx.notifyAll("🎰 " .. player.DisplayName .. " hat am Glücksautomaten " .. Config.format(payout) .. " 💎 gewonnen!", "frenzy")
+		elseif multiplier > 0 then
+			message = "Gewonnen: " .. Config.format(payout) .. " 💎 (x" .. multiplier .. ")"
+		else
+			message = "Leider nichts. -" .. Config.format(bet) .. " 💎"
+		end
+		ctx.sendState(player)
+		return true, message, symbols, payout - bet
+	end
+
+	------------------------------------------------------------------
+	-- Skins: freischalten und ausrüsten
+	------------------------------------------------------------------
+	local skinRemote = ctx.remote("RemoteFunction", "Skin")
+	skinRemote.OnServerInvoke = function(player, skinId)
+		local session = ctx.sessions[player]
+		local skin = type(skinId) == "string" and Config.SKINS_BY_ID[skinId]
+		if not (session and skin) then
+			return false, "Fehler."
+		end
+		local data = session.data
+		if not Config.skinUnlocked(data, skin) then
+			local unlock = skin.unlock
+			if unlock.kind == "crystals" then
+				if data.crystals < unlock.cost then
+					return false, "Nicht genug Kristalle."
+				end
+				data.crystals -= unlock.cost
+			elseif unlock.kind == "robux" then
+				return false, "Diesen Skin gibt es im 🛍️ Robux-Shop."
+			else
+				return false, "Noch gesperrt: " .. Config.skinRequirement(skin)
+			end
+		end
+		data.skins[skin.id] = true
+		data.skin = skin.id
+		ctx.MapBuilder.updatePlot(session.plot, data)
+		ctx.sendState(player)
+		return true, skin.icon .. " " .. skin.name .. " ist jetzt aktiv!"
+	end
+end
+
+return Fun
+]]></ProtectedString></Properties></Item></Item></Item><Item class="StarterPlayer" referent="RBX0000000000000000000000000000000F"><Properties><string name="Name">StarterPlayer</string></Properties><Item class="StarterPlayerScripts" referent="RBX0000000000000000000000000000000E"><Properties><string name="Name">StarterPlayerScripts</string></Properties><Item class="LocalScript" referent="RBX0000000000000000000000000000000C"><Properties><string name="Name">HUD</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Oberfläche, Shop, Effekte (Client).
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -1654,8 +2900,19 @@ local function frenzyLeft()
 	return math.max(0, (state.frenzyEnd or 0) - workspace:GetServerTimeNow())
 end
 
+local function likeLeft()
+	if not state then
+		return 0
+	end
+	return math.max(0, (state.likeEnd or 0) - workspace:GetServerTimeNow())
+end
+
+-- Kristallrausch und Like-Boost
 local function frenzyMult()
-	return frenzyLeft() > 0 and Config.FRENZY_MULTIPLIER or 1
+	if not state then
+		return 1
+	end
+	return Config.tempMultiplier(state, workspace:GetServerTimeNow())
 end
 
 local function perSecond()
@@ -1952,12 +3209,19 @@ local function toast(message, kind)
 	end)
 end
 
-notifyEvent.OnClientEvent:Connect(function(message, kind)
+local function onMessage(message, kind)
 	toast(message, kind)
 	if kind == "gold" or kind == "frenzy" or kind == "build" then
 		play("big")
 	end
-end)
+end
+notifyEvent.OnClientEvent:Connect(onMessage)
+
+-- Damit auch das Extras-Skript Meldungen anzeigen kann
+local toastBindable = Instance.new("BindableEvent")
+toastBindable.Name = "KristallToast"
+toastBindable.Event:Connect(onMessage)
+toastBindable.Parent = player:WaitForChild("PlayerGui")
 
 ---------------------------------------------------------------------------
 -- Schwebende Zahlen beim Klicken
@@ -2446,6 +3710,15 @@ RunService.RenderStepped:Connect(function(dt)
 				crystal:ScaleTo(target)
 			end
 			crystal:PivotTo(CFrame.new(0, math.sin(t * 1.5) * 0.6, 0) * base * CFrame.Angles(0, t * 0.5, 0))
+			-- Regenbogen-Skin: Farbe wandert durch alle Farben
+			if crystal:GetAttribute("Rainbow") then
+				local color = Color3.fromHSV((t * 0.15) % 1, 0.75, 1)
+				for _, part in crystal:GetChildren() do
+					if part:IsA("BasePart") then
+						part.Color = color
+					end
+				end
+			end
 		end
 	end
 	for model, info in spinning do
@@ -2464,9 +3737,14 @@ RunService.RenderStepped:Connect(function(dt)
 		perSecondLabel.Text = "+" .. format(perSecond()) .. " pro Sekunde"
 		mineValue.Text = "+" .. format(Config.clickValue(state) * frenzyMult()) .. " pro Klick"
 		local left = frenzyLeft()
-		frenzyBanner.Visible = left > 0
+		local like = likeLeft()
+		frenzyBanner.Visible = left > 0 or like > 0
 		if left > 0 then
+			frenzyBanner.BackgroundColor3 = C.orange
 			frenzyBanner.Text = "🔥 KRISTALLRAUSCH x" .. Config.FRENZY_MULTIPLIER .. "  –  " .. math.ceil(left) .. "s"
+		elseif like > 0 then
+			frenzyBanner.BackgroundColor3 = Color3.fromRGB(230, 60, 110)
+			frenzyBanner.Text = string.format("❤️ Like-Boost +25 %%  –  %d:%02d", math.floor(like / 60), math.floor(like % 60))
 		end
 	end
 end)
@@ -2491,6 +3769,1157 @@ local function updateScale()
 	shop.Size = UDim2.fromOffset(400, (height - 76) / scale)
 end
 
+if workspace.CurrentCamera then
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+end
+updateScale()
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX0000000000000000000000000000000D"><Properties><string name="Name">Extras</string><ProtectedString name="Source"><![CDATA[-- Kristall-Imperium: Menü, Haustiere, Glücksrad, Tägliche Belohnung, Casino, Skins,
+-- Robux-Shop, Golem-Anzeige und Haustiere, die den Spielern folgen.
+
+local CollectionService = game:GetService("CollectionService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local remotes = ReplicatedStorage:WaitForChild("Remotes")
+local stateEvent = remotes:WaitForChild("State")
+local petAction = remotes:WaitForChild("PetAction")
+local claimDaily = remotes:WaitForChild("ClaimDaily")
+local spinWheel = remotes:WaitForChild("SpinWheel")
+local playSlots = remotes:WaitForChild("PlaySlots")
+local skinRemote = remotes:WaitForChild("Skin")
+local teleport = remotes:WaitForChild("Teleport")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local toastBindable = playerGui:WaitForChild("KristallToast")
+local format = Config.format
+
+local function toast(message, kind)
+	toastBindable:Fire(message, kind)
+end
+
+local state = nil
+stateEvent.OnClientEvent:Connect(function(newState)
+	state = newState
+end)
+
+-- Farben und UI-Helfer ----------------------------------------------------
+
+local C = {
+	panel = Color3.fromRGB(18, 20, 38),
+	card = Color3.fromRGB(34, 38, 66),
+	text = Color3.fromRGB(240, 244, 255),
+	muted = Color3.fromRGB(160, 168, 200),
+	cyan = Color3.fromRGB(90, 200, 255),
+	gold = Color3.fromRGB(255, 205, 60),
+	green = Color3.fromRGB(60, 200, 110),
+	grey = Color3.fromRGB(80, 84, 110),
+	purple = Color3.fromRGB(170, 110, 255),
+	red = Color3.fromRGB(230, 70, 80),
+	pink = Color3.fromRGB(255, 80, 140),
+}
+
+local function create(className, props, parent)
+	local inst = Instance.new(className)
+	for key, value in props do
+		inst[key] = value
+	end
+	inst.Parent = parent
+	return inst
+end
+
+local function corner(parent, radius)
+	create("UICorner", { CornerRadius = UDim.new(0, radius or 12) }, parent)
+end
+
+local function stroke(parent, color, thickness, transparency)
+	return create("UIStroke", {
+		Color = color,
+		Thickness = thickness or 2,
+		Transparency = transparency or 0,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+	}, parent)
+end
+
+local function text(props, parent)
+	local base = {
+		BackgroundTransparency = 1,
+		Font = Enum.Font.GothamBold,
+		TextColor3 = C.text,
+		TextScaled = true,
+		RichText = true,
+	}
+	for key, value in props do
+		base[key] = value
+	end
+	return create("TextLabel", base, parent)
+end
+
+local function button(props, parent)
+	local base = {
+		Font = Enum.Font.FredokaOne,
+		TextColor3 = Color3.new(1, 1, 1),
+		TextScaled = true,
+		AutoButtonColor = true,
+		BackgroundColor3 = C.green,
+	}
+	for key, value in props do
+		base[key] = value
+	end
+	local b = create("TextButton", base, parent)
+	corner(b, 10)
+	return b
+end
+
+local function pad(parent, px)
+	create("UIPadding", {
+		PaddingLeft = UDim.new(0, px),
+		PaddingRight = UDim.new(0, px),
+		PaddingTop = UDim.new(0, px),
+		PaddingBottom = UDim.new(0, px),
+	}, parent)
+end
+
+local function hex(color)
+	local function byte(x)
+		return math.clamp(math.floor(x * 255 + 0.5), 0, 255)
+	end
+	return string.format("#%02X%02X%02X", byte(color.R), byte(color.G), byte(color.B))
+end
+
+local function clock(seconds)
+	seconds = math.max(0, math.floor(seconds))
+	return string.format("%d:%02d:%02d", seconds // 3600, (seconds % 3600) // 60, seconds % 60)
+end
+
+local function serverNow()
+	return workspace:GetServerTimeNow()
+end
+
+local gui = create("ScreenGui", {
+	Name = "KristallExtras",
+	ResetOnSpawn = false,
+	IgnoreGuiInset = true,
+	DisplayOrder = 5,
+	ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+}, playerGui)
+
+local scaled = {}
+local function autoScale(guiObject)
+	table.insert(scaled, create("UIScale", {}, guiObject))
+end
+
+---------------------------------------------------------------------------
+-- Fenster-System
+---------------------------------------------------------------------------
+
+local window = create("Frame", {
+	AnchorPoint = Vector2.new(0.5, 0.5),
+	Position = UDim2.fromScale(0.5, 0.5),
+	Size = UDim2.fromOffset(620, 470),
+	BackgroundColor3 = C.panel,
+	Visible = false,
+	ZIndex = 10,
+}, gui)
+corner(window, 18)
+stroke(window, C.purple, 3, 0.2)
+autoScale(window)
+local windowTitle = text({
+	Position = UDim2.fromOffset(16, 10),
+	Size = UDim2.new(1, -80, 0, 36),
+	Font = Enum.Font.FredokaOne,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	ZIndex = 11,
+}, window)
+local closeButton = button({
+	AnchorPoint = Vector2.new(1, 0),
+	Position = UDim2.new(1, -10, 0, 10),
+	Size = UDim2.fromOffset(38, 38),
+	BackgroundColor3 = C.red,
+	Text = "X",
+	ZIndex = 11,
+}, window)
+local content = create("Frame", {
+	Position = UDim2.fromOffset(14, 56),
+	Size = UDim2.new(1, -28, 1, -70),
+	BackgroundTransparency = 1,
+	ZIndex = 11,
+}, window)
+
+local currentWindow = nil
+local windowRefresh = nil
+local WINDOWS = {}
+
+local function closeWindow()
+	window.Visible = false
+	currentWindow = nil
+	windowRefresh = nil
+	content:ClearAllChildren()
+end
+closeButton.Activated:Connect(closeWindow)
+
+local function openWindow(id, extra)
+	local def = WINDOWS[id]
+	if not def then
+		return
+	end
+	content:ClearAllChildren()
+	windowTitle.Text = def.title
+	currentWindow = id
+	windowRefresh = def.build(content, extra)
+	window.Visible = true
+	if windowRefresh and state then
+		windowRefresh()
+	end
+end
+
+-- Alle Elemente im Fenster liegen über dem restlichen HUD
+local function z(inst)
+	if inst:IsA("GuiObject") then
+		inst.ZIndex = 12
+	end
+	for _, child in inst:GetDescendants() do
+		if child:IsA("GuiObject") then
+			child.ZIndex = 12
+		end
+	end
+	return inst
+end
+
+local function scroller(parent, props)
+	local base = {
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 6,
+		ScrollBarImageColor3 = C.purple,
+		CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+		ScrollingDirection = Enum.ScrollingDirection.Y,
+	}
+	for key, value in props do
+		base[key] = value
+	end
+	return create("ScrollingFrame", base, parent)
+end
+
+local busy = false
+local function invoke(remote, ...)
+	if busy then
+		return false, "Moment..."
+	end
+	busy = true
+	local results = table.pack(pcall(remote.InvokeServer, remote, ...))
+	busy = false
+	if not results[1] then
+		return false, "Verbindungsfehler, versuch es nochmal."
+	end
+	return table.unpack(results, 2, results.n)
+end
+
+---------------------------------------------------------------------------
+-- Haustiere
+---------------------------------------------------------------------------
+
+local function rarityColor(pet)
+	return Config.RARITIES[pet.rarity].color
+end
+
+local function petLabel(entry)
+	local pet, golden = Config.parsePet(entry)
+	if not pet then
+		return "?", "?"
+	end
+	return pet.icon, (golden and "⭐ " or "") .. pet.name
+end
+
+WINDOWS.pets = {
+	title = "🐾 Haustiere",
+	build = function(root, eggId)
+		local tab = eggId and "eggs" or "inventory"
+		local releaseMode = false
+		local lastSignature = ""
+
+		local tabRow = create("Frame", { Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1 }, root)
+		create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8) }, tabRow)
+		local eggTab = button({ Size = UDim2.fromOffset(150, 36), Text = "🥚 Eier", BackgroundColor3 = C.card }, tabRow)
+		local invTab = button({ Size = UDim2.fromOffset(220, 36), Text = "🎒 Inventar", BackgroundColor3 = C.card }, tabRow)
+		pad(eggTab, 6)
+		pad(invTab, 6)
+
+		local eggPage = create("Frame", { Position = UDim2.fromOffset(0, 46), Size = UDim2.new(1, 0, 1, -46), BackgroundTransparency = 1 }, root)
+		local invPage = create("Frame", { Position = UDim2.fromOffset(0, 46), Size = UDim2.new(1, 0, 1, -46), BackgroundTransparency = 1 }, root)
+
+		-- Schlüpf-Animation
+		local hatchOverlay = create("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = C.panel, Visible = false }, root)
+		corner(hatchOverlay, 14)
+		local hatchIcon = text({ AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.4), Size = UDim2.fromOffset(160, 160), Font = Enum.Font.GothamBold }, hatchOverlay)
+		local hatchName = text({ AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0.68), Size = UDim2.fromOffset(460, 40), Font = Enum.Font.FredokaOne }, hatchOverlay)
+		local hatchInfo = text({ AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0.8), Size = UDim2.fromOffset(460, 28), Font = Enum.Font.GothamBold, TextColor3 = C.muted }, hatchOverlay)
+
+		local function playHatch(egg, petId)
+			hatchOverlay.Visible = true
+			hatchName.Text = "..."
+			hatchInfo.Text = ""
+			hatchIcon.Text = egg.icon
+			hatchIcon.Rotation = 0
+			for i = 1, 8 do
+				hatchIcon.Rotation = (i % 2 == 0) and 15 or -15
+				task.wait(0.09 + i * 0.015)
+			end
+			hatchIcon.Rotation = 0
+			local pet = Config.PETS_BY_ID[petId]
+			hatchIcon.Text = pet.icon
+			hatchIcon.Size = UDim2.fromOffset(60, 60)
+			TweenService:Create(hatchIcon, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Size = UDim2.fromOffset(160, 160) }):Play()
+			local rarity = Config.RARITIES[pet.rarity]
+			hatchName.Text = pet.name .. '  <font color="' .. hex(rarity.color) .. '">(' .. rarity.name .. ")</font>"
+			hatchInfo.Text = "+" .. math.floor(pet.boost * 100) .. " % Produktion & Klicks"
+			task.wait(2.2)
+			hatchOverlay.Visible = false
+		end
+
+		-- Eier-Seite
+		local eggList = create("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 }, eggPage)
+		create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 10) }, eggList)
+		local eggButtons = {}
+		for _, egg in Config.EGGS do
+			local card = create("Frame", { Size = UDim2.new(1 / 3, -7, 1, 0), BackgroundColor3 = C.card }, eggList)
+			corner(card, 14)
+			stroke(card, egg.color, 2, 0.3)
+			text({ Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, 0, 0, 50), Text = egg.icon }, card)
+			text({ Position = UDim2.fromOffset(6, 60), Size = UDim2.new(1, -12, 0, 24), Text = egg.name, Font = Enum.Font.FredokaOne }, card)
+			local lines = {}
+			for _, option in egg.pets do
+				local pet = Config.PETS_BY_ID[option.pet]
+				table.insert(lines, pet.icon .. ' <font color="' .. hex(rarityColor(pet)) .. '">' .. pet.name .. "</font>  " .. option.chance .. " %")
+			end
+			text({
+				Position = UDim2.fromOffset(8, 90),
+				Size = UDim2.new(1, -16, 1, -150),
+				Text = table.concat(lines, "\n"),
+				Font = Enum.Font.GothamMedium,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextYAlignment = Enum.TextYAlignment.Top,
+			}, card)
+			local buy = button({ AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -8), Size = UDim2.new(1, -16, 0, 44), Text = "💎 " .. format(egg.cost) }, card)
+			pad(buy, 8)
+			eggButtons[egg.id] = buy
+			buy.Activated:Connect(function()
+				local ok, result = invoke(petAction, "hatch", egg.id)
+				if ok then
+					task.spawn(playHatch, egg, result)
+				else
+					toast(result, "error")
+				end
+			end)
+		end
+
+		-- Inventar-Seite
+		local info = text({ Size = UDim2.new(1, 0, 0, 24), Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left }, invPage)
+		local actionRow = create("Frame", { Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1 }, invPage)
+		create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8) }, actionRow)
+		local bestButton = button({ Size = UDim2.fromOffset(180, 36), Text = "⭐ Beste ausrüsten", BackgroundColor3 = C.cyan }, actionRow)
+		local mergeButton = button({ Size = UDim2.fromOffset(170, 36), Text = "✨ Verschmelzen", BackgroundColor3 = C.gold }, actionRow)
+		local releaseButton = button({ Size = UDim2.fromOffset(200, 36), Text = "🗑️ Freilassen: AUS", BackgroundColor3 = C.grey }, actionRow)
+		for _, b in { bestButton, mergeButton, releaseButton } do
+			pad(b, 7)
+		end
+		local grid = scroller(invPage, { Position = UDim2.fromOffset(0, 74), Size = UDim2.new(1, 0, 1, -74) })
+		create("UIGridLayout", { CellSize = UDim2.fromOffset(104, 118), CellPadding = UDim2.fromOffset(8, 8), SortOrder = Enum.SortOrder.LayoutOrder }, grid)
+
+		bestButton.Activated:Connect(function()
+			local ok, message = invoke(petAction, "best")
+			toast(message, ok and "build" or "error")
+		end)
+		mergeButton.Activated:Connect(function()
+			local ok, message = invoke(petAction, "merge")
+			toast(message, ok and "gold" or "error")
+		end)
+		releaseButton.Activated:Connect(function()
+			releaseMode = not releaseMode
+			releaseButton.Text = releaseMode and "🗑️ Freilassen: AN" or "🗑️ Freilassen: AUS"
+			releaseButton.BackgroundColor3 = releaseMode and C.red or C.grey
+		end)
+
+		local function rebuildGrid()
+			for _, child in grid:GetChildren() do
+				if child:IsA("GuiButton") then
+					child:Destroy()
+				end
+			end
+			local list = {}
+			for uid, entry in state.pets do
+				table.insert(list, { uid = uid, entry = entry, boost = Config.petBoost(entry), equipped = table.find(state.equipped, uid) ~= nil })
+			end
+			table.sort(list, function(a, b)
+				if a.equipped ~= b.equipped then
+					return a.equipped
+				end
+				return a.boost > b.boost
+			end)
+			for order, item in list do
+				local pet, golden = Config.parsePet(item.entry)
+				if pet then
+					local tile = create("TextButton", {
+						LayoutOrder = order,
+						Text = "",
+						AutoButtonColor = true,
+						BackgroundColor3 = item.equipped and Color3.fromRGB(40, 110, 70) or C.card,
+					}, grid)
+					corner(tile, 12)
+					stroke(tile, golden and C.gold or rarityColor(pet), golden and 3 or 2, 0.1)
+					text({ Position = UDim2.fromOffset(0, 6), Size = UDim2.new(1, 0, 0, 46), Text = pet.icon }, tile)
+					local icon, name = petLabel(item.entry)
+					local _ = icon
+					text({ Position = UDim2.fromOffset(4, 56), Size = UDim2.new(1, -8, 0, 20), Text = name, Font = Enum.Font.GothamBold }, tile)
+					text({ Position = UDim2.fromOffset(4, 78), Size = UDim2.new(1, -8, 0, 18), Text = "+" .. format(item.boost * 100) .. " %", TextColor3 = C.gold, Font = Enum.Font.FredokaOne }, tile)
+					text({ Position = UDim2.fromOffset(4, 97), Size = UDim2.new(1, -8, 0, 15), Text = item.equipped and "✓ Ausgerüstet" or "", TextColor3 = C.green, Font = Enum.Font.GothamBold }, tile)
+					tile.Activated:Connect(function()
+						if releaseMode then
+							local ok, message = invoke(petAction, "release", item.uid)
+							toast(message, ok and "info" or "error")
+						else
+							local ok, message = invoke(petAction, "equip", item.uid)
+							if not ok then
+								toast(message, "error")
+							end
+						end
+					end)
+				end
+			end
+			z(grid)
+		end
+
+		local function setTab(id)
+			tab = id
+			eggPage.Visible = id == "eggs"
+			invPage.Visible = id == "inventory"
+			eggTab.BackgroundColor3 = id == "eggs" and C.purple or C.card
+			invTab.BackgroundColor3 = id == "inventory" and C.purple or C.card
+		end
+		eggTab.Activated:Connect(function()
+			setTab("eggs")
+		end)
+		invTab.Activated:Connect(function()
+			setTab("inventory")
+		end)
+		setTab(tab)
+		z(root)
+		-- Die Schlüpf-Animation liegt über allem anderen im Fenster
+		hatchOverlay.ZIndex = 20
+		for _, child in hatchOverlay:GetDescendants() do
+			if child:IsA("GuiObject") then
+				child.ZIndex = 21
+			end
+		end
+
+		return function()
+			local count = 0
+			for _ in state.pets do
+				count += 1
+			end
+			invTab.Text = "🎒 Inventar (" .. count .. "/" .. Config.MAX_PETS .. ")"
+			info.Text = "Ausgerüstet " .. #state.equipped .. "/" .. Config.maxEquipped(state) .. "  •  Haustier-Bonus: x" .. string.format("%.2f", Config.petMultiplier(state))
+			for _, egg in Config.EGGS do
+				eggButtons[egg.id].BackgroundColor3 = state.crystals >= egg.cost and C.green or C.grey
+			end
+			local parts = {}
+			for uid, entry in state.pets do
+				table.insert(parts, uid .. "=" .. entry)
+			end
+			table.sort(parts)
+			local signature = table.concat(parts, ",") .. "|" .. table.concat(state.equipped, ",")
+			if signature ~= lastSignature then
+				lastSignature = signature
+				rebuildGrid()
+			end
+		end
+	end,
+}
+
+---------------------------------------------------------------------------
+-- Glücksrad
+---------------------------------------------------------------------------
+
+WINDOWS.wheel = {
+	title = "🎡 Glücksrad",
+	build = function(root)
+		local tiles = {}
+		local count = #Config.WHEEL
+		local center = create("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(10, 10), BackgroundTransparency = 1 }, root)
+		for i, segment in Config.WHEEL do
+			local angle = (i - 1) / count * math.pi * 2 - math.pi / 2
+			local tile = text({
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromOffset(5 + math.cos(angle) * 230, 5 + math.sin(angle) * 150),
+				Size = UDim2.fromOffset(120, 54),
+				BackgroundTransparency = 0,
+				BackgroundColor3 = segment.color,
+				Text = segment.label,
+				Font = Enum.Font.FredokaOne,
+			}, center)
+			corner(tile, 12)
+			pad(tile, 8)
+			tiles[i] = { label = tile, stroke = stroke(tile, Color3.new(1, 1, 1), 0, 0) }
+		end
+		local spin = button({ AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(200, 70), BackgroundColor3 = C.gold, TextColor3 = Color3.fromRGB(60, 40, 0) }, root)
+		pad(spin, 12)
+		local spinning = false
+
+		local function highlight(index)
+			for i, tile in tiles do
+				tile.stroke.Thickness = (i == index) and 5 or 0
+				tile.label.BackgroundTransparency = (i == index) and 0 or 0.45
+			end
+		end
+		highlight(0)
+
+		spin.Activated:Connect(function()
+			if spinning or not state then
+				return
+			end
+			spinning = true
+			local ok, message, index = invoke(spinWheel)
+			if not ok then
+				toast(message, "error")
+				spinning = false
+				return
+			end
+			local steps = count * 3 + index
+			for step = 1, steps do
+				highlight((step - 1) % count + 1)
+				task.wait(0.04 + (step / steps) ^ 3 * 0.35)
+			end
+			toast(message, "gold")
+			task.wait(1)
+			spinning = false
+		end)
+		z(root)
+
+		return function()
+			local left = Config.WHEEL_COOLDOWN - (os.time() - state.lastSpin)
+			if spinning then
+				spin.Text = "🎡 ..."
+			elseif left > 0 then
+				spin.Text = "⏳ " .. clock(left)
+				spin.BackgroundColor3 = C.grey
+			else
+				spin.Text = "🎡 DREHEN!"
+				spin.BackgroundColor3 = C.gold
+			end
+		end
+	end,
+}
+
+---------------------------------------------------------------------------
+-- Tägliche Belohnung
+---------------------------------------------------------------------------
+
+local function dailyStatus()
+	local day = math.floor(os.time() / 86400)
+	local canClaim = state.dailyDay ~= day
+	local nextStreak = canClaim and ((state.dailyDay == day - 1) and (state.dailyStreak % #Config.DAILY_REWARDS) + 1 or 1) or state.dailyStreak
+	return canClaim, nextStreak, day
+end
+
+WINDOWS.daily = {
+	title = "🎁 Tägliche Belohnung",
+	build = function(root)
+		text({ Size = UDim2.new(1, 0, 0, 44), Font = Enum.Font.GothamMedium, TextColor3 = C.muted, TextWrapped = true, Text = "Komm jeden Tag wieder! Je länger deine Serie, desto größer die Belohnung. An Tag 7 gibt es zusätzlich Sternenstaub ✨" }, root)
+		local row = create("Frame", { Position = UDim2.fromOffset(0, 60), Size = UDim2.new(1, 0, 0, 150), BackgroundTransparency = 1 }, root)
+		create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), HorizontalAlignment = Enum.HorizontalAlignment.Center }, row)
+		local cards = {}
+		for day, minutes in Config.DAILY_REWARDS do
+			local card = create("Frame", { Size = UDim2.fromOffset(76, 150), BackgroundColor3 = C.card }, row)
+			corner(card, 12)
+			local s = stroke(card, C.gold, 0, 0)
+			text({ Position = UDim2.fromOffset(4, 8), Size = UDim2.new(1, -8, 0, 24), Text = "Tag " .. day, Font = Enum.Font.FredokaOne }, card)
+			text({ Position = UDim2.fromOffset(4, 40), Size = UDim2.new(1, -8, 0, 40), Text = day == #Config.DAILY_REWARDS and "🎁" or "💎" }, card)
+			text({ Position = UDim2.fromOffset(4, 86), Size = UDim2.new(1, -8, 0, 36), Text = minutes .. " Min" .. (day == #Config.DAILY_REWARDS and "\n+1 ✨" or ""), Font = Enum.Font.GothamBold, TextColor3 = C.muted }, card)
+			local check = text({ Position = UDim2.fromOffset(4, 124), Size = UDim2.new(1, -8, 0, 20), Text = "", TextColor3 = C.green }, card)
+			cards[day] = { card = card, stroke = s, check = check }
+		end
+		local claim = button({ AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 236), Size = UDim2.fromOffset(300, 66), BackgroundColor3 = C.gold, TextColor3 = Color3.fromRGB(60, 40, 0) }, root)
+		pad(claim, 12)
+		claim.Activated:Connect(function()
+			local ok, message = invoke(claimDaily)
+			toast(message, ok and "gold" or "error")
+		end)
+		z(root)
+
+		return function()
+			local canClaim, nextStreak, day = dailyStatus()
+			for i, c in cards do
+				local claimed = canClaim and i < nextStreak or (not canClaim and i <= nextStreak)
+				c.check.Text = claimed and "✓" or ""
+				c.stroke.Thickness = (canClaim and i == nextStreak) and 4 or 0
+				c.card.BackgroundColor3 = claimed and Color3.fromRGB(40, 90, 60) or C.card
+			end
+			if canClaim then
+				claim.Text = "🎁 Tag " .. nextStreak .. " abholen!"
+				claim.BackgroundColor3 = C.gold
+			else
+				claim.Text = "🌙 Morgen wieder (" .. clock((day + 1) * 86400 - os.time()) .. ")"
+				claim.BackgroundColor3 = C.grey
+			end
+		end
+	end,
+}
+
+---------------------------------------------------------------------------
+-- Casino: Glücksautomat
+---------------------------------------------------------------------------
+
+WINDOWS.casino = {
+	title = "🎰 Glücksautomat",
+	build = function(root)
+		local fraction = Config.SLOT_BETS[1]
+		local reels = {}
+		local reelRow = create("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 0), Size = UDim2.fromOffset(360, 120), BackgroundColor3 = Color3.fromRGB(10, 10, 20) }, root)
+		corner(reelRow, 16)
+		stroke(reelRow, C.gold, 3, 0)
+		create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 10), HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center }, reelRow)
+		for i = 1, 3 do
+			local reel = text({ Size = UDim2.fromOffset(100, 100), BackgroundTransparency = 0, BackgroundColor3 = Color3.fromRGB(240, 240, 250), Text = Config.SLOT_SYMBOLS[i] }, reelRow)
+			corner(reel, 12)
+			pad(reel, 10)
+			reels[i] = reel
+		end
+
+		local betLabel = text({ Position = UDim2.fromOffset(0, 130), Size = UDim2.new(1, 0, 0, 26), Font = Enum.Font.FredokaOne }, root)
+		local betRow = create("Frame", { Position = UDim2.fromOffset(0, 162), Size = UDim2.new(1, 0, 0, 40), BackgroundTransparency = 1 }, root)
+		create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), HorizontalAlignment = Enum.HorizontalAlignment.Center }, betRow)
+		local betButtons = {}
+		for _, f in Config.SLOT_BETS do
+			local b = button({ Size = UDim2.fromOffset(110, 40), BackgroundColor3 = C.card, Text = f >= 1 and "ALLES" or (math.floor(f * 100) .. " %") }, betRow)
+			pad(b, 8)
+			betButtons[f] = b
+			b.Activated:Connect(function()
+				fraction = f
+			end)
+		end
+
+		local spin = button({ AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 214), Size = UDim2.fromOffset(280, 64), BackgroundColor3 = C.pink, Text = "🎰 DREHEN" }, root)
+		pad(spin, 12)
+		text({
+			Position = UDim2.fromOffset(0, 290),
+			Size = UDim2.new(1, 0, 0, 60),
+			Font = Enum.Font.GothamMedium,
+			TextColor3 = C.muted,
+			TextWrapped = true,
+			Text = "💎💎💎 x" .. Config.SLOT_TRIPLE["💎"] .. "  •  ⭐⭐⭐ x" .. Config.SLOT_TRIPLE["⭐"] .. "  •  3 gleiche x4  •  2 gleiche x" .. Config.SLOT_PAIR
+				.. "\nNur mit Kristallen gespielt – kein echtes Geld. Gewinne zählen nicht für Wiedergeburt.",
+		}, root)
+
+		local spinning = false
+		spin.Activated:Connect(function()
+			if spinning then
+				return
+			end
+			spinning = true
+			local result = nil
+			task.spawn(function()
+				result = table.pack(invoke(playSlots, fraction))
+			end)
+			local started = os.clock()
+			while not result or os.clock() - started < 1 do
+				for _, reel in reels do
+					reel.Text = Config.SLOT_SYMBOLS[math.random(1, #Config.SLOT_SYMBOLS)]
+				end
+				task.wait(0.07)
+			end
+			local ok, message, symbols, net = result[1], result[2], result[3], result[4]
+			if ok then
+				for i = 1, 3 do
+					for _ = 1, 4 + i * 2 do
+						for j = i, 3 do
+							reels[j].Text = Config.SLOT_SYMBOLS[math.random(1, #Config.SLOT_SYMBOLS)]
+						end
+						task.wait(0.07)
+					end
+					reels[i].Text = symbols[i]
+				end
+				toast(message, net > 0 and "gold" or "error")
+			else
+				toast(message, "error")
+			end
+			spinning = false
+		end)
+		z(root)
+
+		return function()
+			for f, b in betButtons do
+				b.BackgroundColor3 = (f == fraction) and C.gold or C.card
+				b.TextColor3 = (f == fraction) and Color3.fromRGB(60, 40, 0) or Color3.new(1, 1, 1)
+			end
+			betLabel.Text = "Einsatz: 💎 " .. format(math.floor(state.crystals * fraction))
+		end
+	end,
+}
+
+---------------------------------------------------------------------------
+-- Skins
+---------------------------------------------------------------------------
+
+WINDOWS.skins = {
+	title = "💎 Kristall-Skins",
+	build = function(root)
+		local grid = scroller(root, { Size = UDim2.fromScale(1, 1) })
+		create("UIGridLayout", { CellSize = UDim2.fromOffset(180, 120), CellPadding = UDim2.fromOffset(10, 10) }, grid)
+		local cards = {}
+		for _, skin in Config.SKINS do
+			local card = create("TextButton", { Text = "", BackgroundColor3 = C.card, AutoButtonColor = true }, grid)
+			corner(card, 12)
+			local s = stroke(card, C.gold, 0, 0)
+			local swatch = create("Frame", { Position = UDim2.fromOffset(10, 10), Size = UDim2.fromOffset(44, 44), BackgroundColor3 = skin.color or C.cyan }, card)
+			corner(swatch, 22)
+			text({ Position = UDim2.fromOffset(10, 10), Size = UDim2.fromOffset(44, 44), Text = skin.icon }, card)
+			text({ Position = UDim2.fromOffset(62, 14), Size = UDim2.new(1, -70, 0, 26), Text = skin.name, Font = Enum.Font.FredokaOne, TextXAlignment = Enum.TextXAlignment.Left }, card)
+			local status = text({ Position = UDim2.fromOffset(10, 64), Size = UDim2.new(1, -20, 0, 44), Font = Enum.Font.GothamBold, TextWrapped = true }, card)
+			cards[skin.id] = { card = card, stroke = s, status = status }
+			card.Activated:Connect(function()
+				local ok, message = invoke(skinRemote, skin.id)
+				toast(message, ok and "build" or "error")
+			end)
+		end
+		z(root)
+
+		return function()
+			for _, skin in Config.SKINS do
+				local c = cards[skin.id]
+				local active = state.skin == skin.id
+				local unlocked = Config.skinUnlocked(state, skin)
+				c.stroke.Thickness = active and 4 or 0
+				if active then
+					c.status.Text = "✓ Aktiv"
+					c.status.TextColor3 = C.green
+				elseif unlocked then
+					c.status.Text = "Klicken zum Auswählen"
+					c.status.TextColor3 = C.text
+				else
+					c.status.Text = "🔒 " .. Config.skinRequirement(skin)
+					c.status.TextColor3 = C.muted
+				end
+			end
+		end
+	end,
+}
+
+---------------------------------------------------------------------------
+-- Robux-Shop
+---------------------------------------------------------------------------
+
+local priceCache = {}
+local function fetchPrice(id, infoType, label)
+	if id <= 0 then
+		label.Text = "Bald"
+		return
+	end
+	local key = tostring(infoType) .. id
+	if priceCache[key] then
+		label.Text = priceCache[key]
+		return
+	end
+	task.spawn(function()
+		local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, id, infoType)
+		if ok and info and info.PriceInRobux then
+			priceCache[key] = "R$ " .. info.PriceInRobux
+			if label.Parent then
+				label.Text = priceCache[key]
+			end
+		end
+	end)
+end
+
+WINDOWS.shop = {
+	title = "🛍️ Robux-Shop",
+	build = function(root)
+		local list = scroller(root, { Size = UDim2.fromScale(1, 1) })
+		create("UIListLayout", { Padding = UDim.new(0, 8) }, list)
+		local passButtons = {}
+
+		local function row(icon, name, desc, color)
+			local r = create("Frame", { Size = UDim2.new(1, -10, 0, 76), BackgroundColor3 = C.card }, list)
+			corner(r, 12)
+			stroke(r, color, 2, 0.3)
+			text({ Position = UDim2.fromOffset(8, 12), Size = UDim2.fromOffset(52, 52), Text = icon }, r)
+			text({ Position = UDim2.fromOffset(70, 10), Size = UDim2.new(1, -210, 0, 26), Text = name, Font = Enum.Font.FredokaOne, TextXAlignment = Enum.TextXAlignment.Left }, r)
+			text({ Position = UDim2.fromOffset(70, 40), Size = UDim2.new(1, -210, 0, 24), Text = desc, Font = Enum.Font.GothamMedium, TextColor3 = C.muted, TextXAlignment = Enum.TextXAlignment.Left }, r)
+			local b = button({ AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(120, 50), BackgroundColor3 = C.green, Text = "..." }, r)
+			pad(b, 10)
+			return b
+		end
+
+		text({ Size = UDim2.new(1, -10, 0, 26), Text = "👑 Gamepässe (für immer)", Font = Enum.Font.FredokaOne, TextColor3 = C.gold, TextXAlignment = Enum.TextXAlignment.Left }, list)
+		for _, pass in Config.GAMEPASSES do
+			local b = row(pass.icon, pass.name, pass.desc, C.gold)
+			passButtons[pass.key] = b
+			fetchPrice(pass.passId, Enum.InfoType.GamePass, b)
+			b.Activated:Connect(function()
+				if state and state.passes and state.passes[pass.key] then
+					toast("Du hast " .. pass.name .. " schon! 👑", "info")
+				elseif pass.passId <= 0 then
+					toast("Dieser Pass ist noch nicht eingerichtet (siehe README).", "error")
+				else
+					MarketplaceService:PromptGamePassPurchase(player, pass.passId)
+				end
+			end)
+		end
+
+		text({ Size = UDim2.new(1, -10, 0, 26), Text = "🐾 Exklusive Haustiere & Extras", Font = Enum.Font.FredokaOne, TextColor3 = C.pink, TextXAlignment = Enum.TextXAlignment.Left }, list)
+		for _, product in Config.PRODUCTS do
+			local b = row(product.icon, product.name, product.desc, C.pink)
+			fetchPrice(product.productId, Enum.InfoType.Product, b)
+			b.Activated:Connect(function()
+				if product.reward.kind == "skin" and state and state.skins[product.reward.skin] then
+					toast("Diesen Skin hast du schon! Wähle ihn unter 💎 Skins.", "info")
+				elseif product.productId <= 0 then
+					toast("Dieser Artikel ist noch nicht eingerichtet (siehe README).", "error")
+				else
+					MarketplaceService:PromptProductPurchase(player, product.productId)
+				end
+			end)
+		end
+		z(root)
+
+		return function()
+			for key, b in passButtons do
+				if state.passes and state.passes[key] then
+					b.Text = "✓ Aktiv"
+					b.BackgroundColor3 = C.grey
+				end
+			end
+		end
+	end,
+}
+
+---------------------------------------------------------------------------
+-- Menü links
+---------------------------------------------------------------------------
+
+local menu = create("Frame", {
+	AnchorPoint = Vector2.new(0, 0.5),
+	Position = UDim2.new(0, 12, 0.5, 0),
+	Size = UDim2.fromOffset(148, 296),
+	BackgroundTransparency = 1,
+}, gui)
+autoScale(menu)
+create("UIGridLayout", { CellSize = UDim2.fromOffset(70, 68), CellPadding = UDim2.fromOffset(8, 8), SortOrder = Enum.SortOrder.LayoutOrder }, menu)
+
+local dots = {}
+local MENU = {
+	{ id = "pets", icon = "🐾", label = "Pets", color = C.green },
+	{ id = "wheel", icon = "🎡", label = "Rad", color = C.gold },
+	{ id = "daily", icon = "🎁", label = "Täglich", color = C.purple },
+	{ id = "casino", icon = "🎰", label = "Casino", color = C.pink },
+	{ id = "skins", icon = "💎", label = "Skins", color = C.cyan },
+	{ id = "shop", icon = "🛍️", label = "Shop", color = Color3.fromRGB(255, 120, 60) },
+	{ id = "hub", icon = "🌐", label = "Hub", color = Color3.fromRGB(70, 140, 255) },
+	{ id = "home", icon = "🏝️", label = "Insel", color = Color3.fromRGB(80, 180, 90) },
+}
+for order, item in MENU do
+	local b = button({ LayoutOrder = order, BackgroundColor3 = item.color, Text = "" }, menu)
+	stroke(b, Color3.new(1, 1, 1), 2, 0.5)
+	text({ Position = UDim2.fromOffset(0, 4), Size = UDim2.new(1, 0, 0, 38), Text = item.icon }, b)
+	text({ Position = UDim2.fromOffset(2, 44), Size = UDim2.new(1, -4, 0, 18), Text = item.label, Font = Enum.Font.FredokaOne }, b)
+	local dot = create("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.92, 0.08), Size = UDim2.fromOffset(16, 16), BackgroundColor3 = Color3.fromRGB(255, 50, 50), Visible = false }, b)
+	corner(dot, 8)
+	dots[item.id] = dot
+	b.Activated:Connect(function()
+		if item.id == "hub" or item.id == "home" then
+			teleport:FireServer(item.id)
+			closeWindow()
+		elseif currentWindow == item.id then
+			closeWindow()
+		else
+			openWindow(item.id)
+		end
+	end)
+end
+
+-- Stationen auf der Hub-Insel öffnen die passenden Fenster
+ProximityPromptService.PromptTriggered:Connect(function(prompt)
+	local ui = prompt:GetAttribute("OpenUI")
+	if ui and WINDOWS[ui] then
+		openWindow(ui, prompt:GetAttribute("Extra"))
+	end
+end)
+
+---------------------------------------------------------------------------
+-- Kristallgolem: Anzeige und Treffer
+---------------------------------------------------------------------------
+
+local golemBanner = create("Frame", {
+	AnchorPoint = Vector2.new(0.5, 1),
+	Position = UDim2.new(0.5, 0, 1, -104),
+	Size = UDim2.fromOffset(460, 50),
+	BackgroundColor3 = Color3.fromRGB(150, 30, 40),
+	Visible = false,
+}, gui)
+corner(golemBanner, 14)
+stroke(golemBanner, Color3.fromRGB(255, 120, 120), 2, 0.2)
+autoScale(golemBanner)
+local golemText = text({ Position = UDim2.fromOffset(12, 8), Size = UDim2.new(1, -170, 1, -16), Font = Enum.Font.FredokaOne, TextXAlignment = Enum.TextXAlignment.Left }, golemBanner)
+local golemGo = button({ AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(150, 38), BackgroundColor3 = C.gold, TextColor3 = Color3.fromRGB(60, 40, 0), Text = "⚔️ Zum Kampf!" }, golemBanner)
+pad(golemGo, 6)
+golemGo.Activated:Connect(function()
+	teleport:FireServer("hub")
+end)
+
+local function popup(message, screenPos, color)
+	local label = text({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromOffset(screenPos.X + math.random(-30, 30), screenPos.Y),
+		Size = UDim2.fromOffset(160, 40),
+		Font = Enum.Font.FredokaOne,
+		Text = message,
+		TextColor3 = color,
+		TextStrokeTransparency = 0.3,
+		ZIndex = 20,
+	}, gui)
+	local tween = TweenService:Create(label, TweenInfo.new(0.8), { Position = label.Position - UDim2.fromOffset(0, 80), TextTransparency = 1, TextStrokeTransparency = 1 })
+	tween:Play()
+	tween.Completed:Connect(function()
+		label:Destroy()
+	end)
+end
+
+local golemShake = {}
+local function hookGolem(model)
+	golemShake[model] = { base = model:GetPivot(), hitAt = 0 }
+	local detector = model:WaitForChild("ClickDetector", 10)
+	if detector then
+		detector.MouseClick:Connect(function()
+			if not state then
+				return
+			end
+			local damage = Config.clickValue(state) * Config.tempMultiplier(state, serverNow())
+			popup("-" .. format(damage), UserInputService:GetMouseLocation(), Color3.fromRGB(255, 90, 90))
+			if golemShake[model] then
+				golemShake[model].hitAt = os.clock()
+			end
+		end)
+	end
+end
+for _, model in CollectionService:GetTagged("Golem") do
+	task.spawn(hookGolem, model)
+end
+CollectionService:GetInstanceAddedSignal("Golem"):Connect(hookGolem)
+CollectionService:GetInstanceRemovedSignal("Golem"):Connect(function(model)
+	golemShake[model] = nil
+end)
+
+---------------------------------------------------------------------------
+-- Haustiere folgen ihren Besitzern (wird nur lokal gezeichnet)
+---------------------------------------------------------------------------
+
+local petFolder = Instance.new("Folder")
+petFolder.Name = "LocalPets"
+petFolder.Parent = workspace
+
+local function petPart(model, props)
+	local p = Instance.new("Part")
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p.Material = Enum.Material.SmoothPlastic
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	for key, value in props do
+		p[key] = value
+	end
+	p.Parent = model
+	return p
+end
+
+local function buildPetModel(entry)
+	local pet, golden = Config.parsePet(entry)
+	if not pet then
+		return nil
+	end
+	local model = Instance.new("Model")
+	model.Name = pet.id
+	local color = golden and C.gold or pet.color
+	local shiny = golden or pet.rarity == "Legendary" or pet.rarity == "Exclusive"
+	local body = petPart(model, {
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.new(1.8, 1.8, 1.8),
+		CFrame = CFrame.new(),
+		Color = color,
+		Material = shiny and Enum.Material.Neon or Enum.Material.SmoothPlastic,
+	})
+	model.PrimaryPart = body
+	for _, x in { -0.38, 0.38 } do
+		petPart(model, { Shape = Enum.PartType.Ball, Size = Vector3.new(0.55, 0.55, 0.55), CFrame = CFrame.new(x, 0.25, -0.68), Color = Color3.new(1, 1, 1) })
+		petPart(model, { Shape = Enum.PartType.Ball, Size = Vector3.new(0.28, 0.28, 0.28), CFrame = CFrame.new(x, 0.25, -0.92), Color = Color3.new(0.05, 0.05, 0.1) })
+	end
+	local accent = golden and Color3.fromRGB(255, 240, 160) or color:Lerp(Color3.new(1, 1, 1), 0.35)
+	if pet.style == "ears" then
+		for _, x in { -0.5, 0.5 } do
+			petPart(model, { Size = Vector3.new(0.45, 0.6, 0.25), CFrame = CFrame.new(x, 0.95, 0) * CFrame.Angles(0, 0, -x * 0.6), Color = color })
+		end
+	elseif pet.style == "longears" then
+		for _, x in { -0.35, 0.35 } do
+			petPart(model, { Size = Vector3.new(0.3, 1.3, 0.25), CFrame = CFrame.new(x, 1.3, 0.1) * CFrame.Angles(0, 0, -x * 0.4), Color = accent })
+		end
+	elseif pet.style == "horns" then
+		for _, x in { -0.45, 0.45 } do
+			petPart(model, { Size = Vector3.new(0.25, 0.75, 0.25), CFrame = CFrame.new(x, 1, 0.1) * CFrame.Angles(-0.4, 0, -x * 0.7), Color = Color3.fromRGB(240, 240, 220) })
+		end
+	elseif pet.style == "horn" then
+		petPart(model, { Size = Vector3.new(0.25, 1, 0.25), CFrame = CFrame.new(0, 1.15, -0.45) * CFrame.Angles(-0.5, 0, 0), Color = C.gold, Material = Enum.Material.Neon })
+	elseif pet.style == "wings" then
+		for _, x in { -1, 1 } do
+			petPart(model, { Size = Vector3.new(1.3, 0.7, 0.12), CFrame = CFrame.new(x * 1.05, 0.25, 0.3) * CFrame.Angles(0, x * 0.5, x * 0.3), Color = accent })
+		end
+	elseif pet.style == "halo" then
+		petPart(model, { Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.12, 1.3, 1.3), CFrame = CFrame.new(0, 1.35, 0) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(255, 240, 150), Material = Enum.Material.Neon, Transparency = 0.2 })
+	elseif pet.style == "spikes" then
+		for i = -1, 1 do
+			petPart(model, { Size = Vector3.new(0.25, 0.7, 0.25), CFrame = CFrame.new(i * 0.4, 0.8, 0.35) * CFrame.Angles(0.6, 0, i * 0.3), Color = accent })
+		end
+	end
+	if shiny then
+		local sparkles = Instance.new("Sparkles")
+		sparkles.SparkleColor = golden and C.gold or pet.color
+		sparkles.Parent = body
+		local light = Instance.new("PointLight")
+		light.Color = color
+		light.Range = 6
+		light.Parent = body
+	end
+	model.Parent = petFolder
+	return model
+end
+
+local petViews = {}
+
+local function rebuildPets(plr)
+	local view = petViews[plr]
+	if view then
+		for _, m in view.models do
+			m:Destroy()
+		end
+	end
+	view = { models = {}, cframes = {}, rainbow = {} }
+	petViews[plr] = view
+	local list = plr:GetAttribute("Pets")
+	if type(list) ~= "string" or list == "" then
+		return
+	end
+	for entry in string.gmatch(list, "[^,]+") do
+		local model = buildPetModel(entry)
+		if model then
+			table.insert(view.models, model)
+			local pet = Config.parsePet(entry)
+			table.insert(view.rainbow, pet.id == "RainbowUnicorn")
+		end
+	end
+end
+
+local function watchPlayer(plr)
+	rebuildPets(plr)
+	plr:GetAttributeChangedSignal("Pets"):Connect(function()
+		rebuildPets(plr)
+	end)
+end
+for _, plr in Players:GetPlayers() do
+	watchPlayer(plr)
+end
+Players.PlayerAdded:Connect(watchPlayer)
+Players.PlayerRemoving:Connect(function(plr)
+	local view = petViews[plr]
+	if view then
+		for _, m in view.models do
+			m:Destroy()
+		end
+	end
+	petViews[plr] = nil
+end)
+
+---------------------------------------------------------------------------
+-- Jedes Bild: Haustiere bewegen, Golem wackeln lassen
+---------------------------------------------------------------------------
+
+RunService.RenderStepped:Connect(function(dt)
+	local t = os.clock()
+	for plr, view in petViews do
+		local character = plr.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local n = #view.models
+		for i, model in view.models do
+			if root then
+				local x = (i - (n + 1) / 2) * 3
+				local target = root.CFrame * CFrame.new(x, 0.5 + math.sin(t * 3 + i) * 0.35, 4.5)
+				local current = view.cframes[i]
+				if not current or (current.Position - target.Position).Magnitude > 60 then
+					current = target
+				end
+				current = current:Lerp(target, math.min(1, dt * 8))
+				view.cframes[i] = current
+				model:PivotTo(current)
+				if view.rainbow[i] then
+					model.PrimaryPart.Color = Color3.fromHSV((t * 0.3 + i * 0.2) % 1, 0.7, 1)
+				end
+			end
+		end
+	end
+
+	for model, shake in golemShake do
+		if model.Parent then
+			local since = t - shake.hitAt
+			local offset = since < 0.15 and Vector3.new(math.random() - 0.5, 0, math.random() - 0.5) * 0.6 or Vector3.zero
+			model:PivotTo(shake.base * CFrame.new(offset + Vector3.new(0, math.sin(t * 2) * 0.3, 0)))
+		end
+	end
+end)
+
+---------------------------------------------------------------------------
+-- Regelmäßig: Fenster aktualisieren, rote Punkte, Golem-Banner
+---------------------------------------------------------------------------
+
+task.spawn(function()
+	while true do
+		if state then
+			if windowRefresh then
+				local ok, err = pcall(windowRefresh)
+				if not ok then
+					warn("[Kristall-Imperium] Fenster-Fehler:", err)
+				end
+			end
+			local canClaim = dailyStatus()
+			dots.daily.Visible = canClaim
+			dots.wheel.Visible = os.time() - state.lastSpin >= Config.WHEEL_COOLDOWN
+		end
+
+		local golem = CollectionService:GetTagged("Golem")[1]
+		golemBanner.Visible = golem ~= nil
+		if golem then
+			local left = (golem:GetAttribute("EndsAt") or 0) - serverNow()
+			local hp = golem:GetAttribute("HP") or 0
+			local maxHp = golem:GetAttribute("MaxHP") or 1
+			golemText.Text = "⚔️ KRISTALLGOLEM!  " .. math.floor(math.clamp(hp / maxHp, 0, 1) * 100) .. " %  •  " .. math.max(0, math.ceil(left)) .. "s"
+		end
+		task.wait(0.25)
+	end
+end)
+
+local function updateScale()
+	local camera = workspace.CurrentCamera
+	local height = camera and camera.ViewportSize.Y or 900
+	local scale = math.clamp(height / 900, 0.55, 1.15)
+	for _, s in scaled do
+		s.Scale = scale
+	end
+end
 if workspace.CurrentCamera then
 	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 end

@@ -49,8 +49,19 @@ local function frenzyLeft()
 	return math.max(0, (state.frenzyEnd or 0) - workspace:GetServerTimeNow())
 end
 
+local function likeLeft()
+	if not state then
+		return 0
+	end
+	return math.max(0, (state.likeEnd or 0) - workspace:GetServerTimeNow())
+end
+
+-- Kristallrausch und Like-Boost
 local function frenzyMult()
-	return frenzyLeft() > 0 and Config.FRENZY_MULTIPLIER or 1
+	if not state then
+		return 1
+	end
+	return Config.tempMultiplier(state, workspace:GetServerTimeNow())
 end
 
 local function perSecond()
@@ -347,12 +358,19 @@ local function toast(message, kind)
 	end)
 end
 
-notifyEvent.OnClientEvent:Connect(function(message, kind)
+local function onMessage(message, kind)
 	toast(message, kind)
 	if kind == "gold" or kind == "frenzy" or kind == "build" then
 		play("big")
 	end
-end)
+end
+notifyEvent.OnClientEvent:Connect(onMessage)
+
+-- Damit auch das Extras-Skript Meldungen anzeigen kann
+local toastBindable = Instance.new("BindableEvent")
+toastBindable.Name = "KristallToast"
+toastBindable.Event:Connect(onMessage)
+toastBindable.Parent = player:WaitForChild("PlayerGui")
 
 ---------------------------------------------------------------------------
 -- Schwebende Zahlen beim Klicken
@@ -841,6 +859,15 @@ RunService.RenderStepped:Connect(function(dt)
 				crystal:ScaleTo(target)
 			end
 			crystal:PivotTo(CFrame.new(0, math.sin(t * 1.5) * 0.6, 0) * base * CFrame.Angles(0, t * 0.5, 0))
+			-- Regenbogen-Skin: Farbe wandert durch alle Farben
+			if crystal:GetAttribute("Rainbow") then
+				local color = Color3.fromHSV((t * 0.15) % 1, 0.75, 1)
+				for _, part in crystal:GetChildren() do
+					if part:IsA("BasePart") then
+						part.Color = color
+					end
+				end
+			end
 		end
 	end
 	for model, info in spinning do
@@ -859,9 +886,14 @@ RunService.RenderStepped:Connect(function(dt)
 		perSecondLabel.Text = "+" .. format(perSecond()) .. " pro Sekunde"
 		mineValue.Text = "+" .. format(Config.clickValue(state) * frenzyMult()) .. " pro Klick"
 		local left = frenzyLeft()
-		frenzyBanner.Visible = left > 0
+		local like = likeLeft()
+		frenzyBanner.Visible = left > 0 or like > 0
 		if left > 0 then
+			frenzyBanner.BackgroundColor3 = C.orange
 			frenzyBanner.Text = "🔥 KRISTALLRAUSCH x" .. Config.FRENZY_MULTIPLIER .. "  –  " .. math.ceil(left) .. "s"
+		elseif like > 0 then
+			frenzyBanner.BackgroundColor3 = Color3.fromRGB(230, 60, 110)
+			frenzyBanner.Text = string.format("❤️ Like-Boost +25 %%  –  %d:%02d", math.floor(like / 60), math.floor(like % 60))
 		end
 	end
 end)

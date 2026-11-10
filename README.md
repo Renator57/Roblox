@@ -20,6 +20,19 @@ Insel immer weiter aus.
 - **Sternen-Shop:** Dauerhafte Upgrades mit Sternenstaub, z. B. die Kristall-Drohne
   (klickt automatisch), Sternenmotor, Rabatt und Startkapital.
 - **Offline-Einnahmen** und **Speicherstand** per DataStore.
+- **Hub-Insel** in der Mitte mit Brücken zu allen Inseln, Stationen für Eier, Casino,
+  Glücksrad und tägliche Belohnung.
+- **Likes:** Auf jeder Insel steht ein ❤️. Ein Like gibt dem Besitzer +25 % für 5 Minuten,
+  der Liker bekommt eine kleine Belohnung.
+- **Kristallgolem:** Alle 3 Minuten landet ein Boss auf der Hub-Insel. Alle klicken ihn
+  gemeinsam kaputt, Beute je nach Schaden, der MVP bekommt Sternenstaub.
+- **Haustiere:** 3 Eier mit offenen Chancen, 15 Haustiere in 4 Seltenheiten, die dir
+  hinterherlaufen und Produktion + Klicks verstärken. 3 gleiche → 1 goldenes (x3).
+- **Kristall-Skins:** 9 Skins (Rubin, Eis, Feuer, Galaxie, Regenbogen …).
+- **Tägliche Belohnung** (7-Tage-Serie) und **Glücksrad** (alle 4 Stunden gratis).
+- **Glücksautomat:** Einsatz nur in Kristallen, Auszahlung ca. 95 %.
+- **Robux-Shop:** exklusive Haustiere, Regenbogen-Skin, Kristallrausch, Gamepässe
+  (VIP x2, +2 Haustier-Plätze).
 
 ## Dateien
 
@@ -29,11 +42,19 @@ Insel immer weiter aus.
 | `src/server/Main.server.luau` | ServerScriptService → `Server` → `Main` | Script |
 | `src/server/MapBuilder.luau` | ServerScriptService → `Server` → `MapBuilder` | ModuleScript |
 | `src/server/PlayerData.luau` | ServerScriptService → `Server` → `PlayerData` | ModuleScript |
+| `src/server/Hub.luau` | ServerScriptService → `Server` → `Hub` | ModuleScript |
+| `src/server/Pets.luau` | ServerScriptService → `Server` → `Pets` | ModuleScript |
+| `src/server/Fun.luau` | ServerScriptService → `Server` → `Fun` | ModuleScript |
 | `src/client/HUD.client.luau` | StarterPlayer → StarterPlayerScripts → `HUD` | LocalScript |
+| `src/client/Extras.client.luau` | StarterPlayer → StarterPlayerScripts → `Extras` | LocalScript |
 
 Alle Werte (Preise, Helfer, Upgrades, Ausbaustufen) stehen in `Config.luau`.
 
 ## Starten
+
+**Am einfachsten:** `KristallImperium.rbxlx` herunterladen und in Studio mit
+*Datei → Aus Datei öffnen* öffnen. Die Datei wird mit `python3 tools/build_place.py`
+aus `src/` gebaut.
 
 **Von Hand:** Die 5 Skripte wie in der Tabelle in Roblox Studio anlegen, den Code
 hineinkopieren und **Play** drücken.
@@ -45,3 +66,20 @@ Tipps:
   einschalten, damit der Speicherstand funktioniert.
 - Unter *Spieleinstellungen → Orte* die maximale Spielerzahl auf **8** stellen
   (es gibt 8 Inseln pro Server).
+
+## Robux-Shop einrichten
+
+Der Shop funktioniert erst, wenn du die Artikel bei Roblox anlegst:
+
+1. Spiel veröffentlichen (*Datei → In Roblox veröffentlichen*).
+2. Auf [create.roblox.com](https://create.roblox.com) dein Spiel öffnen →
+   **Monetarisierung → Entwicklerprodukte**. Für jeden Eintrag in `Config.PRODUCTS`
+   ein Produkt mit Name und Preis anlegen und die **Produkt-ID** kopieren.
+3. Unter **Monetarisierung → Pässe** die Gamepässe aus `Config.GAMEPASSES` anlegen
+   und die **Pass-ID** kopieren.
+4. Die IDs in `Config.luau` bei `productId = 0` bzw. `passId = 0` eintragen.
+
+Hinweise zu den Roblox-Regeln: Haustiere für Robux werden als feste Haustiere verkauft
+(keine Zufalls-Eier für Echtgeld). Glücksautomat und Glücksrad laufen nur mit Kristallen,
+die man nicht für Robux kaufen kann. Fülle den Fragebogen zur Altersfreigabe
+(*Experience-Fragebogen*) ehrlich aus und gib dort das simulierte Glücksspiel an.

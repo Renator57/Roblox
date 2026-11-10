@@ -8,6 +8,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 
 local MapBuilder = {}
 MapBuilder.plots = {}
+MapBuilder.ISLAND_SIZE = 96
 
 local CRYSTAL_COLOR = Color3.fromRGB(90, 200, 255)
 local GOLD = Color3.fromRGB(255, 205, 60)
@@ -610,7 +611,7 @@ function MapBuilder.build()
 	-- Leuchtende Wolkeninseln in der Mitte als Deko
 	local rng = Random.new(42)
 	for _ = 1, 14 do
-		local pos = Vector3.new(rng:NextNumber(-90, 90), rng:NextNumber(-40, -10), rng:NextNumber(-90, 90))
+		local pos = Vector3.new(rng:NextNumber(-90, 90), rng:NextNumber(-80, -50), rng:NextNumber(-90, 90))
 		ball(root, rng:NextNumber(10, 22), CFrame.new(pos), Color3.fromRGB(240, 245, 255), Enum.Material.SmoothPlastic).CanCollide = false
 	end
 end
@@ -681,27 +682,57 @@ function MapBuilder.updatePlot(plot, data)
 	end
 	plot.islandLevel = level
 
-	-- Der Kristall wächst mit der Insel und ändert bei Wiedergeburt die Farbe
+	-- Der Kristall wächst mit der Insel, ändert bei Wiedergeburt die Farbe und zeigt den Skin
 	local rebirths = data and data.rebirths or 0
-	if plot.rebirths ~= rebirths or plot.crystalLevel ~= level then
+	local skinId = data and data.skin or "Default"
+	if plot.rebirths ~= rebirths or plot.crystalLevel ~= level or plot.skin ~= skinId then
 		plot.rebirths = rebirths
 		plot.crystalLevel = level
-		local color = Config.rebirthColor(rebirths)
+		plot.skin = skinId
+		local skin = Config.SKINS_BY_ID[skinId] or Config.SKINS_BY_ID.Default
+		local color = skin.color or Config.rebirthColor(rebirths)
+		local material = skin.material == "Glass" and Enum.Material.Glass or Enum.Material.Neon
 		local crystal = plot.crystal
 		local scale = 1 + 0.07 * level
 		crystal:PivotTo(plot.crystalCF)
 		crystal:ScaleTo(scale)
 		crystal:SetAttribute("BaseScale", scale)
 		crystal:SetAttribute("BaseCFrame", plot.crystalCF * CFrame.new(0, 8.4 * (scale - 1), 0))
+		crystal:SetAttribute("Rainbow", skin.effect == "rainbow")
 		crystal:PivotTo(plot.crystalCF * CFrame.new(0, 8.4 * (scale - 1), 0))
 		for _, part in crystal:GetDescendants() do
 			if part:IsA("BasePart") then
 				part.Color = color
+				part.Material = material
+				part.Transparency = (material == Enum.Material.Glass) and 0.25 or 0.05
 			end
 		end
-		plot.core.PointLight.Color = color
-		plot.core.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
-		plot.core.Ambient.Color = ColorSequence.new(color)
+		local core = plot.core
+		core.PointLight.Color = color
+		core.Burst.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+		core.Ambient.Color = ColorSequence.new(color)
+
+		-- Spezialeffekte der Skins
+		for _, name in { "SkinFire", "SkinSparkles" } do
+			local old = core:FindFirstChild(name)
+			if old then
+				old:Destroy()
+			end
+		end
+		if skin.effect == "fire" then
+			local fire = Instance.new("Fire")
+			fire.Name = "SkinFire"
+			fire.Size = 10
+			fire.Heat = 12
+			fire.Color = Color3.fromRGB(255, 140, 40)
+			fire.SecondaryColor = Color3.fromRGB(255, 60, 20)
+			fire.Parent = core
+		elseif skin.effect == "sparkles" or skin.effect == "rainbow" then
+			local sparkles = Instance.new("Sparkles")
+			sparkles.Name = "SkinSparkles"
+			sparkles.SparkleColor = skin.effect == "rainbow" and Color3.new(1, 1, 1) or color
+			sparkles.Parent = core
+		end
 	end
 end
 
@@ -732,5 +763,14 @@ function MapBuilder.spawnGolden(plot)
 	CollectionService:AddTag(golden, "Golden")
 	return golden, click, core
 end
+
+-- Bau-Helfer auch für andere Module (Hub-Insel)
+MapBuilder.helpers = {
+	makePart = makePart,
+	vCylinder = vCylinder,
+	ball = ball,
+	billboard = billboard,
+	crystalShape = crystalShape,
+}
 
 return MapBuilder

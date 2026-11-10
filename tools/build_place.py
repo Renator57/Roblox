@@ -34,10 +34,14 @@ place = "".join([
          item("Folder", "Server",
               script("Script", "Main", "src/server/Main.server.luau")
               + script("ModuleScript", "MapBuilder", "src/server/MapBuilder.luau")
-              + script("ModuleScript", "PlayerData", "src/server/PlayerData.luau"))),
+              + script("ModuleScript", "PlayerData", "src/server/PlayerData.luau")
+              + script("ModuleScript", "Hub", "src/server/Hub.luau")
+              + script("ModuleScript", "Pets", "src/server/Pets.luau")
+              + script("ModuleScript", "Fun", "src/server/Fun.luau"))),
     item("StarterPlayer", "StarterPlayer",
          item("StarterPlayerScripts", "StarterPlayerScripts",
-              script("LocalScript", "HUD", "src/client/HUD.client.luau"))),
+              script("LocalScript", "HUD", "src/client/HUD.client.luau")
+              + script("LocalScript", "Extras", "src/client/Extras.client.luau"))),
 ])
 
 out = ROOT / "KristallImperium.rbxlx"

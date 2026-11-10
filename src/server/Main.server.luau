@@ -7,6 +7,9 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local MapBuilder = require(script.Parent.MapBuilder)
 local PlayerData = require(script.Parent.PlayerData)
+local Hub = require(script.Parent.Hub)
+local Pets = require(script.Parent.Pets)
+local Fun = require(script.Parent.Fun)
 
 -- Remotes ---------------------------------------------------------------
 
@@ -37,8 +40,9 @@ local function now()
 	return workspace:GetServerTimeNow()
 end
 
+-- Kristallrausch und Like-Boost
 local function frenzyMultiplier(session)
-	return (session.frenzyEnd > now()) and Config.FRENZY_MULTIPLIER or 1
+	return Config.tempMultiplier(session, now())
 end
 
 local function notify(player, text, kind)
@@ -62,6 +66,17 @@ local function sendState(player)
 		stardustSpent = data.stardustSpent,
 		rebirths = data.rebirths,
 		frenzyEnd = session.frenzyEnd,
+		likeEnd = session.likeEnd,
+		pets = data.pets,
+		equipped = data.equipped,
+		skins = data.skins,
+		skin = data.skin,
+		likes = data.likes,
+		golemKills = data.golemKills,
+		dailyDay = data.dailyDay,
+		dailyStreak = data.dailyStreak,
+		lastSpin = data.lastSpin,
+		passes = data.passes,
 	})
 end
 
@@ -128,6 +143,7 @@ local function onPlayerAdded(player)
 		plot = plot,
 		tokens = Config.CLICKS_PER_SECOND,
 		frenzyEnd = 0,
+		likeEnd = 0,
 		nextGolden = 0,
 		golden = nil,
 		lastLevel = Config.islandLevel(data.allTime),
@@ -135,6 +151,7 @@ local function onPlayerAdded(player)
 	sessions[player] = session
 	scheduleGolden(session)
 	MapBuilder.updatePlot(plot, data)
+	Pets.onJoin(player, session)
 
 	player.CharacterAdded:Connect(function(character)
 		onCharacterAdded(player, character)
@@ -171,6 +188,26 @@ local function onPlayerRemoving(player)
 	end
 	PlayerData.release(player)
 end
+
+-- Zusatz-Module (Hub-Insel, Haustiere, Robux, Glücksrad, Casino, Skins) ----
+
+local ctx = {
+	sessions = sessions,
+	now = now,
+	earn = earn,
+	notify = notify,
+	notifyAll = function(text, kind)
+		notifyEvent:FireAllClients(text, kind)
+	end,
+	sendState = sendState,
+	remote = remote,
+	PlayerData = PlayerData,
+	MapBuilder = MapBuilder,
+	boost = frenzyMultiplier,
+}
+Hub.init(ctx)
+Pets.init(ctx)
+Fun.init(ctx)
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 Players.PlayerRemoving:Connect(onPlayerRemoving)
@@ -275,7 +312,7 @@ RunService.Heartbeat:Connect(function(dt)
 		if slowNow then
 			checkIslandLevel(player, session)
 			PlayerData.updateLeaderstats(player)
-			session.plot.sign.Text = "🏝️ " .. player.DisplayName .. "\n💎 " .. Config.format(Config.perSecond(session.data)) .. "/Sek"
+			session.plot.sign.Text = "🏝️ " .. player.DisplayName .. "\n💎 " .. Config.format(Config.perSecond(session.data)) .. "/Sek  •  ❤️ " .. session.data.likes
 		end
 	end
 end)
