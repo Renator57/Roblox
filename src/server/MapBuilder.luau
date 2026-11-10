@@ -629,6 +629,7 @@ local function buildPlot(index, root)
 	})
 	local sign = billboard(signAnchor, 14, 3.5, 4, 400)
 	sign.Text = "🏝️ Freie Insel"
+	sign.Parent.Enabled = false
 
 	-- Sockel für die Helfer im Kreis um den Kristall
 	local slots = {}
@@ -700,8 +701,8 @@ function MapBuilder.build()
 		end
 		inst.Parent = Lighting
 	end
-	ensure("Atmosphere", { Density = 0.3, Offset = 0.25, Color = Color3.fromRGB(200, 220, 255), Decay = Color3.fromRGB(120, 140, 200), Glare = 0.3, Haze = 1.5 })
-	ensure("BloomEffect", { Intensity = 0.6, Size = 30, Threshold = 1.6 })
+	ensure("Atmosphere", { Density = 0.25, Offset = 0.2, Color = Color3.fromRGB(205, 225, 255), Decay = Color3.fromRGB(140, 160, 210), Glare = 0, Haze = 0.8 })
+	ensure("BloomEffect", { Intensity = 0.25, Size = 16, Threshold = 2.6 })
 	ensure("ColorCorrectionEffect", { Saturation = 0.15, Contrast = 0.05 })
 	ensure("SunRaysEffect", { Intensity = 0.06, Spread = 0.6 })
 
@@ -737,6 +738,7 @@ function MapBuilder.claimPlot(player)
 			plot.owner = player
 			plot.folder:SetAttribute("OwnerId", player.UserId)
 			plot.sign.Text = "🏝️ " .. player.DisplayName
+			plot.sign.Parent.Enabled = true
 			return plot
 		end
 	end
@@ -747,6 +749,7 @@ function MapBuilder.releasePlot(plot)
 	plot.owner = nil
 	plot.folder:SetAttribute("OwnerId", 0)
 	plot.sign.Text = "🏝️ Freie Insel"
+	plot.sign.Parent.Enabled = false -- freie Inseln ohne Schild
 	MapBuilder.updatePlot(plot, nil)
 end
 

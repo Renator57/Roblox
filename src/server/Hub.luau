@@ -33,11 +33,30 @@ function Hub.init(ctx)
 	local terrain = workspace.Terrain
 	local rng = Random.new(2024)
 	h.terrainIsland(Vector3.zero, R, rng)
-	terrain:FillCylinder(CFrame.new(0, -1, 0), 2, R - 10, Enum.Material.Pavement)
+	terrain:FillCylinder(CFrame.new(0, -1, 0), 2, 19, Enum.Material.Pavement)
 	-- Bäume nur dort, wo keine Brücke und keine Station ist
 	for _, deg in { 67.5, 157.5, 247.5, 337.5 } do
 		local a = math.rad(deg)
 		h.terrainTree(root, Vector3.new(math.cos(a) * (R - 6), 0, math.sin(a) * (R - 6)), rng)
+	end
+	-- Blumen rund um den Platz
+	local flowerColors = { Color3.fromRGB(255, 110, 140), Color3.fromRGB(255, 220, 90), Color3.fromRGB(190, 140, 255), Color3.fromRGB(255, 255, 255) }
+	for _ = 1, 70 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local r = rng:NextNumber(21, R - 4)
+		local deg = math.deg(a) % 45
+		if deg > 8 and deg < 37 then -- nicht auf den Wegen zu den Brücken
+			local pos = Vector3.new(math.cos(a) * r, 0, math.sin(a) * r)
+			vCylinder(root, 1, 0.2, CFrame.new(pos + Vector3.new(0, 0.5, 0)), Color3.fromRGB(60, 140, 60)).CanCollide = false
+			ball(root, 0.7, CFrame.new(pos + Vector3.new(0, 1.1, 0)), flowerColors[rng:NextInteger(1, #flowerColors)]).CanCollide = false
+		end
+	end
+	-- Wege von der Mitte zu den Brücken
+	for k = 0, 7 do
+		local a = k / 8 * math.pi * 2
+		local from = Vector3.new(math.cos(a) * 17, -1, math.sin(a) * 17)
+		local to = Vector3.new(math.cos(a) * (R + 1), -1, math.sin(a) * (R + 1))
+		terrain:FillBlock(CFrame.lookAt((from + to) / 2, to), Vector3.new(7, 2, (to - from).Magnitude), Enum.Material.Pavement)
 	end
 	vCylinder(root, 0.2, 30, CFrame.new(0, 0.1, 0), CYAN, Enum.Material.Neon)
 	vCylinder(root, 0.25, 28, CFrame.new(0, 0.15, 0), DARK, Enum.Material.Slate)
@@ -65,10 +84,10 @@ function Hub.init(ctx)
 		})
 		for _, x in { -3.4, 3.4 } do
 			makePart(root, {
-				Size = Vector3.new(0.4, 0.4, length),
+				Size = Vector3.new(0.5, 0.5, length),
 				CFrame = cf * CFrame.new(x, 1.3, 0),
-				Color = CYAN,
-				Material = Enum.Material.Neon,
+				Color = Color3.fromRGB(110, 75, 45),
+				Material = Enum.Material.Wood,
 			})
 		end
 		-- Schild am Brückenanfang mit dem Namen des Besitzers
@@ -76,7 +95,8 @@ function Hub.init(ctx)
 		local label = billboard(signPart, 7, 1.6, 0, 120)
 		local function refresh()
 			local owner = plot.owner
-			label.Text = owner and ("🏝️ " .. owner.DisplayName) or "🏝️ Freie Insel"
+			label.Text = owner and ("🏝️ " .. owner.DisplayName) or ""
+			label.Parent.Enabled = owner ~= nil
 		end
 		refresh()
 		plot.folder:GetAttributeChangedSignal("OwnerId"):Connect(refresh)
@@ -136,7 +156,7 @@ function Hub.init(ctx)
 	do
 		local cf = stationCF(112.5, 30)
 		makePart(root, { Size = Vector3.new(5, 7, 3.5), CFrame = cf * CFrame.new(0, 3.5, 0), Color = Color3.fromRGB(200, 40, 60), Material = Enum.Material.Metal })
-		makePart(root, { Size = Vector3.new(5.6, 1, 4), CFrame = cf * CFrame.new(0, 7.5, 0), Color = GOLD, Material = Enum.Material.Neon })
+		makePart(root, { Size = Vector3.new(5.6, 1, 4), CFrame = cf * CFrame.new(0, 7.5, 0), Color = GOLD, Material = Enum.Material.Metal })
 		local screen = makePart(root, { Size = Vector3.new(4, 2.2, 0.2), CFrame = cf * CFrame.new(0, 4.8, -1.8), Color = Color3.fromRGB(20, 20, 30) })
 		local gui = Instance.new("SurfaceGui")
 		gui.Face = Enum.NormalId.Front
@@ -171,10 +191,10 @@ function Hub.init(ctx)
 				Size = Vector3.new(0.1, 4.6, 3.4),
 				CFrame = wheelCF * CFrame.Angles((k - 1) / #Config.WHEEL * math.pi * 2, 0, 0) * CFrame.new(0.45, 2.7, 0),
 				Color = segment.color,
-				Material = Enum.Material.Neon,
+				Material = Enum.Material.SmoothPlastic,
 			})
 		end
-		ball(root, 1.6, wheelCF * CFrame.new(0.6, 0, 0), GOLD, Enum.Material.Neon)
+		ball(root, 1.6, wheelCF * CFrame.new(0.6, 0, 0), GOLD, Enum.Material.Metal)
 		for _, x in { -2.5, 2.5 } do
 			makePart(root, { Size = Vector3.new(0.8, 7, 0.8), CFrame = cf * CFrame.new(x, 3.5, 0.8), Color = DARK, Material = Enum.Material.Metal })
 		end
@@ -188,9 +208,9 @@ function Hub.init(ctx)
 	do
 		local cf = stationCF(292.5, 30)
 		local box = makePart(root, { Size = Vector3.new(4.5, 4.5, 4.5), CFrame = cf * CFrame.new(0, 2.25, 0), Color = Color3.fromRGB(170, 90, 255) })
-		makePart(root, { Size = Vector3.new(4.7, 4.7, 1), CFrame = cf * CFrame.new(0, 2.25, 0), Color = GOLD, Material = Enum.Material.Neon })
-		makePart(root, { Size = Vector3.new(1, 4.7, 4.7), CFrame = cf * CFrame.new(0, 2.25, 0), Color = GOLD, Material = Enum.Material.Neon })
-		ball(root, 1.6, cf * CFrame.new(0, 5, 0), GOLD, Enum.Material.Neon)
+		makePart(root, { Size = Vector3.new(4.7, 4.7, 1), CFrame = cf * CFrame.new(0, 2.25, 0), Color = GOLD, Material = Enum.Material.SmoothPlastic })
+		makePart(root, { Size = Vector3.new(1, 4.7, 4.7), CFrame = cf * CFrame.new(0, 2.25, 0), Color = GOLD, Material = Enum.Material.SmoothPlastic })
+		ball(root, 1.6, cf * CFrame.new(0, 5, 0), GOLD, Enum.Material.SmoothPlastic)
 		local label = billboard(box, 10, 2.4, 5, 80)
 		label.Text = "🎁 Tägliche Belohnung"
 		prompt(box, "Abholen", "Tägliche Belohnung", "daily")
