@@ -106,6 +106,88 @@ local function crystalShape(parent, cf, width, height, color, material, transpar
 end
 
 ----------------------------------------------------------------------
+-- Natürliches Gelände (Roblox-Terrain) statt eckiger Teile
+----------------------------------------------------------------------
+
+local Terrain = workspace.Terrain
+
+-- Schwebende Insel: flache Grasdecke mit unregelmäßigem Rand, felsige Unterseite
+local function terrainIsland(center, radius, rng)
+	Terrain:FillCylinder(CFrame.new(center + Vector3.new(0, -3, 0)), 6, radius, Enum.Material.Grass)
+	-- unregelmäßiger Rand
+	for _ = 1, 16 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local r = radius * rng:NextNumber(0.9, 1.02)
+		Terrain:FillBall(center + Vector3.new(math.cos(a) * r, -5, math.sin(a) * r), rng:NextNumber(4, 6), Enum.Material.Grass)
+	end
+	-- Unterseite: nach unten schmaler werdende Erd- und Felsschichten
+	for i = 1, 5 do
+		local layerRadius = radius * (1 - i * 0.16)
+		local material = (i == 1) and Enum.Material.Ground or Enum.Material.Rock
+		Terrain:FillCylinder(CFrame.new(center + Vector3.new(0, -3 - i * 6, 0)), 6, layerRadius, material)
+	end
+	-- Felsbrocken für eine natürliche, zerklüftete Form
+	for _ = 1, 22 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local spread = rng:NextNumber(0.15, 0.85)
+		local ballRadius = rng:NextNumber(5, 10)
+		local depth = 6 + (1 - spread) * rng:NextNumber(8, 26)
+		local material = rng:NextNumber() < 0.7 and Enum.Material.Rock or Enum.Material.Slate
+		Terrain:FillBall(center + Vector3.new(math.cos(a) * radius * spread, -depth - ballRadius * 0.4, math.sin(a) * radius * spread), ballRadius, material)
+	end
+	Terrain:FillBall(center + Vector3.new(0, -38, 0), 7, Enum.Material.Rock)
+end
+
+-- Baum: Holzstamm mit buschiger Krone aus Laub-Gelände
+local function terrainTree(parent, pos, rng)
+	local height = rng:NextNumber(8, 12)
+	makePart(parent, {
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(height + 2, 1.8, 1.8),
+		CFrame = CFrame.new(pos + Vector3.new(0, height / 2 - 1, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Color = WOOD,
+		Material = Enum.Material.Wood,
+	})
+	local top = pos + Vector3.new(0, height, 0)
+	Terrain:FillBall(top, rng:NextNumber(4.5, 6), Enum.Material.LeafyGrass)
+	for _ = 1, 3 do
+		local offset = Vector3.new(rng:NextNumber(-3.5, 3.5), rng:NextNumber(-1.5, 2), rng:NextNumber(-3.5, 3.5))
+		Terrain:FillBall(top + offset, rng:NextNumber(3, 4.5), Enum.Material.LeafyGrass)
+	end
+end
+
+----------------------------------------------------------------------
+-- Eigene 3D-Modelle: Lege Modelle in ReplicatedStorage > Modelle
+-- (Name = ID, z. B. "Pickaxe", "Golem"). Sonst werden einfache Modelle gebaut.
+----------------------------------------------------------------------
+
+local function customModel(name, targetSize, cframe)
+	local folder = ReplicatedStorage:FindFirstChild("Modelle")
+	local template = folder and folder:FindFirstChild(name)
+	if not (template and template:IsA("Model")) then
+		return nil
+	end
+	local model = template:Clone()
+	for _, inst in model:GetDescendants() do
+		if inst:IsA("LuaSourceContainer") then
+			inst:Destroy() -- Skripte aus Toolbox-Modellen nie mitlaufen lassen
+		elseif inst:IsA("BasePart") then
+			inst.Anchored = true
+			inst.CanCollide = false
+		end
+	end
+	local boxCF, size = model:GetBoundingBox()
+	local biggest = math.max(size.X, size.Y, size.Z)
+	if biggest > 0 then
+		model.WorldPivot = boxCF
+		model:ScaleTo(model:GetScale() * targetSize / biggest)
+	end
+	local _, newSize = model:GetBoundingBox()
+	model:PivotTo(cframe * CFrame.new(0, newSize.Y / 2, 0))
+	return model
+end
+
+----------------------------------------------------------------------
 -- Die 3D-Modelle der Helfer. `cf` = Oberseite des Sockels, Blick zur Inselmitte.
 ----------------------------------------------------------------------
 
@@ -231,6 +313,14 @@ MODEL_BUILDERS.Core = function(m, cf)
 end
 
 local function buildGeneratorModel(slot, gen)
+	local custom = customModel(gen.id, 6, slot.top)
+	if custom then
+		custom.Name = gen.id
+		custom.WorldPivot = slot.top
+		custom.Parent = slot.folder
+		CollectionService:AddTag(custom, "GenModel")
+		return custom
+	end
 	local model = Instance.new("Model")
 	model.Name = gen.id
 	MODEL_BUILDERS[gen.id](model, slot.top)
@@ -258,18 +348,10 @@ local function spinModel(parent, name)
 end
 
 local DECOR_BUILDERS = {
-	-- 1 Steinweg: Ring aus Steinplatten um den Kristall
-	function(folder, plot)
-		local c = CFrame.new(plot.center)
-		for k = 0, 27 do
-			local a = k / 28 * math.pi * 2
-			makePart(folder, {
-				Size = Vector3.new(3.2, 0.3, 2.6),
-				CFrame = c * CFrame.Angles(0, -a, 0) * CFrame.new(14, 0.15, 0),
-				Color = Color3.fromRGB(175, 170, 160),
-				Material = Enum.Material.Cobblestone,
-			})
-		end
+	-- 1 Steinweg: Ring aus Kopfsteinpflaster um den Kristall
+	function(_, plot)
+		Terrain:FillCylinder(CFrame.new(plot.center + Vector3.new(0, -1, 0)), 2, 16.5, Enum.Material.Cobblestone)
+		Terrain:FillCylinder(CFrame.new(plot.center + Vector3.new(0, -1, 0)), 2, 11.5, Enum.Material.Grass)
 	end,
 
 	-- 2 Laternen zwischen den Sockeln
@@ -303,22 +385,33 @@ local DECOR_BUILDERS = {
 		end
 	end,
 
-	-- 4 Wasserfälle am Inselrand
+	-- 4 Wasserfälle: kleine Teiche am Rand, Wasser stürzt als Gischt in die Tiefe
 	function(folder, plot)
 		for k = 0, 3 do
 			local a = k / 4 * math.pi * 2 + 0.4
 			local dir = Vector3.new(math.cos(a), 0, math.sin(a))
-			local pos = plot.center + dir * (ISLAND_SIZE / 2 + 0.6) + Vector3.new(0, -20, 0)
-			makePart(folder, {
-				Size = Vector3.new(7, 40, 0.6),
-				CFrame = CFrame.lookAt(pos, pos + dir),
-				Color = Color3.fromRGB(110, 190, 255),
-				Material = Enum.Material.Neon,
-				Transparency = 0.35,
+			local pond = plot.center + dir * 38
+			Terrain:FillCylinder(CFrame.new(pond + Vector3.new(0, -1, 0)), 2, 5, Enum.Material.Water)
+			local edge = plot.center + dir * (ISLAND_SIZE / 2 + 1)
+			local emitterPart = makePart(folder, {
+				Size = Vector3.new(6, 0.2, 2),
+				CFrame = CFrame.lookAt(edge, edge + dir),
+				Transparency = 1,
 				CanCollide = false,
+				CanQuery = false,
 			})
-			local pool = plot.center + dir * 40
-			vCylinder(folder, 0.4, 8, CFrame.new(pool + Vector3.new(0, 0.2, 0)), Color3.fromRGB(80, 160, 255), Enum.Material.Glass).Transparency = 0.3
+			local water = Instance.new("ParticleEmitter")
+			water.Color = ColorSequence.new(Color3.fromRGB(170, 220, 255), Color3.fromRGB(230, 245, 255))
+			water.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 5) })
+			water.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 1) })
+			water.Lifetime = NumberRange.new(2, 2.6)
+			water.Rate = 70
+			water.Speed = NumberRange.new(2, 4)
+			water.Acceleration = Vector3.new(0, -25, 0)
+			water.SpreadAngle = Vector2.new(10, 10)
+			water.EmissionDirection = Enum.NormalId.Front
+			water.LightEmission = 0.3
+			water.Parent = emitterPart
 		end
 	end,
 
@@ -429,14 +522,6 @@ local DECOR_BUILDERS = {
 -- Insel
 ----------------------------------------------------------------------
 
-local function buildTree(parent, cf, rng)
-	local height = rng:NextNumber(6, 9)
-	vCylinder(parent, height, 1.4, cf * CFrame.new(0, height / 2, 0), WOOD, Enum.Material.Wood)
-	local leafColor = Color3.fromHSV(rng:NextNumber(0.25, 0.38), 0.6, rng:NextNumber(0.55, 0.75))
-	ball(parent, rng:NextNumber(5, 7), cf * CFrame.new(0, height + 1.5, 0), leafColor, Enum.Material.Grass)
-	ball(parent, rng:NextNumber(3.5, 5), cf * CFrame.new(1.6, height + 0.4, 0.8), leafColor, Enum.Material.Grass)
-end
-
 local function buildPlot(index, root)
 	local angle = (index - 1) / Config.PLOT_COUNT * math.pi * 2
 	local center = Vector3.new(math.cos(angle) * Config.PLOT_RADIUS, 0, math.sin(angle) * Config.PLOT_RADIUS)
@@ -448,17 +533,21 @@ local function buildPlot(index, root)
 	folder:SetAttribute("OwnerId", 0)
 	folder.Parent = root
 
-	-- Insel (Gras oben, Felsen nach unten schmaler werdend)
-	vCylinder(folder, 4, ISLAND_SIZE, centerCF * CFrame.new(0, -2, 0), GRASS, Enum.Material.Grass)
-	vCylinder(folder, 10, ISLAND_SIZE - 14, centerCF * CFrame.new(0, -9, 0), ROCK, Enum.Material.Rock)
-	vCylinder(folder, 10, ISLAND_SIZE - 40, centerCF * CFrame.new(0, -18, 0), ROCK, Enum.Material.Rock)
-	vCylinder(folder, 10, ISLAND_SIZE - 70, centerCF * CFrame.new(0, -27, 0), ROCK, Enum.Material.Rock)
+	-- Insel aus natürlichem Gelände
+	terrainIsland(center, ISLAND_SIZE / 2, rng)
 
-	-- Bäume am Rand
-	for _ = 1, 7 do
+	-- Bäume am Rand (nicht auf dem Weg zur Brücke)
+	local toHub = math.atan2(-center.Z, -center.X)
+	for k = 1, 8 do
+		local a = toHub + 0.5 + (k - 1) / 8 * (math.pi * 2 - 1)
+		local r = rng:NextNumber(37, 42)
+		terrainTree(folder, center + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r), rng)
+	end
+	-- ein paar Felsen
+	for _ = 1, 4 do
 		local a = rng:NextNumber(0, math.pi * 2)
-		local r = rng:NextNumber(36, 43)
-		buildTree(folder, centerCF * CFrame.new(math.cos(a) * r, 0, math.sin(a) * r), rng)
+		local r = rng:NextNumber(30, 40)
+		Terrain:FillBall(center + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r), rng:NextNumber(1.8, 3), Enum.Material.Rock)
 	end
 
 	-- Sockel und Kristall in der Mitte
@@ -598,6 +687,14 @@ function MapBuilder.build()
 	ensure("ColorCorrectionEffect", { Saturation = 0.15, Contrast = 0.05 })
 	ensure("SunRaysEffect", { Intensity = 0.06, Spread = 0.6 })
 
+	-- Kräftige, freundliche Gelände-Farben
+	Terrain:SetMaterialColor(Enum.Material.Grass, Color3.fromRGB(105, 200, 85))
+	Terrain:SetMaterialColor(Enum.Material.LeafyGrass, Color3.fromRGB(70, 165, 70))
+	Terrain:SetMaterialColor(Enum.Material.Rock, Color3.fromRGB(130, 115, 105))
+	Terrain:SetMaterialColor(Enum.Material.Ground, Color3.fromRGB(120, 85, 60))
+	Terrain:SetMaterialColor(Enum.Material.Cobblestone, Color3.fromRGB(170, 165, 155))
+	Terrain:SetMaterialColor(Enum.Material.Pavement, Color3.fromRGB(185, 180, 170))
+
 	local root = Instance.new("Folder")
 	root.Name = "Plots"
 	root.Parent = workspace
@@ -608,12 +705,12 @@ function MapBuilder.build()
 		MapBuilder.updatePlot(plot, nil)
 	end
 
-	-- Leuchtende Wolkeninseln in der Mitte als Deko
-	local rng = Random.new(42)
-	for _ = 1, 14 do
-		local pos = Vector3.new(rng:NextNumber(-90, 90), rng:NextNumber(-80, -50), rng:NextNumber(-90, 90))
-		ball(root, rng:NextNumber(10, 22), CFrame.new(pos), Color3.fromRGB(240, 245, 255), Enum.Material.SmoothPlastic).CanCollide = false
-	end
+	-- Echte Roblox-Wolken
+	local clouds = Terrain:FindFirstChildOfClass("Clouds") or Instance.new("Clouds")
+	clouds.Cover = 0.6
+	clouds.Density = 0.55
+	clouds.Color = Color3.fromRGB(255, 250, 245)
+	clouds.Parent = Terrain
 end
 
 function MapBuilder.claimPlot(player)
@@ -645,11 +742,12 @@ function MapBuilder.updatePlot(plot, data)
 				slot.model = buildGeneratorModel(slot, gen)
 				slot.ring.Color = GOLD
 				slot.scale = 1
+				slot.baseScale = slot.model:GetScale()
 			end
 			-- Jeder Meilenstein lässt das Modell wachsen
 			local scale = 1 + 0.12 * Config.milestonesReached(owned)
 			if slot.scale ~= scale then
-				slot.model:ScaleTo(scale)
+				slot.model:ScaleTo(slot.baseScale * scale)
 				slot.scale = scale
 			end
 			slot.label.Text = gen.icon .. " " .. gen.name .. "\nx" .. owned
@@ -672,6 +770,7 @@ function MapBuilder.updatePlot(plot, data)
 	local level = data and Config.islandLevel(data.allTime) or 0
 	if level < plot.islandLevel then
 		plot.decor:ClearAllChildren()
+		Terrain:FillCylinder(CFrame.new(plot.center + Vector3.new(0, -1, 0)), 2, 16.5, Enum.Material.Grass)
 		plot.islandLevel = 0
 	end
 	for i = plot.islandLevel + 1, level do
@@ -771,6 +870,9 @@ MapBuilder.helpers = {
 	ball = ball,
 	billboard = billboard,
 	crystalShape = crystalShape,
+	terrainIsland = terrainIsland,
+	terrainTree = terrainTree,
+	customModel = customModel,
 }
 
 return MapBuilder

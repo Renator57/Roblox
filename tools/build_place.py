@@ -29,7 +29,9 @@ def script(cls, name, path):
 
 place = "".join([
     item("ReplicatedStorage", "ReplicatedStorage",
-         item("Folder", "Shared", script("ModuleScript", "Config", "src/shared/Config.luau"))),
+         item("Folder", "Shared", script("ModuleScript", "Config", "src/shared/Config.luau"))
+         # Leerer Ordner für eigene 3D-Modelle (Toolbox), siehe README
+         + item("Folder", "Modelle")),
     item("ServerScriptService", "ServerScriptService",
          item("Folder", "Server",
               script("Script", "Main", "src/server/Main.server.luau")

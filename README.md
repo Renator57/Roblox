@@ -83,3 +83,19 @@ Hinweise zu den Roblox-Regeln: Haustiere für Robux werden als feste Haustiere v
 (keine Zufalls-Eier für Echtgeld). Glücksautomat und Glücksrad laufen nur mit Kristallen,
 die man nicht für Robux kaufen kann. Fülle den Fragebogen zur Altersfreigabe
 (*Experience-Fragebogen*) ehrlich aus und gib dort das simulierte Glücksspiel an.
+
+## Eigene 3D-Modelle (schöner als die eingebauten)
+
+Ohne eigene Modelle baut das Spiel Helfer, Haustiere und den Golem aus einfachen Formen.
+Schöner wird es mit Modellen aus der **Toolbox**:
+
+1. In Studio **Toolbox** öffnen, z. B. nach „cute cat“ oder „pickaxe“ suchen und ein Modell einfügen.
+2. Das Modell im Explorer nach **ReplicatedStorage → Modelle** ziehen.
+3. Es **genau** wie die ID umbenennen:
+   - Helfer: `Pickaxe`, `Dwarf`, `Drill`, `Mine`, `Laser`, `Portal`, `Forge`, `Core`
+   - Haustiere: `Mouse`, `Cat`, `Bunny`, `Fox`, `Dragon`, `Frog`, `Hedgehog`, `Owl`, `Spirit`,
+     `Phoenix`, `Jelly`, `Comet`, `Wolf`, `Nebula`, `Unicorn`, `RainbowUnicorn`, `ShadowGriffin`
+   - Boss: `Golem`
+
+Größe und Position passt das Spiel automatisch an. Skripte in Toolbox-Modellen werden
+aus Sicherheitsgründen entfernt.

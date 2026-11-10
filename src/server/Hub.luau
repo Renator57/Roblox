@@ -9,10 +9,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 
 local Hub = {}
 
-local STONE = Color3.fromRGB(150, 145, 140)
 local DARK = Color3.fromRGB(70, 70, 85)
-local GRASS = Color3.fromRGB(100, 190, 90)
-local ROCK = Color3.fromRGB(120, 95, 75)
 local WOOD = Color3.fromRGB(150, 105, 65)
 local GOLD = Color3.fromRGB(255, 205, 60)
 local CYAN = Color3.fromRGB(90, 200, 255)
@@ -32,12 +29,18 @@ function Hub.init(ctx)
 	------------------------------------------------------------------
 	-- Insel
 	------------------------------------------------------------------
-	vCylinder(root, 4, R * 2, CFrame.new(0, -2, 0), GRASS, Enum.Material.Grass)
-	vCylinder(root, 10, R * 2 - 12, CFrame.new(0, -9, 0), ROCK, Enum.Material.Rock)
-	vCylinder(root, 10, R * 2 - 34, CFrame.new(0, -18, 0), ROCK, Enum.Material.Rock)
-	vCylinder(root, 0.4, R * 2 - 20, CFrame.new(0, 0.2, 0), STONE, Enum.Material.Cobblestone)
-	vCylinder(root, 0.2, 30, CFrame.new(0, 0.45, 0), CYAN, Enum.Material.Neon)
-	vCylinder(root, 0.25, 28, CFrame.new(0, 0.5, 0), DARK, Enum.Material.Slate)
+	-- Natürliches Gelände mit gepflastertem Platz in der Mitte
+	local terrain = workspace.Terrain
+	local rng = Random.new(2024)
+	h.terrainIsland(Vector3.zero, R, rng)
+	terrain:FillCylinder(CFrame.new(0, -1, 0), 2, R - 10, Enum.Material.Pavement)
+	-- Bäume nur dort, wo keine Brücke und keine Station ist
+	for _, deg in { 67.5, 157.5, 247.5, 337.5 } do
+		local a = math.rad(deg)
+		h.terrainTree(root, Vector3.new(math.cos(a) * (R - 6), 0, math.sin(a) * (R - 6)), rng)
+	end
+	vCylinder(root, 0.2, 30, CFrame.new(0, 0.1, 0), CYAN, Enum.Material.Neon)
+	vCylinder(root, 0.25, 28, CFrame.new(0, 0.15, 0), DARK, Enum.Material.Slate)
 
 	local signAnchor = makePart(root, { Size = Vector3.one, CFrame = CFrame.new(0, 30, 0), Transparency = 1, CanCollide = false })
 	billboard(signAnchor, 30, 7, 0, 600).Text = "🌐 HUB-INSEL"
@@ -262,24 +265,32 @@ function Hub.init(ctx)
 	local golem = nil
 
 	local function buildGolem()
-		local model = Instance.new("Model")
+		local custom = h.customModel("Golem", 18, CFrame.new(0, 0.5, 0))
+		local model = custom or Instance.new("Model")
 		model.Name = "KristallGolem"
-		local rock = Color3.fromRGB(95, 90, 110)
-		local base = CFrame.new(0, 0.5, 0)
-		for _, x in { -2.5, 2.5 } do
-			makePart(model, { Size = Vector3.new(3, 6, 3), CFrame = base * CFrame.new(x, 3, 0), Color = rock, Material = Enum.Material.Slate })
+		local head
+		if custom then
+			-- Unsichtbarer Punkt über dem Modell für die Lebensleiste
+			local boxCF, size = custom:GetBoundingBox()
+			head = makePart(custom, { Name = "Head", Size = Vector3.one, CFrame = boxCF * CFrame.new(0, size.Y / 2, 0), Transparency = 1, CanCollide = false })
+		else
+			local rock = Color3.fromRGB(95, 90, 110)
+			local base = CFrame.new(0, 0.5, 0)
+			for _, x in { -2.5, 2.5 } do
+				makePart(model, { Size = Vector3.new(3, 6, 3), CFrame = base * CFrame.new(x, 3, 0), Color = rock, Material = Enum.Material.Slate })
+			end
+			makePart(model, { Size = Vector3.new(9, 8, 5), CFrame = base * CFrame.new(0, 10, 0), Color = rock, Material = Enum.Material.Slate })
+			ball(model, 2.6, base * CFrame.new(0, 10.5, 2.4), CYAN, Enum.Material.Neon)
+			head = makePart(model, { Name = "Head", Size = Vector3.new(5, 4, 4.5), CFrame = base * CFrame.new(0, 16, 0), Color = rock, Material = Enum.Material.Slate })
+			for _, x in { -1.1, 1.1 } do
+				makePart(model, { Size = Vector3.new(0.9, 0.6, 0.2), CFrame = base * CFrame.new(x, 16.5, 2.3), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon })
+			end
+			for _, x in { -6, 6 } do
+				makePart(model, { Size = Vector3.new(2.6, 9, 2.6), CFrame = base * CFrame.new(x, 9.5, 0), Color = rock, Material = Enum.Material.Slate })
+				crystalShape(model, base * CFrame.new(x, 15.5, 0) * CFrame.Angles(0, 0, x > 0 and -0.4 or 0.4), 1.6, 3, CYAN, Enum.Material.Neon, 0)
+			end
+			model.WorldPivot = base
 		end
-		makePart(model, { Size = Vector3.new(9, 8, 5), CFrame = base * CFrame.new(0, 10, 0), Color = rock, Material = Enum.Material.Slate })
-		ball(model, 2.6, base * CFrame.new(0, 10.5, 2.4), CYAN, Enum.Material.Neon)
-		local head = makePart(model, { Name = "Head", Size = Vector3.new(5, 4, 4.5), CFrame = base * CFrame.new(0, 16, 0), Color = rock, Material = Enum.Material.Slate })
-		for _, x in { -1.1, 1.1 } do
-			makePart(model, { Size = Vector3.new(0.9, 0.6, 0.2), CFrame = base * CFrame.new(x, 16.5, 2.3), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon })
-		end
-		for _, x in { -6, 6 } do
-			makePart(model, { Size = Vector3.new(2.6, 9, 2.6), CFrame = base * CFrame.new(x, 9.5, 0), Color = rock, Material = Enum.Material.Slate })
-			crystalShape(model, base * CFrame.new(x, 15.5, 0) * CFrame.Angles(0, 0, x > 0 and -0.4 or 0.4), 1.6, 3, CYAN, Enum.Material.Neon, 0)
-		end
-		model.WorldPivot = base
 		local click = Instance.new("ClickDetector")
 		click.MaxActivationDistance = 120
 		click.Parent = model

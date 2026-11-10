@@ -970,6 +970,40 @@ local function buildPetModel(entry)
 	if not pet then
 		return nil
 	end
+	-- Eigenes Modell aus ReplicatedStorage > Modelle (gleicher Name wie die Haustier-ID)
+	local folder = ReplicatedStorage:FindFirstChild("Modelle")
+	local template = folder and folder:FindFirstChild(pet.id)
+	if template and template:IsA("Model") then
+		local custom = template:Clone()
+		local firstPart = nil
+		for _, inst in custom:GetDescendants() do
+			if inst:IsA("LuaSourceContainer") then
+				inst:Destroy()
+			elseif inst:IsA("BasePart") then
+				inst.Anchored = true
+				inst.CanCollide = false
+				inst.CanQuery = false
+				inst.CanTouch = false
+				firstPart = firstPart or inst
+			end
+		end
+		if firstPart then
+			local boxCF, size = custom:GetBoundingBox()
+			custom.WorldPivot = boxCF
+			custom:ScaleTo(custom:GetScale() * 2.6 / math.max(size.X, size.Y, size.Z))
+			custom.PrimaryPart = custom.PrimaryPart or firstPart
+			custom.WorldPivot = custom:GetBoundingBox()
+			if golden then
+				local sparkles = Instance.new("Sparkles")
+				sparkles.SparkleColor = C.gold
+				sparkles.Parent = firstPart
+			end
+			custom.Parent = petFolder
+			return custom
+		end
+		custom:Destroy()
+	end
+
 	local model = Instance.new("Model")
 	model.Name = pet.id
 	local color = golden and C.gold or pet.color
