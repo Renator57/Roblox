@@ -254,6 +254,14 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 
 	for player, session in sessions do
+		-- Sicherheitsnetz: Wer von der Insel fällt, kommt zurück zum Startpunkt
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if root and root.Position.Y < -40 then
+			root.AssemblyLinearVelocity = Vector3.zero
+			character:PivotTo(session.plot.spawnCF)
+		end
+
 		session.tokens = math.min(Config.CLICKS_PER_SECOND, session.tokens + Config.CLICKS_PER_SECOND * dt)
 		earn(session, Config.perSecond(session.data) * frenzyMultiplier(session) * dt)
 

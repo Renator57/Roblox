@@ -555,7 +555,6 @@ function MapBuilder.build()
 			child:Destroy()
 		end
 	end
-	workspace.FallenPartsDestroyHeight = -120
 
 	-- Stimmungsvolles Licht
 	Lighting.ClockTime = 16.8
